@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    'transaction' element test.
+ -->
+<package name="test-transaction" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd" xmlns="http://xdtl.org/xdtl">
+  <connection name="conn" type="DB">$testdb</connection>
+  <tasks>
+    <task name="first">
+      <steps>
+        <transaction connection="$conn">
+          <query source="select '1' from dual"/>
+          <query source="select '1' from dual"/>
+        </transaction>
+      </steps>
+    </task>
+  </tasks>
+</package>

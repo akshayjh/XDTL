@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Test query command.
+ -->
+<package name="test-query" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd" xmlns="http://xdtl.org/xdtl">
+  <connection name="conn" type="DB">$testdb</connection>
+  <tasks>
+    <task name="first" connection="$conn">
+      <steps>
+        <query source="file:query.sql" target="tmp"/>
+        <log msg="Query result=$tmp"/>
+      </steps>
+    </task>
+  </tasks>
+</package>

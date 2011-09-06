@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	'send' element test.
+ -->
+<package name="test-send" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd" xmlns="http://xdtl.org/xdtl">
+  <tasks>
+    <task name="first">
+      <steps>
+        <send source="test1" target="file:///c:/temp/test.txt" overwrite="1"/>
+        <render template="paramstest.vm" target="tmp">
+        	<parameter name="param1">p1value</parameter>
+        	<parameter name="param2">p2value</parameter>
+        </render>
+        <send source="$tmp" target="testvar" overwrite="1"/>
+        <log msg="testvar= '$testvar'" />
+      </steps>
+    </task>
+  </tasks>
+</package>

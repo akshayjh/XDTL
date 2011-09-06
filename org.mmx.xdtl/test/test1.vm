@@ -1,0 +1,15 @@
+﻿#parse( "general.vm" )
+#parse( "mmx.vm" )
+#parse( "sql.vm" )
+## basic insert select statement
+#foreach ( $tgt in $Targets ) 
+#set ( $mapId = $tgt.mapId)
+#if ( $mapId == "1" )
+#INSERT ( $tgt.target $Columns )
+#SELECT ( $Columns )
+#FROM ( $Sources $Conditions )
+#WHERE ( $Conditions )
+#GROUPBY ( $Columns )
+#HAVING ( $Conditions )
+#end
+#end

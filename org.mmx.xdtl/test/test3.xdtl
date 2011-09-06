@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Minimal XDTL file using xdtl namespace.
+ -->
+<xdtl:package name="minimal" xmlns:xdtl="http://xdtl.org/xdtl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd ">
+  <xdtl:connection name="conn" type="FILE">xdtl:connection</xdtl:connection>
+  <xdtl:tasks>
+    <xdtl:task name="first">
+      <xdtl:steps>
+      	<xdtl:exec cmd="cmd /c dir"/>
+      	<xdtl:get source="http://www.cydonia.ee/index.html" target="proov.html" overwrite="1"/>
+      </xdtl:steps>
+    </xdtl:task>
+  </xdtl:tasks>
+</xdtl:package>

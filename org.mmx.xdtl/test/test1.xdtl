@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xdtl:package name="test1" xmlns:xdtl="http://xdtl.org/xdtl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd ">
+  <xdtl:parameter name="dbhost" default="localhost" required="0"></xdtl:parameter>
+  <xdtl:parameter name="dbname" default="test" required="0"></xdtl:parameter>
+  <xdtl:parameter name="dbuser" default="postgres" required="0"></xdtl:parameter>
+  <xdtl:parameter name="dbpass" default="postgres" required="0"></xdtl:parameter>
+  <xdtl:parameter name="site" default="localhost" required="0"></xdtl:parameter>
+  
+  <xdtl:variable name="source">http://$site/source</xdtl:variable>
+  <xdtl:variable name="target">http://$site/target</xdtl:variable>
+
+  <xdtl:connection name="conn" type="DB">jdbc:postgresql://$dbhost/$dbname?user=$dbuser&amp;password=$dbpass</xdtl:connection>
+
+  <xdtl:tasks>
+    <xdtl:task name="first" onerror="testlib.xdtl#errorhandler">
+      <xdtl:steps>
+        <xdtl:mappings target="mappings">
+		    <xdtl:source mapid="0" source="raw_cdr" alias="r" isquery="0"/>
+		    <xdtl:source mapid="1" source="cdr" alias="c" isquery="0"/>
+		    <xdtl:source mapid="1" source="customer" alias="a" isquery="0"/>
+		    <xdtl:source mapid="2" source="call" alias="c" isquery="0"/>
+		    <xdtl:source mapid="2" source="network" alias="n" isquery="0"/>
+		    <xdtl:target mapid="0" target="cdr" alias="c" isvirtual="0"/>
+		    <xdtl:target mapid="1" target="call" alias="c" isvirtual="0"/>
+		    <xdtl:target mapid="2" target="network" alias="n" isvirtual="0"/>
+		    <xdtl:column mapid="0" target="call_type" source="r.call_type" datatype="integer" isjoinkey="1" isdistinct="1"/>
+		    <xdtl:column mapid="0" target="call_length" source="r.call_length" datatype="integer" isupdatable="1"/>
+		    <xdtl:column mapid="0" target="call_date" source="r.call_date" datatype="date" isupdatable="1"/>
+		    <xdtl:column mapid="1" target="cust_a" source="a.cust_id" isjoinkey="1" isdistinct="1"/>
+		    <xdtl:column mapid="1" target="cust_b" source="b.cust_id" isjoinkey="1"/>
+		    <xdtl:column mapid="1" target="type" source="c.call_type" datatype="integer" isupdatable="1"/>
+		    <xdtl:column mapid="1" target="length" source="c.call_length" datatype="integer" isupdatable="1"/>
+		    <xdtl:column mapid="1" target="date" source="c.call_date" datatype="date" isupdatable="1"/>
+		    <xdtl:column mapid="2" target="caller" source="c.cust_a" isaggregate="1"/>
+		    <xdtl:column mapid="2" target="receiver" source="c.cust_b" isaggregate="1"/>
+		    <xdtl:column mapid="2" target="calls_no" source="c.calls" function="SUM(%)" isupdatable="1"/>
+		    <xdtl:condition mapid="0" alias="r" condition="call_length GT 0" condtype="filter"/>
+		    <xdtl:condition mapid="1" alias="c" condition="c.phone_a is not null" condtype="filter"/>
+		    <xdtl:condition mapid="1" alias="a" condition="a.phone_no = c.phone_a" condtype="join" jointype="inner"/>
+		    <xdtl:condition mapid="1" alias="b" condition="b.phone_no = c.phone_b" condtype="join" jointype="right"/>
+		    <xdtl:condition mapid="2" alias="n" condition="n.network_id = c.network_id" condtype="join" jointype="left"/>
+		    <xdtl:condition mapid="2" alias="n" condition="n.network_id IS NOT NULL" condtype="filter"/>
+		    <xdtl:condition mapid="2" alias="n" condition="n.network_id GT 0" condtype="filter"/>
+		    <xdtl:condition mapid="2" alias="c" condition="SUM(c.calls) GT 0" condtype="aggr"/>
+      	</xdtl:mappings>
+      	<xdtl:render template="test1.vm" source="$mappings" target="sqlstmt"/>
+      	<!--<xdtl:transaction connection="$conn">
+      		<xdtl:query source="select count(*) from call" />
+      		<xdtl:query source="$sqlstmt" />
+      	</xdtl:transaction>-->
+      	<xdtl:exec cmd="echo $sqlstmt"/>
+      </xdtl:steps>
+    </xdtl:task>
+    <xdtl:task name="second">
+      <xdtl:steps>
+        <!--<xdtl:get overwrite="0" source="$source/file2.txt" target="$target/file2.txt"/>-->
+        <xdtl:call href="minimal-ns.xdtl#first"/>
+        <xdtl:call href="minimal-ns.xdtl#first"/>
+      </xdtl:steps>
+    </xdtl:task>
+  </xdtl:tasks>
+</xdtl:package>

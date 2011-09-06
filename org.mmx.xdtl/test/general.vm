@@ -1,0 +1,13 @@
+## general macro extensions to vtl
+
+##$mapId
+
+#set ($sp = 0)
+#set ($stack = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+#macro ( push $value )#set( $ret = $stack.set($sp, $value) )#set( $sp = $sp + 1 )#end
+#macro ( pop $value )#set( $sp = $sp - 1 )#set( $value = $stack.get($sp) )#end
+
+#macro ( first )#set ( $loop = 0 )#end
+#macro ( next )#set( $loop = $loop + 1 )#end
+#define( $first )#if( $loop == 0 )true#end#end
+#define( $next )#if( $loop > 0 )true#end#end

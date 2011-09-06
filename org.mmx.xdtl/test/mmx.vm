@@ -1,0 +1,28 @@
+## mmx mapping format definition
+
+##define( $tgtMap )$!tgt.mapId#end
+##define( $tgtName )$!tgt.target#end
+##define( $tgtPerm )$!tgt.virtual#end
+##define( $srcMap )$!src.mapId#end
+##define( $srcName )$!src.source#end
+##define( $srcAlias )$!src.alias#end
+##define( $srcQuery )$!src.query#end
+##define( $colMap )$!col.mapId#end
+##define( $colTarget )$!col.target#end
+##define( $colSource )$!col.source#end
+##define( $colFunc )$!col.function#end
+##define( $colType )$!col.dataType#end
+##define( $colKey )$!col.joinKey#end
+##define( $colUpd )$!col.updatable#end
+##define( $colDist )$!col.distinct#end
+##define( $colAggr )$!col.aggregate#end
+##define( $condMap )$!cond.mapId#end
+##define( $condAlias )$!cond.alias#end
+##define( $condType )$!cond.condType#end
+##define( $condExpr )$!cond.condition#end
+##define( $condJoin )$!cond.joinType#end
+
+## qualified column expressions
+
+#define( $colExpr )#if( $col.source != "" )$col.source#else$col.function#end#end
+#define( $colQualif )$colExpr#if( $!col.dataType )::$col.dataType#end#end

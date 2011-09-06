@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Test A1 functionality.
+ -->
+<package name="minimal" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd" xmlns="http://xdtl.org/xdtl">
+  <connection name="conn" type="FILE">xdtl:connection</connection>
+  <tasks>
+    <task name="first">
+      <steps>
+        <strip source="test-a1.xdtl" target="test-a1.tst" expr="s/test-a1/test-a2/g" overwrite="1"/>
+        <log msg="Moving files..."/>
+        <move source="*.tst" target="/tmp" overwrite="1"/>
+        <log msg="Clearing..."/>
+        <clear target="/tmp/*.tst"/>
+      </steps>
+    </task>
+  </tasks>
+</package>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Predefined variables test
+ -->
+<package name="test-vars" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd" xmlns="http://xdtl.org/xdtl" onerror="errorhandler.xdtl">
+  <connection name="conn" type="DB">jdbc:postgresql://localhost/test</connection>
+  <tasks>
+    <task name="first" onerror="errorhandler.xdtl">
+      <steps>
+        <call href="echo.xdtl">
+          <parameter name="msg">XDTL\ version:\ $xdtlVersion</parameter>
+        </call>
+        <call href="error.xdtl"/>
+      </steps>
+    </task>
+  </tasks>
+</package>

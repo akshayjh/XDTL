@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Minimal XDTL file with default namespace specified.
+ -->
+<package name="test2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd" xmlns="http://xdtl.org/xdtl">
+  <connection name="conn" type="URI">http://connection</connection>
+  <tasks>
+    <task name="first">
+      <steps>
+      	<exec cmd="cmd /c dir"/>
+      	<get source="$conn" target="target 2" overwrite="0"/>
+      	<put source="target 2" target="$conn" overwrite="0"/>
+      	<pack source="target 2" target="target 2.tgz" overwrite="0"/>
+      	<unpack source="target 2.tgz" target="" overwrite="0"/>
+      </steps>
+    </task>
+  </tasks>
+</package>

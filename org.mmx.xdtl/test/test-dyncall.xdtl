@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Minimal XDTL file with default namespace specified.
+ -->
+<package name="test-dyncall" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd" xmlns="http://xdtl.org/xdtl">
+  <variable name="callref1">#second</variable>
+  <variable name="callref2">echo.xdtl</variable>
+  <connection name="conn" type="FILE">xdtl:connection</connection>
+  <tasks>
+    <task name="first">
+      <steps>
+        <call href="$callref1"></call>
+      </steps>
+    </task>
+    <task name="second">
+      <steps>
+        <call href="$callref2">
+        	<parameter name="msg">Call 1</parameter>
+        </call>
+        <call href="$callref2">
+        	<parameter name="msg">Call 2</parameter>
+        </call>
+      </steps>
+    </task>
+  </tasks>
+</package>

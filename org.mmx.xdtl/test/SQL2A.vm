@@ -1,0 +1,74 @@
+﻿#parse( "general.vm" )
+#parse( "mmx.vm" )
+#parse( "sql.vm" )
+
+
+####################################################################
+## sql templates
+
+BASIC:
+## basic insert select statement
+#foreach ( $tgt in $Targets ) 
+#set ( $mapId = $tgt.mapId)
+#if ( $mapId == "1" )
+#INSERT ( $tgt.target $Columns )
+#SELECT ( $Columns )
+#FROM ( $Sources $Conditions )
+#WHERE ( $Conditions )
+#GROUPBY ( $Columns )
+#HAVING ( $Conditions )
+#end
+#end
+;
+
+COMPLEX:
+## complex insert select statement
+#foreach ( $tgt in $Targets ) 
+#if( $tgt.mapId == $Targets.size() - 1 )
+#set ( $mapId = $tgt.mapId )
+###mappingType ( $Conditions )
+#INSERT ( $tgt.target $Columns )
+#SELECT ( $Columns )
+#FROM ( $Sources $Conditions )
+#WHERE ( $Conditions )
+#GROUPBY ( $Columns )
+#HAVING ( $Conditions )
+#end
+#end  
+;
+
+STAGED:
+## generic multistage insert select
+#foreach ( $tgt in $Targets ) 
+#set ( $mapId = $tgt.mapId )
+###mappingType ( $Conditions )
+#if ( !$tgt.virtual )
+#SELECT ( $Columns )
+INTO TEMP TABLE $tgt.target
+#FROM ( $Sources $Conditions )
+#WHERE ( $Conditions )
+#GROUPBY ( $Columns )
+#HAVING ( $Conditions )
+#else
+#INSERT ( $tgt.target $Columns )
+#SELECT ( $Columns )
+#FROM ( $Sources $Conditions )
+#WHERE ( $Conditions )
+#GROUPBY ( $Columns )
+#HAVING ( $Conditions )
+#end
+#end
+;
+
+UPDATE:
+## generic update from 
+#foreach ( $tgt in $Targets ) 
+#set ( $mapId = $tgt.mapId )
+#if ( $mapId == "1" )
+#UPDATE ( $tgt.target $Columns )
+#FROM ( $Sources $Conditions )
+#WHERE ( $Conditions )
+#JOINKEY ( $Columns ) 
+#end##if ( $mapId == "0" )
+#end##foreach ( $tgt in $Targets )
+;

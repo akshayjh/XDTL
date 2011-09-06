@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package name="test4" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd" 
+	xmlns="http://xdtl.org/xdtl">
+	<tasks>
+		<task name="first">
+			<steps>
+				<exec cmd="echo $xdtlVersion"/>
+				<!-- <exec cmd="sh -c 'date'" target="ls"/> -->
+				<exec cmd="date" target="ls"/>
+				<exec cmd="echo $ls" />
+			</steps>
+		</task>
+	</tasks>
+</package>
+

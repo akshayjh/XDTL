@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xdtl:package name="test1"
+    xmlns:xdtl="http://xdtl.org/xdtl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd">
+
+	<xdtl:parameter name="dbhost" default="windev2.in.mwx.ee:1521" required="0"></xdtl:parameter>
+	<xdtl:parameter name="dbname" default="odb" required="0"></xdtl:parameter>
+	<xdtl:parameter name="dbuser" default="MARX" required="0"></xdtl:parameter>
+	<xdtl:parameter name="dbpass" default="MarXX" required="0"></xdtl:parameter>
+	<xdtl:parameter name="site" default="localhost" required="0"></xdtl:parameter>
+  
+	<xdtl:variable name="target">/tmp/xdtl/md_object_type.txt</xdtl:variable>
+	<xdtl:connection name="conn" type="DB">jdbc:oracle:thin:$dbuser/$dbpass@$dbhost:$dbname</xdtl:connection>
+
+	<xdtl:tasks>
+		<xdtl:task name="first">
+			<xdtl:steps>
+				<xdtl:query cmd="select count(*) from mmx.md_object_type" target="testvar" connection="$conn"/>
+				<xdtl:exec cmd="echo $testvar" />
+				<!-- <xdtl:fetch source="select * from mmx.md_object_type" target="$target" connection="$conn" type="CSV" /> -->
+			</xdtl:steps>
+		</xdtl:task>
+	</xdtl:tasks>
+</xdtl:package>
+
+
+
+

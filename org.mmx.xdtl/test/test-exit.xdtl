@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Test resume after an error.
+ -->
+<package name="test-exit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd" xmlns="http://xdtl.org/xdtl">
+  <connection name="conn" type="FILE">xdtl:connection</connection>
+  <tasks>
+    <task name="first">
+      <steps>
+        <log msg="Before exit"/>
+        <if expr="${1 == 2}">
+          <exit/>
+        </if>
+        <log msg="After exit, should not be reached"/>
+      </steps>
+    </task>
+    <task name="second">
+      <steps>
+        <log msg="should not be reached"/>
+      </steps>
+    </task>
+  </tasks>
+</package>

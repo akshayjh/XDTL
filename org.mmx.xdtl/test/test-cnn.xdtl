@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Test read command.
+ -->
+<package name="test-read" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd" xmlns="http://xdtl.org/xdtl">
+  <parameter name="tmpdir" required="0" default="/tmp"/>
+  <connection name="conn" type="DB">jdbc:postgresql://localhost/test?user=postgres&amp;password=postgres&amp;allowEncodingChanges=true</connection>
+  <tasks>
+    <task name="first" connection="$conn">
+      <steps>
+      	<transaction>
+	        <query source="set client_encoding to 'LATIN1'"/>
+	        <query source="set client_encoding to 'LATIN1'"/>
+        </transaction>
+        <write source="public.call" target="$tmpdir/call.csv" type="CSV" overwrite="1" delimiter="\t" quote="\'"/>
+        <call ref="#second" />
+      </steps>
+    </task>
+    <task name="second">
+      <steps>
+        <read target="public.call" source="$tmpdir/call.csv" type="CSV" connection="$conn" overwrite="1" delimiter="\t" quote="\'"/>
+      </steps>
+    </task>
+  </tasks>
+</package>

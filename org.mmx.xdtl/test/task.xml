@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<task xmlns="http://xdtl.org/xdtl" name="task" onerror="errorhandler.xdtl">
+  <steps>
+    <call ref="echo.xdtl">
+      <parameter name="msg">Task in separate file</parameter>
+    </call>
+    <call ref="error.xdtl"/>
+  </steps>
+</task>

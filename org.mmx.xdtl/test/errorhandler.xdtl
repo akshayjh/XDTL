@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Errorhandler.
+ -->
+<package name="errorhandler" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd" xmlns="http://xdtl.org/xdtl">
+  <connection name="conn" type="FILE">xdtl:connection</connection>
+  <tasks>
+    <task name="log-error">
+      <steps>
+        <log level="ERROR" msg="xdtlError=$xdtlError xdtlErrorCode=$xdtlErrorCode xdtlErrorDesc=$xdtlErrorDesc xdtlErrorType=$xdtlErrorType xdtlErrorLocation=$xdtlErrorLocation"/>
+      </steps>
+    </task>
+  </tasks>
+</package>

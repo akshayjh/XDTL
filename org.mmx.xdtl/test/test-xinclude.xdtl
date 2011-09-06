@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	XInclude test
+ -->
+<package name="test-xinclude"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd"
+    xmlns="http://xdtl.org/xdtl"
+    onerror="errorhandler.xdtl">
+    
+  <connection name="conn" type="DB">jdbc:postgresql://localhost/test</connection>
+  <tasks>
+    <xi:include href="task.xml"/>
+    <task name="second" onerror="errorhandler.xdtl">
+      <steps>
+        <call ref="echo.xdtl">
+          <parameter name="msg">XDTL\ version:\ $xdtlVersion</parameter>
+        </call>
+      </steps>
+    </task>
+  </tasks>
+</package>

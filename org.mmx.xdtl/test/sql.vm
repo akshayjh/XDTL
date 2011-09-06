@@ -1,0 +1,136 @@
+## basic macros for generic sql
+
+#macro ( filterMap $Conds $filter )
+#set ( $filter = false )
+#foreach ( $cond in $Conds )
+#if ( $cond.mapId == $mapId )#if ( $cond.condType == "filter" )#set ( $filter = true )#end
+#end
+#end
+#end
+
+#macro ( joinMap $Conds $join )
+#set ( $join = false )
+#foreach ( $cond in $Conds )
+#if ( $cond.mapId == $mapId )#if ( $cond.condType == "join" )#set ( $join = true )#end
+#end
+#end
+#end
+
+#macro ( aggrMap $Conds $aggr )
+#set ( $aggr = false )
+#foreach ( $cond in $Conds )
+#if ( $cond.mapId == $mapId )#if ( $cond.condType == "aggr" )#set ( $aggr = true )#end
+#end
+#end
+#end
+
+#macro( SELECT $Cols )
+SELECT#first
+#foreach ( $col in $Cols )
+#if ( $col.mapId == $mapId )
+#if( $first == true )#if( $col.distinct )DISTINCT #end
+#elseif( $next == true ),#end$colQualif AS $col.target#next
+#end
+#end
+#end
+
+#macro( FROM $Srcs $Conds )
+FROM#first
+#foreach ( $src in $Srcs )
+#if ( $src.mapId == $mapId )
+#foreach ( $cond in $Conds )
+#if ( $cond.mapId == $mapId )
+#if( $cond.alias == $src.alias )
+#joinMap ( $Conditions $join )
+#if( $first == true )
+#if( $src.query )#QUERY( $src.source ) $src.alias#else$src.source $src.alias#end
+#elseif( $cond.condType == "join" )
+#if( $cond.joinType == "inner" )INNER#elseif( $cond.joinType == "left" )LEFT OUTER#elseif( $cond.joinType == "right" )RIGHT OUTER#end JOIN
+#if( $src.query )#QUERY( $src.source ) $src.alias#else$src.source $src.alias#end ON $cond.condition#end
+#end
+#end
+#end#next
+#end
+#end
+#end
+
+#macro( WHERE $Conds )
+#filterMap ( $Conditions $filter )#if ( $filter )WHERE#first
+#foreach ( $cond in $Conds )
+#if ( $cond.mapId == $mapId )
+#if( $cond.condType == "filter" )#if( $next == true ) AND #end$cond.condition
+#next#end
+#end
+#end
+#end
+#end
+
+#macro( INSERT $tgtName $Cols )
+INSERT INTO $tgtName (#first
+#foreach ($col in $Cols )
+#if( $col.mapId == $mapId )
+#if( $next == true ),#end$col.target
+#next#end
+#end
+)
+#end
+
+#macro( GROUPBY $Cols )
+#aggrMap ( $Conditions $aggr )#if( $aggr )GROUP BY#first
+#foreach ( $col in $Cols )
+#if( $col.mapId == $mapId )
+#if( $col.aggregate )#if( $next == true ),#end$col.source
+#next#end
+#end
+#end
+#end
+#end
+
+#macro( HAVING $Conds )
+#aggrMap ( $Conditions $aggr )#if( $aggr )HAVING#first
+#foreach ( $cond in $Conds )
+#if( $cond.mapId == $mapId )
+#if( $cond.condType == "aggr" )#if( $next == true ) AND #end$cond.condition
+#next#end
+#end
+#end
+#end
+#end
+
+#macro( QUERY $tName )
+#push( $mapId ) 
+#foreach ( $tgt in $Targets ) 
+#if ( $tName == $tgt.get(1) )
+#set ( $mapId = $tgt.get(0) )
+(#SELECT ( $Columns )
+#FROM ( $Sources $Conditions )
+#WHERE ( $Conditions )
+#GROUPBY ( $Columns )
+#HAVING ( $Conditions )
+)#end
+#end
+#pop ( $mapId )
+#end
+
+#macro( UPDATE $tgtName $Cols )
+UPDATE $tgtName $$$mapId
+SET#first
+#foreach ($col in $Cols )
+#if ( $col.mapId == $mapId )
+#if( $col.updatable )#if( $next == true ),#end$col.target = $col.source
+#next#end
+#end
+#end
+#end
+
+#macro ( JOINKEY $Cols )
+#filterMap ( $Conditions $filter )#if ( $filter )AND#else
+WHERE#end#first
+#foreach ($col in $Cols )
+#if ( $col.mapId == $mapId )
+#if( $col.joinKey )#if( $next == true )AND
+#end $$$mapId.$col.target = $col.source
+#end
+#next#end
+#end
+#end

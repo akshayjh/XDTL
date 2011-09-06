@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Minimal XDTL file using xdtl namespace.
+ -->
+<xdtl:package name="minimal" xmlns:xdtl="http://xdtl.org/xdtl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd ">
+  <xdtl:connection name="conn" type="FILE">xdtl:connection</xdtl:connection>
+  <xdtl:tasks>
+    <xdtl:task name="first">
+      <xdtl:steps>
+        <xdtl:get overwrite="0" source="http://tempuri.org" target="http://tempuri.org"/>
+      </xdtl:steps>
+    </xdtl:task>
+  </xdtl:tasks>
+</xdtl:package>

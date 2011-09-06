@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Test for element.
+ -->
+<package name="test-for" xmlns="http://xdtl.org/xdtl">
+  <connection name="conn" type="DB">$testdb</connection>
+  <tasks>
+    <task name="first">
+      <steps>
+        <fetch source="select * from vais_mmx.process_run_log" rowset="rows" connection="$conn"/>
+        <for item="row" rowset="$rows">
+            <log msg="Index:$xdtlRowid Count:$xdtlRowcount Row:${row[1]}"/>
+        </for>
+        <!-- <render template="rowstest.vm" rowset="$rows" target="tmp"/>-->
+      </steps>
+    </task>
+  </tasks>
+</package>

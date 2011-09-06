@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Library of test tasks
+ -->
+<package name="testlib" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd" xmlns="http://xdtl.org/xdtl">
+  <connection name="conn" type="FILE">xdtl:connection</connection>
+  <tasks>
+    <task name="errorhandler">
+      <steps>
+        <get overwrite="0" source="a" target="b"/>
+      </steps>
+    </task>
+  </tasks>
+</package>

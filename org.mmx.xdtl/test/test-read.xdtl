@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Test read command.
+ -->
+<package name="test-read" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd" xmlns="http://xdtl.org/xdtl">
+  <connection name="conn" type="DB">$testdb</connection>
+  <tasks>
+    <task name="first" connection="$conn">
+      <steps>
+        <!-- <write source="public.call" target="/tmp/call-$xdtlDateCode.csv" type="CSV" overwrite="1" delimiter="\t" quote="\'"/>-->
+        <read target="vais_mmx.vahur_test" source="read-testdata-large.xls" type="EXCEL" encoding="cp775" overwrite="1" delimiter=";" quote="\'" header="1" skip="2" batch="5000"/>
+      </steps>
+    </task>
+  </tasks>
+</package>
