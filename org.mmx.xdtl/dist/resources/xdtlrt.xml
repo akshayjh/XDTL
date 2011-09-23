@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
-    <entry key="startupscript">/startup.js</entry>
     <entry key="osprocessrunner.logger.prefix">process.</entry>
     <entry key="osprocessrunner.stream.encoding">cp1257</entry>
     <entry key="useinternalschema">true</entry>
     <entry key="loader.batchsize">1000</entry>
     <entry key="read.impl">org.mmx.xdtl.runtime.command.JdbcReadCmd</entry>
-    <!--
+<!--
+    <entry key="startupscripts">resources</entry>
+ -->
+<!--
 	<entry key="write.impl">org.mmx.xdtl.runtime.command.PostgresqlWriteCmd</entry>
-	-->
+-->
 <!--
     Exec based versions of read/write commands
 

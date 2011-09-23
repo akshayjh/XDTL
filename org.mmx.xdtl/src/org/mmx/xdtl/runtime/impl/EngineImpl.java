@@ -1,5 +1,9 @@
 package org.mmx.xdtl.runtime.impl;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -32,6 +36,8 @@ import org.mmx.xdtl.runtime.ExpressionEvaluator;
 import org.mmx.xdtl.runtime.TypeConverter;
 import org.mmx.xdtl.runtime.XdtlError;
 import org.mmx.xdtl.runtime.util.ContextToBindingsAdapter;
+import org.mmx.xdtl.runtime.util.PathList;
+import org.mmx.xdtl.runtime.util.PathList.ForEachCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +47,7 @@ import com.google.inject.name.Named;
 
 public class EngineImpl implements Engine, EngineControl {
     private static final String TASK_DEFAULT_CONNECTION_ARG_NAME = "taskConn";
+    private static final String SYSTEM_STARTUP_SCRIPT = "/startup.js";
     
     private final Logger m_logger = LoggerFactory.getLogger(EngineImpl.class);
     private final ExpressionEvaluator m_exprEval;
@@ -49,7 +56,7 @@ public class EngineImpl implements Engine, EngineControl {
     private final Provider<ConnectionManager> m_connectionManagerProvider;
     private final Parser m_parser;
     private final String m_version;
-    private final String m_startupScript;
+    private final PathList m_startupScripts;
     private final ScriptEngine m_scriptEngine;
     
     private ContextStack m_contextStack;
@@ -62,7 +69,7 @@ public class EngineImpl implements Engine, EngineControl {
             CommandInvoker commandInvoker,
             Provider<ConnectionManager> connectionManagerProvider,
             ScriptEngine scriptEngine,
-            @Named("startupscript") String startupScript,
+            @Named("startupScripts") PathList startupScripts,
             @Named("xdtl.version") String version) {
 
         m_parser = parser;
@@ -71,7 +78,7 @@ public class EngineImpl implements Engine, EngineControl {
         m_commandInvoker = commandInvoker;
         m_connectionManagerProvider = connectionManagerProvider;
         m_scriptEngine = scriptEngine;
-        m_startupScript = startupScript;
+        m_startupScripts = startupScripts;
         m_version = version;
     }
 
@@ -88,7 +95,7 @@ public class EngineImpl implements Engine, EngineControl {
             Map<String, Object> globals) {
         m_contextStack = new ContextStack(createGlobalContext(globals));
         try {
-            runStartupScript();
+            runStartupScripts();
             run(pkg, taskname, args);
         } finally {
             if (m_contextStack.size() != 1) {
@@ -570,28 +577,60 @@ public class EngineImpl implements Engine, EngineControl {
         return context;
     }
     
-    private void runStartupScript() {
-        if (m_startupScript == null || m_startupScript.length() == 0) {
+    private void runStartupScripts() {
+        runSystemStartupScript();
+        runUserStartupScripts();
+    }
+
+    private void runUserStartupScripts() {
+        if (m_startupScripts == null) {
             return;
         }
+
+        FilenameFilter filter = new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.toLowerCase().endsWith(".js");
+            }
+        };
         
-        InputStream is = getClass().getResourceAsStream(m_startupScript);
+        m_startupScripts.forEachFile(filter, new ForEachCallback() {
+            @Override
+            public void execute(File file) {
+                try {
+                    m_logger.debug("runUserStartupScripts: running script '{}'", file);
+                    runScript(new FileInputStream(file));
+                } catch (Exception e) {
+                    throw new XdtlException("Error while executing user startup script: '" + file + "'", e);
+                }
+            }
+        });
+    }
+
+    private void runSystemStartupScript() {
+        InputStream is = getClass().getResourceAsStream(SYSTEM_STARTUP_SCRIPT);
         if (is == null) {
-            m_logger.warn("Could not find startup script '{}'", m_startupScript);
+            m_logger.debug("runSystemStartupScript: script not found, skipping");
             return;
         }
-        
+
         try {
-            m_logger.info("Running startup script: '{}'", m_startupScript);
-            m_scriptEngine.eval(new InputStreamReader(is),
-                    new ContextToBindingsAdapter(m_contextStack.getGlobalContext()));
+            m_logger.debug("runSystemStartupScript: running script '{}'", SYSTEM_STARTUP_SCRIPT);
+            runScript(is);
         } catch (Exception e) {
-            throw new XdtlException("Error while executing startup script: '" + m_startupScript + "'", e);
+            throw new XdtlException("Error while executing system startup script: '" + SYSTEM_STARTUP_SCRIPT + "'", e);
+        }
+    }
+
+    private void runScript(InputStream is) throws Exception {
+        try {
+            m_scriptEngine.eval(new BufferedReader(new InputStreamReader(is)),
+                    new ContextToBindingsAdapter(m_contextStack.getGlobalContext()));
         } finally {
             try {
                 is.close();
             } catch (IOException e) {
-                m_logger.warn("Failed to close input stream", e);
+                m_logger.warn("runScript: Failed to close input stream", e);
             }
         }
     }

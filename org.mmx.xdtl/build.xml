@@ -3,14 +3,6 @@
 
 	<property file="src/org/mmx/xdtl/Version.properties"/>
 
-	<loadfile property="svnrevision" srcfile="./.svn/entries">
-		<filterchain>
-			<headfilter lines="1" skip="3"/>
-			<striplinebreaks/>
-		</filterchain>
-	</loadfile>
-	
-	<property name="xdtl.implementation.version" value="${xdtl.implementation.version.prefix}.${svnrevision}"/>
 	<property name="jarfile"                     value="xdtl-${xdtl.implementation.version}.jar"/>
 	<property name="zipfile"                     value="xdtlrt-${xdtl.implementation.version}.zip"/>
 	<property name="build.dir"                   value="build"/>
@@ -55,6 +47,7 @@
          destdir="${bin.dir}"
          classpathref="classpath"
          debug="on"
+		 includeantruntime="false"
 		/>
 	</target>
 

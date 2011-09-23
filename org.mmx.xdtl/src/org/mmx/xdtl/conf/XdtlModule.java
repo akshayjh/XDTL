@@ -7,7 +7,6 @@ import org.mmx.xdtl.model.XdtlException;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
-import com.google.inject.util.Modules;
 
 public class XdtlModule extends AbstractModule {
     private final Properties m_properties;
@@ -31,16 +30,24 @@ public class XdtlModule extends AbstractModule {
         m_defaultProperties = new Properties();
 
         try {
+            m_defaultProperties.put("home", getXdtlHomeDir());
             m_defaultProperties.load(getClass().getResourceAsStream("default.properties"));
         } catch (IOException e) {
             throw new XdtlException("Failed to load default properties", e);
         }
     }
     
+    private String getXdtlHomeDir() {
+        String separator = System.getProperty("file.separator");
+        return System.getProperty("user.home") + separator + ".xdtl";
+    }
+
     @Override
     protected void configure() {
-        install(Modules.override(new PropertiesModule(m_defaultProperties)).with(new PropertiesModule(m_properties)));
+        Properties properties = new Properties(m_defaultProperties);
+        properties.putAll(m_properties);
+        install(new PropertiesModule(properties));
         install(new ParserModule());
-        install(new RuntimeModule(m_properties));
+        install(new RuntimeModule(properties));
     }
 }

@@ -87,6 +87,7 @@ import org.mmx.xdtl.runtime.impl.ConnectionManagerImpl;
 import org.mmx.xdtl.runtime.impl.EngineImpl;
 import org.mmx.xdtl.runtime.impl.ScriptExpressionEvaluator;
 import org.mmx.xdtl.runtime.impl.TypeConverterImpl;
+import org.mmx.xdtl.runtime.util.PathList;
 import org.mmx.xdtl.runtime.util.StringShortener;
 import org.mmx.xdtl.runtime.util.VariableNameValidator;
 import org.mmx.xdtl.services.GuiceInjector;
@@ -128,8 +129,10 @@ public class RuntimeModule extends AbstractModule {
 
     private final CommandMappingSet m_commandMappings = createDefaultCommandMappings();
     private final ScriptEngineManager m_scriptEngineManager = new ScriptEngineManager();
+    private final Properties m_properties;
     
     public RuntimeModule(Properties properties) {
+        m_properties = properties;
         CommandOverrides overrides = new CommandOverrides(properties, m_commandMappings);
         
         try {
@@ -157,7 +160,12 @@ public class RuntimeModule extends AbstractModule {
         bind(VariableNameValidator.class);
         bind(StringShortener.class);
         bind(UriSchemeParser.class).in(Singleton.class);
+        
+        PathList startupScriptsPathList = new PathList(
+                m_properties.getProperty("home"),
+                m_properties.getProperty("startupscripts"));
 
+        bind(PathList.class).annotatedWith(Names.named("startupScripts")).toInstance(startupScriptsPathList);
         bindCommandBuilders();
 
         Version ver = new Version();
