@@ -2,6 +2,7 @@ package org.mmx.xdtl.runtime;
 
 import java.util.HashMap;
 
+import org.mmx.xdtl.model.Package;
 import org.mmx.xdtl.model.Variable;
 import org.mmx.xdtl.model.XdtlException;
 
@@ -19,22 +20,26 @@ public class Context {
     private final EngineControl m_engineControl;
     private final HashMap<String, Variable> m_varmap = new HashMap<String, Variable>();
     private final ConnectionManager m_connectionManager;
+    private final Context m_upperContext;
     
     public Context() {
         m_engineControl = null;
         m_connectionManager = null;
+        m_upperContext = null;
     }
     
     public Context(EngineControl engineControl,
             ConnectionManager connectionManager) {
         m_engineControl = engineControl;
         m_connectionManager = connectionManager;
+        m_upperContext = null;
     }
     
     public Context(Context upperContext, ConnectionManager connectionManager) {
         m_engineControl = upperContext.m_engineControl;
         m_varmap.putAll(upperContext.m_varmap);
         m_connectionManager = connectionManager;
+        m_upperContext = upperContext;
     }
     
     /**
@@ -95,6 +100,10 @@ public class Context {
         }
         
         return var.getValue();
+    }
+
+    public Package getPackage() {
+        return m_upperContext != null ? m_upperContext.getPackage() : null;
     }
 
     /**

@@ -69,7 +69,7 @@ public class EngineImpl implements Engine, EngineControl {
             CommandInvoker commandInvoker,
             Provider<ConnectionManager> connectionManagerProvider,
             ScriptEngine scriptEngine,
-            @Named("startupScripts") PathList startupScripts,
+            @Named("startupscripts.path") PathList startupScripts,
             @Named("xdtl.version") String version) {
 
         m_parser = parser;

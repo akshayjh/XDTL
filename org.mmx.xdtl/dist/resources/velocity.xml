@@ -4,6 +4,5 @@
 	<entry key="runtime.log.logsystem.class">org.mmx.xdtl.runtime.util.VelocityLogger</entry>
 	<entry key="resource.loader">url</entry>
 	<entry key="url.resource.loader.class">org.apache.velocity.runtime.resource.loader.URLResourceLoader</entry>
-	<entry key="url.resource.loader.root">file:</entry>
 	<entry key="velocimacro.library" />
 </properties>

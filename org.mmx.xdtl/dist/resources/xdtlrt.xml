@@ -7,7 +7,16 @@
     <entry key="loader.batchsize">1000</entry>
     <entry key="read.impl">org.mmx.xdtl.runtime.command.JdbcReadCmd</entry>
 <!--
-    <entry key="startupscripts">resources</entry>
+    A comma separated list of directories of javascript files to execute at startup.
+    A relative path is relative to xdtl home directory - usually $(HOME)/.xdtl.
+    <entry key="startupscripts.path">startup</entry>
+ -->
+<!--
+    A comma separated list of root url-s of velocity resources. Velocity
+    resources are loaded from package's directory first and if not found, then
+    following directories are tried. Relative directories are relative to xdtl
+    home directory - usually $(HOME)/.xdtl.
+    <entry key="velocity.path">velocity</entry>
  -->
 <!--
 	<entry key="write.impl">org.mmx.xdtl.runtime.command.PostgresqlWriteCmd</entry>

@@ -153,7 +153,8 @@ public class RuntimeModule extends AbstractModule {
         bind(Engine.class).to(EngineImpl.class);
         bind(CommandInvoker.class).to(CommandInvokerImpl.class);
         bind(ConnectionManager.class).to(ConnectionManagerImpl.class);
-        bind(VelocityEngine.class).toProvider(VelocityEngineProvider.class).in(Singleton.class);
+        bind(VelocityEngine.class).toProvider(VelocityEngineProvider.class);
+        bind(Properties.class).annotatedWith(Names.named("velocity.properties")).toProvider(VelocityPropertiesProvider.class);
         bind(OsProcessRunner.class).to(OsProcessRunnerImpl.class);
         bind(OsArgListBuilder.class).to(OsArgListBuilderImpl.class);
         bind(CommandMappingSet.class).toInstance(m_commandMappings);
@@ -161,13 +162,16 @@ public class RuntimeModule extends AbstractModule {
         bind(StringShortener.class);
         bind(UriSchemeParser.class).in(Singleton.class);
         
-        PathList startupScriptsPathList = new PathList(
-                m_properties.getProperty("home"),
-                m_properties.getProperty("startupscripts"));
+        String homeDirUrl = "file://" + m_properties.getProperty("home");
+        PathList startupScriptsPathList = new PathList(homeDirUrl,
+                m_properties.getProperty("startupscripts.path"));
+        bind(PathList.class).annotatedWith(Names.named("startupscripts.path")).toInstance(startupScriptsPathList);
+        
+        PathList velocityPathList = new PathList(homeDirUrl,
+                m_properties.getProperty("velocity.path"));
+        bind(PathList.class).annotatedWith(Names.named("velocity.path")).toInstance(velocityPathList);
 
-        bind(PathList.class).annotatedWith(Names.named("startupScripts")).toInstance(startupScriptsPathList);
         bindCommandBuilders();
-
         Version ver = new Version();
         bind(String.class).annotatedWith(Names.named("xdtl.version")).toInstance(ver.getImplementationVersion());
         bind(Injector.class).to(GuiceInjector.class);

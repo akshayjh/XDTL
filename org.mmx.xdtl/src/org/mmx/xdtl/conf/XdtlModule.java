@@ -39,7 +39,7 @@ public class XdtlModule extends AbstractModule {
     
     private String getXdtlHomeDir() {
         String separator = System.getProperty("file.separator");
-        return System.getProperty("user.home") + separator + ".xdtl";
+        return System.getProperty("user.home") + separator + ".xdtl" + separator;
     }
 
     @Override
