@@ -4,7 +4,7 @@ public abstract class AbstractElementHandler implements ElementHandler {
     private StringBuilder m_textBuffer;
 
     @Override
-    public void startElement(String name, Attributes attr) {
+    public void startElement(String nsUri, String name, Attributes attr) {
         startElement(attr);
     }
 

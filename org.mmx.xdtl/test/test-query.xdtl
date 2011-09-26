@@ -7,7 +7,10 @@
   <tasks>
     <task name="first" connection="$conn">
       <steps>
-        <query source="file:query.sql" target="tmp"/>
+        <query source="select nvl(to_char(?, 'dd.mm.yyyy'), 'null') || ', ' || to_char(?) from dual" target="tmp">
+          <parameter name="p1" type="date">2011-02-01</parameter>
+          <parameter name="p2" type="double">1.234</parameter>
+        </query>
         <log msg="Query result=$tmp"/>
       </steps>
     </task>

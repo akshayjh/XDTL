@@ -1,5 +1,7 @@
 package org.mmx.xdtl.cli;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -19,8 +21,8 @@ import com.google.inject.Injector;
 
 public class Main {
     private static final Logger m_logger = LoggerFactory.getLogger(Main.class);
-    private static final String RESOURCE_GLOBALS = "/globals.xml";
-    private static final String RESOURCE_CONF = "/xdtlrt.xml";
+    private static final String GLOBALS_NAME = "globals.xml";
+    private static final String CONFIG_NAME = "xdtlrt.xml";
     
     /**
      * @param args
@@ -32,14 +34,23 @@ public class Main {
         }
         
         try {
-            HashMap<String, Object> argMap = createArgumentMap(args);
+            HashMap<String, Object> optionsMap = createArgumentMap(args, 0, "-");
+            if (args.length <= optionsMap.size()) {
+                usage();
+                System.exit(-1);
+            }
+
+            URL taskUrl = new URL(new URL("file:"), args[optionsMap.size()]); 
+            HashMap<String, Object> argMap = createArgumentMap(args, optionsMap.size() + 1, null);
             MDC.setContextMap(argMap);
-            
-            Properties conf = loadProperties(RESOURCE_CONF);
+
+            String homeDir = initXdtlHomeDir(optionsMap);
+            Properties conf = loadProperties(homeDir, CONFIG_NAME);
+            conf.putAll(optionsMap);
             Injector injector = Guice.createInjector(new XdtlModule(conf));
     
-            URL url = new URL(new URL("file:"), args[0]);
-            injector.getInstance(Engine.class).run(url, argMap, loadGlobals());
+            
+            injector.getInstance(Engine.class).run(taskUrl, argMap, loadGlobals(homeDir));
             m_logger.info("done");
             System.exit(0);
         } catch (Throwable t) {
@@ -49,14 +60,49 @@ public class Main {
     }
     
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static Map<String, Object> loadGlobals() throws Exception {
-        return (Map) loadProperties(RESOURCE_GLOBALS);
+    private static Map<String, Object> loadGlobals(String homeDir) throws Exception {
+        return (Map) loadProperties(homeDir, GLOBALS_NAME);
     }
 
-    private static Properties loadProperties(String resourceName) throws IOException,
+    private static Properties loadProperties(String homeDir, String name) throws Exception {
+        Properties defaultprops = loadPropertiesFromClasspath("/" + name);
+        Properties userprops = loadPropertiesFromFile(homeDir + name);
+        defaultprops.putAll(userprops);
+        return defaultprops;
+    }
+
+    private static String initXdtlHomeDir(HashMap<String, Object> optionsMap) {
+        String homeDir = (String) optionsMap.get("home");
+        if (homeDir == null) {
+            homeDir = System.getProperty("user.home") + "/.xdtl/";
+            optionsMap.put("home", homeDir);
+        } else if (!homeDir.endsWith("/")) {
+            homeDir += "/";
+            optionsMap.put("home", homeDir);
+        }
+        
+        return homeDir;
+    }
+
+    private static Properties loadPropertiesFromFile(String fileName) throws IOException,
             InvalidPropertiesFormatException {
         Properties props = new Properties();
-        InputStream is = Main.class.getResourceAsStream(resourceName);
+        File file = new File(fileName);
+        if (!file.exists()) {
+            return props;
+        }
+
+        return loadPropertiesFromStream(props, new FileInputStream(file));
+    }
+
+    private static Properties loadPropertiesFromClasspath(String name)
+            throws IOException, InvalidPropertiesFormatException {
+        Properties props = new Properties();
+        return loadPropertiesFromStream(props, Main.class.getResourceAsStream(name));
+    }
+
+    private static Properties loadPropertiesFromStream(Properties props, InputStream is)
+            throws IOException, InvalidPropertiesFormatException {
         if (is != null) {
             try {
                 props.loadFromXML(is);
@@ -67,7 +113,7 @@ public class Main {
         return props;
     }
 
-    private static HashMap<String, Object> createArgumentMap(String[] args)
+    private static HashMap<String, Object> createArgumentMap(String[] args, int start, String prefix)
             throws Exception {
         
         if (args.length < 1) {
@@ -76,8 +122,13 @@ public class Main {
         
         HashMap<String, Object> map = new HashMap<String, Object>();
         
-        for (int i = 1; i < args.length; i++) {
+        for (int i = start; i < args.length; i++) {
             String arg = args[i];
+            if (prefix != null) {
+                if (!arg.startsWith(prefix)) return map;
+                arg = arg.substring(prefix.length());
+            }
+                
             int pos = arg.indexOf('=');
             
             if (pos == -1) {
@@ -112,6 +163,6 @@ public class Main {
     }
 
     private static void usage() {
-        System.out.println("Usage: xdtlrt <task url> [param=val ...]");
+        System.out.println("Usage: xdtlrt [-option=val ...] <task url> [param=val ...]");
     }
 }

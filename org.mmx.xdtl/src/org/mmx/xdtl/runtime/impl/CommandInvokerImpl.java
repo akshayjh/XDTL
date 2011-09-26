@@ -15,7 +15,7 @@ import org.slf4j.MDC;
 import com.google.inject.Inject;
 
 public class CommandInvokerImpl implements CommandInvoker {
-    private final Logger m_logger = LoggerFactory.getLogger(CommandInvokerImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(CommandInvokerImpl.class);
     private final CommandMappingSet m_mappings;
     private final Injector m_injector;
     
@@ -59,7 +59,7 @@ public class CommandInvokerImpl implements CommandInvoker {
                 
                 m_injector.injectMembers(runtimeCmd);
     
-                m_logger.debug("{} running command '{}'", cmd.getSourceLocator(),
+                logger.debug("{} running command '{}'", cmd.getSourceLocator(),
                         runtimeCmd.getClass().getName());
                 
                 runtimeCmd.run(context);

@@ -20,6 +20,8 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author vsi
  */
 class Handler extends DefaultHandler {
+    private static final String XDTL_URI = "http://xdtl.org/xdtl";
+
     private final ElementHandlerStack m_elementHandlerStack = new ElementHandlerStack();
     private final ElementHandlerSet m_elementHandlerSet;
     private final String m_documentUrl;
@@ -33,10 +35,11 @@ class Handler extends DefaultHandler {
     }
     
     @Override
-    public void startElement(String uri, String localName, String qName,
+    public void startElement(String nsUri, String localName, String qName,
             Attributes attr) throws SAXException {
 
-        Class<? extends ElementHandler> clazz = getElementHandlerClass(localName);
+        Class<? extends ElementHandler> clazz = getElementHandlerClass(nsUri,
+                localName);
         
         ElementHandler elementHandler;
         
@@ -52,7 +55,7 @@ class Handler extends DefaultHandler {
                 new SourceLocator(m_documentUrl, m_locator.getLineNumber(), localName),
                 wrappedAttrs.getStringValue("id", ""));
         
-        elementHandler.startElement(localName, wrappedAttrs);
+        elementHandler.startElement(nsUri, localName, wrappedAttrs);
     }
 
     /**
@@ -62,11 +65,15 @@ class Handler extends DefaultHandler {
      * @return
      * @throws SAXException
      */
-    private Class<? extends ElementHandler> getElementHandlerClass(
+    private Class<? extends ElementHandler> getElementHandlerClass(String nsUri,
             String elementName) throws SAXException {
         
-        Class<? extends ElementHandler> clazz = m_elementHandlerSet.get(
-                elementName);
+        Class<? extends ElementHandler> clazz;
+        if (XDTL_URI.equalsIgnoreCase(nsUri)) {
+            clazz = m_elementHandlerSet.get(elementName);
+        } else {
+            clazz = m_elementHandlerSet.getDefault();
+        }
         
         if (clazz == null) {
             throw new SAXException("Cannot find handler for element '"

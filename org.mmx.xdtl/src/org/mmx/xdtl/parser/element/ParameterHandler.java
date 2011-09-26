@@ -20,5 +20,7 @@ public class ParameterHandler extends AbstractElementHandler {
         m_param.setName(attr.getStringValue("name"));
         m_param.setDefault(attr.getStringValue("default"));
         m_param.setRequired(attr.getBooleanValue("required", false));
+        m_param.setType(attr.getStringValue("type"));
+        m_param.setFormat(attr.getStringValue("format"));
     }
 }

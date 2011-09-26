@@ -41,7 +41,7 @@ public class PathList {
         }
     }
 
-    public void forEachFile(FilenameFilter filter, ForEachCallback callback) {
+    public Object forEachFile(FilenameFilter filter, ForEachCallback callback) {
         for (URL root: m_roots) {
             if (!root.getProtocol().equalsIgnoreCase("file")) continue;
     
@@ -52,11 +52,14 @@ public class PathList {
             Arrays.sort(files);
             
             for (int i = 0; i < files.length; i++) {
-                callback.execute(files[i]);
+                Object result = callback.execute(files[i]);
+                if (result != null) return result;
             }
         }
+        
+        return null;
     }
-    
+
     public void prepend(URL url) {
         m_roots.add(0, getDirectoryUrl(url));
     }
@@ -73,7 +76,7 @@ public class PathList {
     }
 
     public interface ForEachCallback {
-        void execute(File file);
+        Object execute(File file);
     }
     
     public String toCsv() {

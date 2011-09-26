@@ -14,6 +14,7 @@ import org.mmx.xdtl.model.command.Clear;
 import org.mmx.xdtl.model.command.Error;
 import org.mmx.xdtl.model.command.Exec;
 import org.mmx.xdtl.model.command.Exit;
+import org.mmx.xdtl.model.command.Extension;
 import org.mmx.xdtl.model.command.Fetch;
 import org.mmx.xdtl.model.command.For;
 import org.mmx.xdtl.model.command.Get;
@@ -47,6 +48,8 @@ import org.mmx.xdtl.runtime.command.ExecCmd;
 import org.mmx.xdtl.runtime.command.ExecCmdBuilder;
 import org.mmx.xdtl.runtime.command.ExitCmd;
 import org.mmx.xdtl.runtime.command.ExitCmdBuilder;
+import org.mmx.xdtl.runtime.command.ExtensionCmd;
+import org.mmx.xdtl.runtime.command.ExtensionCmdBuilder;
 import org.mmx.xdtl.runtime.command.FetchCmd;
 import org.mmx.xdtl.runtime.command.FetchCmdBuilder;
 import org.mmx.xdtl.runtime.command.FileTransferCmd;
@@ -85,6 +88,7 @@ import org.mmx.xdtl.runtime.impl.CommandMapping;
 import org.mmx.xdtl.runtime.impl.CommandMappingSet;
 import org.mmx.xdtl.runtime.impl.ConnectionManagerImpl;
 import org.mmx.xdtl.runtime.impl.EngineImpl;
+import org.mmx.xdtl.runtime.impl.ExtensionLoader;
 import org.mmx.xdtl.runtime.impl.ScriptExpressionEvaluator;
 import org.mmx.xdtl.runtime.impl.TypeConverterImpl;
 import org.mmx.xdtl.runtime.util.PathList;
@@ -124,7 +128,8 @@ public class RuntimeModule extends AbstractModule {
         new CommandMapping(For.class, ForCmdBuilder.class, ForCmd.class),
         new CommandMapping(Send.class, SendCmdBuilder.class, SendCmd.class),
         new CommandMapping(Exit.class, ExitCmdBuilder.class, ExitCmd.class),
-        new CommandMapping(Error.class, ErrorCmdBuilder.class, ErrorCmd.class)
+        new CommandMapping(Error.class, ErrorCmdBuilder.class, ErrorCmd.class),
+        new CommandMapping(Extension.class, ExtensionCmdBuilder.class, ExtensionCmd.class)
     };
 
     private final CommandMappingSet m_commandMappings = createDefaultCommandMappings();
@@ -171,10 +176,15 @@ public class RuntimeModule extends AbstractModule {
                 m_properties.getProperty("velocity.path"));
         bind(PathList.class).annotatedWith(Names.named("velocity.path")).toInstance(velocityPathList);
 
+        PathList extensionsPathList = new PathList(homeDirUrl,
+                m_properties.getProperty("extensions.path"));
+        bind(PathList.class).annotatedWith(Names.named("extensions.path")).toInstance(extensionsPathList);
+
         bindCommandBuilders();
         Version ver = new Version();
         bind(String.class).annotatedWith(Names.named("xdtl.version")).toInstance(ver.getImplementationVersion());
         bind(Injector.class).to(GuiceInjector.class);
+        bind(ExtensionLoader.class);
     }
     
     @Provides @Singleton

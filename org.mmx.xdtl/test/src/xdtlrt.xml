@@ -8,6 +8,7 @@
     <entry key="loader.batchsize">1000</entry>
     <entry key="startupscripts.path">startup</entry>
     <entry key="velocity.path">velocity</entry>
+    <entry key="extensions.path">extensions</entry>
 <!--
     Exec based versions of read/write commands
 

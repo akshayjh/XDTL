@@ -1,8 +1,10 @@
 package org.mmx.xdtl.runtime.command;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 import org.mmx.xdtl.db.JdbcConnection;
 import org.mmx.xdtl.runtime.Context;
@@ -15,11 +17,13 @@ public class QueryCmd implements RuntimeCommand {
     private final JdbcConnection m_connection;
     private final String m_sqlStatement;
     private final String m_target;
+    private final List<Object> m_params;
     
-    public QueryCmd(JdbcConnection connection, String sqlStatement, String target) {
+    public QueryCmd(JdbcConnection connection, String sqlStatement, String target, List<Object> params) {
         m_connection = connection;
         m_sqlStatement = sqlStatement;
         m_target = target;
+        m_params = params;
     }
     
     @Override
@@ -36,10 +40,11 @@ public class QueryCmd implements RuntimeCommand {
     }
 
     private Object executeStatementReturnScalar() throws SQLException {
-        Statement statement = m_connection.createStatement();
+        PreparedStatement statement = m_connection.prepareStatement(m_sqlStatement);
 
         try {
-            if (statement.execute(m_sqlStatement)) {
+            setParameters(statement);
+            if (statement.execute()) {
                 ResultSet rs = statement.getResultSet();
                 try {
                     if (rs.next()) {
@@ -58,11 +63,19 @@ public class QueryCmd implements RuntimeCommand {
         }
     }
     
+    private void setParameters(PreparedStatement statement) throws SQLException {
+        int i = 1;
+        for (Object value: m_params) {
+            statement.setObject(i++, value);
+        }
+    }
+
     private void executeStatement() throws SQLException {
-        Statement statement = m_connection.createStatement();
+        PreparedStatement statement = m_connection.prepareStatement(m_sqlStatement);
 
         try {
-            statement.execute(m_sqlStatement);
+            setParameters(statement);
+            statement.execute();
         } finally {
             close(statement);
         }

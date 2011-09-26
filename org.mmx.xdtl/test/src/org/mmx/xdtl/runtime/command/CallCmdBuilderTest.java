@@ -43,6 +43,12 @@ public class CallCmdBuilderTest {
             public void exit() {
                 Assert.fail();
             }
+
+            @Override
+            public void callExtension(String nsUri, String name,
+                    Map<String, Object> args) {
+                Assert.fail();
+            }
         }, null);
         
         context.addVariable(new Variable("var", "varvalue"));

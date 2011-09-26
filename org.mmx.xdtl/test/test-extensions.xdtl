@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Extension elements test.
+ -->
+<package name="test-extensions"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd"
+  xmlns="http://xdtl.org/xdtl"
+  xmlns:ext="http://xdtl.org/xdtl/ext">
+  <connection name="conn" type="FILE">xdtl:connection</connection>
+  <tasks>
+    <task name="first">
+      <steps>
+        <ext:say msg="hello"/>
+        <ext:say msg="hello"/>
+        <ext:say2 msg="hello 2"/>
+      </steps>
+    </task>
+  </tasks>
+</package>

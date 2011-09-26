@@ -18,8 +18,8 @@ public class DefaultElementHandler extends AbstractElementHandler {
     }
 
     @Override
-    public void startElement(String name, Attributes attr) {
-        m_elem = new Extension(name);
+    public void startElement(String nsUri, String name, Attributes attr) {
+        m_elem = new Extension(nsUri, name);
 
         for (int i = 0; i < attr.getLength(); i++) {
             Attribute a = attr.get(i);
@@ -41,6 +41,6 @@ public class DefaultElementHandler extends AbstractElementHandler {
                 : null;
         
         throw new XdtlException("Only 'parameter' elements are allowed inside "
-                + "unknown elements", srcLocator);
+                + "extension elements", srcLocator);
     }
 }
