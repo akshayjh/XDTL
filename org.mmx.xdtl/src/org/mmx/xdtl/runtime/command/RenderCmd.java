@@ -10,7 +10,7 @@ import org.apache.velocity.app.VelocityEngine;
 import org.mmx.xdtl.model.Variable;
 import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.RuntimeCommand;
-import org.mmx.xdtl.runtime.util.PathList;
+import org.mmx.xdtl.services.PathList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

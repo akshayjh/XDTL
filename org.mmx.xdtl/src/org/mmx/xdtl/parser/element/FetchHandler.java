@@ -29,7 +29,8 @@ public class FetchHandler extends AbstractElementHandler {
                 attrs.getStringValue("quote"),
                 attrs.getStringValue("target"),
                 attrs.getStringValue("rowset"),
-                attrs.getStringValue("encoding"));
+                attrs.getStringValue("encoding"),
+                attrs.getValue("destination"));
     }
 
     /**

@@ -9,7 +9,7 @@
 <!--
     A comma separated list of directories of javascript files to execute at startup.
     A relative path is relative to xdtl home directory - usually $(HOME)/.xdtl.
-    <entry key="startupscripts.path">startup</entry>
+    <entry key="startup.path">startup</entry>
  -->
 <!--
     A comma separated list of root url-s of velocity resources. Velocity
@@ -18,6 +18,16 @@
     home directory - usually $(HOME)/.xdtl.
     <entry key="velocity.path">velocity</entry>
  -->
+<!--
+    A command separated list of directories of extension packages. A relative
+    path is relative to xdtl home directory - usually $(HOME)/.xdtl.
+    <entry key="extensions.path">extensions</entry>
+-->
+<!--
+    A command separated list of directories of library packages. A relative
+    path is relative to xdtl home directory - usually $(HOME)/.xdtl.
+    <entry key="extensions.path">extensions</entry>
+-->
 <!--
 	<entry key="write.impl">org.mmx.xdtl.runtime.command.PostgresqlWriteCmd</entry>
 -->

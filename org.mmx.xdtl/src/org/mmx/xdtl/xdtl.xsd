@@ -219,8 +219,8 @@
 			<xs:element ref="xdtl:render"/>
 			<xs:element ref="xdtl:log"/>
 			<xs:element ref="xdtl:send"/>
-			<xs:element ref="xdtl:lineage"/>
-			<!--xs:element ref="xdtl:mappings"/-->
+			<!--xs:element ref="xdtl:lineage"/-->
+			<xs:element ref="xdtl:mappings"/>
 			<xs:element ref="xdtl:error"/>
 			<xs:element ref="xdtl:exit"/>
 			<xs:any namespace="##other" processContents="lax"/>
@@ -402,6 +402,7 @@
 			<xs:attribute name="overwrite" type="xdtl:check"/>
 			<xs:attribute name="rowset" type="xs:string"/>
 			<xs:attribute name="connection" type="xs:string" use="required"/>
+            <xs:attribute name="destination" type="xs:string"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="if">
@@ -510,7 +511,8 @@
 			<xs:attribute name="overwrite" type="xdtl:check" use="required"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="lineage">
+	<!--
+		<xs:element name="lineage">
 		<xs:annotation>
 			<xs:documentation>Store load process metrics and lineage data to the lineage table. </xs:documentation>
 		</xs:annotation>
@@ -520,7 +522,7 @@
 			<xs:attribute name="target" type="xs:string" use="required"/>
 		</xs:complexType>
 	</xs:element>
-<!--
+	-->
 	<xs:element name="mappings">
 		<xs:annotation>
 			<xs:documentation>Define or retrieve mappings used to instantiate an SQL statement.</xs:documentation>
@@ -587,7 +589,6 @@
 			<xs:attribute name="repo" type="xs:string"/>
 		</xs:complexType>
 	</xs:element>
--->
 	<xs:element name="exit">
 		<xs:annotation>
 			<xs:documentation>Exit</xs:documentation>

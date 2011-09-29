@@ -36,8 +36,8 @@ import org.mmx.xdtl.runtime.ExpressionEvaluator;
 import org.mmx.xdtl.runtime.TypeConverter;
 import org.mmx.xdtl.runtime.XdtlError;
 import org.mmx.xdtl.runtime.util.ContextToBindingsAdapter;
-import org.mmx.xdtl.runtime.util.PathList;
-import org.mmx.xdtl.runtime.util.PathList.ForEachCallback;
+import org.mmx.xdtl.services.PathList;
+import org.mmx.xdtl.services.PathList.ForEachCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +70,7 @@ public class EngineImpl implements Engine, EngineControl {
             CommandInvoker commandInvoker,
             Provider<ConnectionManager> connectionManagerProvider,
             ScriptEngine scriptEngine,
-            @Named("startupscripts.path") PathList startupScripts,
+            @Named("startup.path") PathList startupScripts,
             @Named("xdtl.version") String version,
             ExtensionLoader extensionLoader) {
 
@@ -155,7 +155,8 @@ public class EngineImpl implements Engine, EngineControl {
         logger.debug("callExtension: nsUri={}, name={}", nsUri, name);
         Package pkg = m_extensionLoader.getExtensionPackage(nsUri, name);
         if (pkg == null) {
-            throw new XdtlException("Extension package not found: nsUri=" + nsUri + ", name=" + name);
+            throw new XdtlException("Extension package not found: nsUri="
+                    + nsUri + ", name=" + name);
         }
 
         Context upperCtx = m_contextStack.getTop();
@@ -169,7 +170,7 @@ public class EngineImpl implements Engine, EngineControl {
         // Put all arguments into context irrespective of whether task
         // parameters exist.
         for (String argName: args.keySet()) {
-            context.assignVariable(argName, args.get(argName));
+            context.addVariable(new Variable(argName, args.get(argName)));
         }
         
         runTaskInContext(context, null);

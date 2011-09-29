@@ -114,7 +114,7 @@ public class QueryCmdBuilder extends AbstractCmdBuilder {
 
             String strValue = m_typeConv.toString(m_exprEval.evaluate(ctx, param.getValue()));
             Object value = null;
-            if (strValue != null && strValue.length() != 0) {
+            if (strValue != null) {
                 value = convertValue(ctx, param, type, strValue);
             }
 

@@ -8,8 +8,8 @@ import java.util.HashMap;
 
 import org.mmx.xdtl.model.Package;
 import org.mmx.xdtl.parser.Parser;
-import org.mmx.xdtl.runtime.util.PathList;
-import org.mmx.xdtl.runtime.util.PathList.ForEachCallback;
+import org.mmx.xdtl.services.PathList;
+import org.mmx.xdtl.services.PathList.ForEachCallback;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;

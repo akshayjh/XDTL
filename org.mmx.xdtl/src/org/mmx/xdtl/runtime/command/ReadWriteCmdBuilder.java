@@ -14,7 +14,7 @@ public abstract class ReadWriteCmdBuilder extends AbstractCmdBuilder {
     private final ExpressionEvaluator m_exprEval;
     private final TypeConverter m_typeConv;
     
-    private String m_source;
+    private Object m_source;
     private String m_target;
     private String m_type;
     private boolean m_overwrite;
@@ -46,7 +46,13 @@ public abstract class ReadWriteCmdBuilder extends AbstractCmdBuilder {
             m_connection = (Connection) cnnObj;
         }
         
-        m_source = m_typeConv.toString(m_exprEval.evaluate(ctx, cmd.getSource()));
+        m_source = m_exprEval.evaluate(ctx, cmd.getSource());
+        m_type = m_typeConv.toString(m_exprEval.evaluate(ctx, cmd.getType()));
+
+        if (m_type != null && !m_type.equalsIgnoreCase("ROWSET")) {
+            m_source = m_typeConv.toString(m_source);
+        }
+        
         m_target = m_typeConv.toString(m_exprEval.evaluate(ctx, cmd.getTarget()));
         m_type = m_typeConv.toString(m_exprEval.evaluate(ctx, cmd.getType()));
         m_overwrite = m_typeConv.toBoolean(m_exprEval.evaluate(ctx, cmd.getOverwrite()));
@@ -55,7 +61,7 @@ public abstract class ReadWriteCmdBuilder extends AbstractCmdBuilder {
         m_encoding = m_typeConv.toString(m_exprEval.evaluate(ctx, cmd.getEncoding()));
     }
 
-    protected String getSource() {
+    protected Object getSource() {
         return m_source;
     }
 

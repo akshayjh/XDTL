@@ -26,6 +26,7 @@ public class FetchCmdBuilder extends AbstractCmdBuilder {
     private char m_quote;
     private Fetch.Type m_type;
     private JdbcConnection m_connection;
+    private JdbcConnection m_destination;
     private boolean m_overwrite;
     private String m_rowset;
     private String m_encoding;
@@ -73,7 +74,16 @@ public class FetchCmdBuilder extends AbstractCmdBuilder {
             throw new XdtlException("Invalid connection type: '" + cnnObj.getClass() + "'");
         }
 
-        m_connection = ctx.getConnectionManager().getJdbcConnection((Connection) cnnObj);        
+        m_connection = ctx.getConnectionManager().getJdbcConnection((Connection) cnnObj);
+
+        cnnObj = m_exprEval.evaluate(ctx, fetch.getDestination());
+        if (cnnObj != null) {
+            if (!(cnnObj instanceof Connection)) {
+                throw new XdtlException("Invalid destination connection type: '" + cnnObj.getClass() + "'");
+            }
+            
+            m_destination = ctx.getConnectionManager().getJdbcConnection((Connection) cnnObj);
+        }
     }
 
     @Override
@@ -81,9 +91,11 @@ public class FetchCmdBuilder extends AbstractCmdBuilder {
         Constructor<? extends RuntimeCommand> ctor = getRuntimeClass()
                 .getConstructor(String.class, JdbcConnection.class,
                         Fetch.Type.class, boolean.class, char.class,
-                        char.class, String.class, String.class, String.class);
+                        char.class, String.class, String.class, String.class,
+                        JdbcConnection.class);
         
         return ctor.newInstance(m_source, m_connection, m_type, m_overwrite,
-                m_delimiter, m_quote, m_target, m_rowset, m_encoding);
+                m_delimiter, m_quote, m_target, m_rowset, m_encoding,
+                m_destination);
     }
 }

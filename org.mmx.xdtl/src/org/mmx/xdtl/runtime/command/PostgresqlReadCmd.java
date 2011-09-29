@@ -13,11 +13,11 @@ public class PostgresqlReadCmd extends PostgresqlReadWriteCmd {
     
     private final String m_errors;
 
-    public PostgresqlReadCmd(String source, String target, String type,
+    public PostgresqlReadCmd(Object source, String target, String type,
             boolean overwrite, String delimiter, String quote, String encoding,
             Connection cnn, String errors, boolean header, int rowOffset, int batch) {
 
-        super(source, target, type, overwrite, delimiter, quote, encoding, cnn, true);
+        super((String) source, target, type, overwrite, delimiter, quote, encoding, cnn, true);
         m_errors = errors;        
     }
 

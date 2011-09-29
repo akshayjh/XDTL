@@ -13,6 +13,7 @@ public class Fetch extends AbstractElement implements Command {
     private final String m_target;
     private final String m_rowset;
     private final String m_encoding;
+    private final String m_destination;
 
     public enum Type {
         CSV,
@@ -22,7 +23,7 @@ public class Fetch extends AbstractElement implements Command {
     
     public Fetch(String source, String connection, String type,
             String overwrite, String delimiter, String quote, String target,
-            String rowset, String encoding) {
+            String rowset, String encoding, String destination) {
         super();
         m_source = source;
         m_connection = connection;
@@ -33,6 +34,7 @@ public class Fetch extends AbstractElement implements Command {
         m_target = target;
         m_rowset = rowset;
         m_encoding = encoding;
+        m_destination = destination;
     }
 
     public String getSource() {
@@ -69,5 +71,9 @@ public class Fetch extends AbstractElement implements Command {
 
     public String getEncoding() {
         return m_encoding;
+    }
+
+    public String getDestination() {
+        return m_destination;
     }
 }

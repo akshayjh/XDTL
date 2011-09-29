@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 public class ReadCmd implements RuntimeCommand {
     private final Logger m_logger = LoggerFactory.getLogger(ReadCmd.class);
     
-    private final String m_source;
+    private final Object m_source;
     private final String m_target;
     private final String m_type;
     private final String m_delimiter;
@@ -29,7 +29,7 @@ public class ReadCmd implements RuntimeCommand {
     private OsProcessRunner m_osProcessRunner;
     private OsArgListBuilder m_argListBuilder;
 
-    public ReadCmd(String source, String target, String type,
+    public ReadCmd(Object source, String target, String type,
             boolean overwrite, String delimiter, String quote, String encoding,
             Connection cnn, String errors, boolean header, int rowOffset,
             int batch) {
@@ -57,7 +57,7 @@ public class ReadCmd implements RuntimeCommand {
                     m_type, m_delimiter, m_quote, m_encoding, m_connection,
                     m_errors, m_header, m_rowOffset, m_batch));
         
-        m_argListBuilder.addVariableEscaped("source", m_source);
+        m_argListBuilder.addVariableEscaped("source", (String) m_source);
         m_argListBuilder.addVariableEscaped("target", m_target);
         m_argListBuilder.addVariableEscaped("type", m_type);
         m_argListBuilder.addVariableEscaped("delimiter", m_delimiter);

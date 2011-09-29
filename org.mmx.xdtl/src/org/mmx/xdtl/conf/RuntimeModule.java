@@ -91,11 +91,11 @@ import org.mmx.xdtl.runtime.impl.EngineImpl;
 import org.mmx.xdtl.runtime.impl.ExtensionLoader;
 import org.mmx.xdtl.runtime.impl.ScriptExpressionEvaluator;
 import org.mmx.xdtl.runtime.impl.TypeConverterImpl;
-import org.mmx.xdtl.runtime.util.PathList;
 import org.mmx.xdtl.runtime.util.StringShortener;
 import org.mmx.xdtl.runtime.util.VariableNameValidator;
 import org.mmx.xdtl.services.GuiceInjector;
 import org.mmx.xdtl.services.Injector;
+import org.mmx.xdtl.services.PathList;
 import org.mmx.xdtl.services.UriSchemeParser;
 
 import com.google.inject.AbstractModule;
@@ -168,17 +168,17 @@ public class RuntimeModule extends AbstractModule {
         bind(UriSchemeParser.class).in(Singleton.class);
         
         String homeDirUrl = "file://" + m_properties.getProperty("home");
-        PathList startupScriptsPathList = new PathList(homeDirUrl,
-                m_properties.getProperty("startupscripts.path"));
-        bind(PathList.class).annotatedWith(Names.named("startupscripts.path")).toInstance(startupScriptsPathList);
+        PathList pathList = new PathList(homeDirUrl, m_properties.getProperty("startup.path"));
+        bind(PathList.class).annotatedWith(Names.named("startup.path")).toInstance(pathList);
         
-        PathList velocityPathList = new PathList(homeDirUrl,
-                m_properties.getProperty("velocity.path"));
-        bind(PathList.class).annotatedWith(Names.named("velocity.path")).toInstance(velocityPathList);
+        pathList = new PathList(homeDirUrl, m_properties.getProperty("velocity.path"));
+        bind(PathList.class).annotatedWith(Names.named("velocity.path")).toInstance(pathList);
 
-        PathList extensionsPathList = new PathList(homeDirUrl,
-                m_properties.getProperty("extensions.path"));
-        bind(PathList.class).annotatedWith(Names.named("extensions.path")).toInstance(extensionsPathList);
+        pathList = new PathList(homeDirUrl, m_properties.getProperty("extensions.path"));
+        bind(PathList.class).annotatedWith(Names.named("extensions.path")).toInstance(pathList);
+
+        pathList = new PathList(homeDirUrl, m_properties.getProperty("library.path"));
+        bind(PathList.class).annotatedWith(Names.named("library.path")).toInstance(pathList);
 
         bindCommandBuilders();
         Version ver = new Version();

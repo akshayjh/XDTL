@@ -6,9 +6,10 @@
     <entry key="write.impl">org.mmx.xdtl.runtime.command.PostgresqlWriteCmd</entry>
     <entry key="useinternalschema">true</entry>
     <entry key="loader.batchsize">1000</entry>
-    <entry key="startupscripts.path">startup</entry>
+    <entry key="startup.path">startup</entry>
     <entry key="velocity.path">velocity</entry>
     <entry key="extensions.path">extensions</entry>
+    <entry key="library.path">library</entry>
 <!--
     Exec based versions of read/write commands
 

@@ -8,8 +8,8 @@
   <tasks>
     <task name="first" connection="$conn">
       <steps>
-        <fetch source="select * from $table" type="CSV" target="/temp/test.csv" encoding="UTF-8" overwrite="1" connection="$conn"/>
-        <read source="/temp/test.csv" type="CSV" target="$table" overwrite="1"/>
+        <fetch source="select * from $table" target="test2" encoding="UTF-8" overwrite="1" connection="$conn" destination="$conn"/>
+        <!-- <read source="/temp/test.csv" type="CSV" target="$table" overwrite="1"/> -->
       </steps>
     </task>
   </tasks>

@@ -3,12 +3,14 @@ package org.mmx.xdtl.runtime.command;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.Statement;
+import java.util.List;
 
 import org.mmx.xdtl.db.CsvSource;
 import org.mmx.xdtl.db.DbfSource;
 import org.mmx.xdtl.db.ExcelSource;
 import org.mmx.xdtl.db.JdbcConnection;
 import org.mmx.xdtl.db.Loader;
+import org.mmx.xdtl.db.RowSetSource;
 import org.mmx.xdtl.db.Source;
 import org.mmx.xdtl.model.Connection;
 import org.mmx.xdtl.model.XdtlException;
@@ -23,7 +25,7 @@ import com.google.inject.name.Named;
 public class JdbcReadCmd implements RuntimeCommand {
     private final Logger m_logger = LoggerFactory.getLogger(JdbcReadCmd.class);
     
-    private final String m_source;
+    private final Object m_source;
     private final String m_target;
     private final SourceType m_sourceType;
     private final String m_delimiter;
@@ -40,7 +42,8 @@ public class JdbcReadCmd implements RuntimeCommand {
     private enum SourceType {
         CSV,
         EXCEL,
-        DBF;
+        DBF,
+        ROWSET;
         
         public static SourceType valueOfIgnoreCase(String name) {
             for (SourceType type: values()) {
@@ -50,7 +53,7 @@ public class JdbcReadCmd implements RuntimeCommand {
         }
     };
     
-    public JdbcReadCmd(String source, String target, String type,
+    public JdbcReadCmd(Object source, String target, String type,
             boolean overwrite, String delimiter, String quote, String encoding,
             Connection cnn, String errors, boolean header, int skip, int commitRowCount) {
 
@@ -72,13 +75,14 @@ public class JdbcReadCmd implements RuntimeCommand {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
 	public void run(Context context) throws Throwable {
         m_logger.info(String.format(
                 "read: source='%s', target='%s', " +
                 "type='%s', delimiter='%s', quote='%s', encoding='%s', " +
                 "connection='%s', errors='%s', header=%s, skip=%d, batch=%d",
-                m_source, m_target,
+                (m_source instanceof String) ? m_source : "<rowset>", m_target,
                 m_sourceType, m_delimiter, m_quote, m_encoding, m_connection,
                 m_errors, m_header, m_skip, m_commitRowCount));
 
@@ -90,17 +94,21 @@ public class JdbcReadCmd implements RuntimeCommand {
         
         switch (m_sourceType) {
         case CSV:
-            FileInputStream stream = new FileInputStream(m_source);
+            FileInputStream stream = new FileInputStream((String) m_source);
             source = new CsvSource(stream, m_encoding, m_delimiter.charAt(0), m_quote.charAt(0), m_header, m_skip);
             break;
         case EXCEL:
-            String[] arr = m_source.split("#");
+            String[] arr = ((String)m_source).split("#");
             String sheetName = arr.length > 1 ? arr[1] : null;
             stream = new FileInputStream(arr[0]);
             source = new ExcelSource(stream, sheetName, m_header, m_skip);
             break;
         case DBF:
-            source = new DbfSource(m_source, m_encoding, m_skip);
+            source = new DbfSource((String) m_source, m_encoding, m_skip);
+            break;
+        case ROWSET:
+            source = new RowSetSource((List<Object[]>)m_source, m_skip);
+            break;
         }
 
         try {

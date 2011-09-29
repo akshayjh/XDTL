@@ -24,7 +24,7 @@ public class WriteCmdBuilder extends ReadWriteCmdBuilder {
                         String.class, boolean.class, String.class, String.class,
                         String.class, Connection.class);
 
-        RuntimeCommand rtCmd = ctor.newInstance(getSource(), getTarget(), getType(),
+        RuntimeCommand rtCmd = ctor.newInstance((String) getSource(), getTarget(), getType(),
                 isOverwrite(), getDelimiter(), getQuote(), getEncoding(),
                 getConnection());
         

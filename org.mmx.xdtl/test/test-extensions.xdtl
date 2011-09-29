@@ -7,13 +7,25 @@
   xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd"
   xmlns="http://xdtl.org/xdtl"
   xmlns:ext="http://xdtl.org/xdtl/ext">
+  <variable name="msg">abc</variable>
   <connection name="conn" type="FILE">xdtl:connection</connection>
   <tasks>
     <task name="first">
       <steps>
+        <call href="#second"/>
+        <log msg="$msg"/>
+        <log msg="Get is: $get"/>
+        <call href="test-setglobal.xdtl#first"/>
+        <log msg="Get is: $get"/>
         <ext:say msg="hello"/>
         <ext:say msg="hello"/>
         <ext:say2 msg="hello 2"/>
+        <log msg="$msg"/>
+      </steps>
+    </task>
+    <task name="second">
+      <steps>
+        <send source="second" target="msg" overwrite="1"/>
       </steps>
     </task>
   </tasks>

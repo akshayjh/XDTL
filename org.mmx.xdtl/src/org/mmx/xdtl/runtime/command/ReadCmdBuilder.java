@@ -36,7 +36,7 @@ public class ReadCmdBuilder extends ReadWriteCmdBuilder {
     @Override
     protected RuntimeCommand createInstance() throws Exception {
         Constructor<? extends RuntimeCommand> ctor =
-            getRuntimeClass().getConstructor(String.class, String.class,
+            getRuntimeClass().getConstructor(Object.class, String.class,
                     String.class, boolean.class, String.class, String.class,
                     String.class, Connection.class, String.class, boolean.class,
                     int.class, int.class);

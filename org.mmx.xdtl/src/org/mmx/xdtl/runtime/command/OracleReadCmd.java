@@ -4,7 +4,7 @@ import org.mmx.xdtl.model.Connection;
 
 public class OracleReadCmd extends JdbcReadCmd {
 
-    public OracleReadCmd(String source, String target, String type,
+    public OracleReadCmd(Object source, String target, String type,
             boolean overwrite, String delimiter, String quote, String encoding,
             Connection cnn, String errors, boolean header, int skipRows,
             int batch) {
