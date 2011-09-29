@@ -1,6 +1,7 @@
 package org.mmx.xdtl.parser.impl;
 
 import java.net.URL;
+import java.net.URLConnection;
 
 import org.mmx.xdtl.model.Package;
 import org.mmx.xdtl.parser.Parser;
@@ -22,11 +23,12 @@ public class CachingParser implements Parser {
     }
     
     @Override
-    public Package parse(URL url) {
+    public Package parse(URLConnection cnn) {
+        URL url = cnn.getURL();
         Package pkg = m_cache.get(url);
         
         if (pkg == null) {
-            pkg = m_parser.parse(url);
+            pkg = m_parser.parse(cnn);
             m_cache.put(pkg);
             return pkg;
         } else {

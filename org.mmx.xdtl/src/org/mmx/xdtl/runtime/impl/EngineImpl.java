@@ -25,7 +25,6 @@ import org.mmx.xdtl.model.SourceLocator;
 import org.mmx.xdtl.model.Task;
 import org.mmx.xdtl.model.Variable;
 import org.mmx.xdtl.model.XdtlException;
-import org.mmx.xdtl.parser.Parser;
 import org.mmx.xdtl.runtime.ConnectionManager;
 import org.mmx.xdtl.runtime.ConnectionManagerEvent;
 import org.mmx.xdtl.runtime.ConnectionManagerListener;
@@ -49,12 +48,13 @@ public class EngineImpl implements Engine, EngineControl {
     private static final String TASK_DEFAULT_CONNECTION_ARG_NAME = "taskConn";
     private static final String SYSTEM_STARTUP_SCRIPT = "/startup.js";
     private static final Logger logger = LoggerFactory.getLogger(EngineImpl.class);
+    private static final URL DEFAULT_BASE_URL; 
     
     private final ExpressionEvaluator m_exprEval;
     private final TypeConverter m_typeConv;
     private final CommandInvoker m_commandInvoker;
     private final Provider<ConnectionManager> m_connectionManagerProvider;
-    private final Parser m_parser;
+    private final PackageLoader m_pkgLoader;
     private final String m_version;
     private final PathList m_startupScripts;
     private final ScriptEngine m_scriptEngine;
@@ -64,8 +64,16 @@ public class EngineImpl implements Engine, EngineControl {
     private boolean m_errorTaskRunning;
     private Throwable m_firstError;
 
+    static {
+        try {
+            DEFAULT_BASE_URL = new URL("file:");
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
     @Inject
-    EngineImpl(Parser parser, ExpressionEvaluator expressionEvaluator,
+    EngineImpl(PackageLoader pkgLoader, ExpressionEvaluator expressionEvaluator,
             TypeConverter typeConverter,
             CommandInvoker commandInvoker,
             Provider<ConnectionManager> connectionManagerProvider,
@@ -74,7 +82,7 @@ public class EngineImpl implements Engine, EngineControl {
             @Named("xdtl.version") String version,
             ExtensionLoader extensionLoader) {
 
-        m_parser = parser;
+        m_pkgLoader = pkgLoader;
         m_exprEval = expressionEvaluator;
         m_typeConv = typeConverter;
         m_commandInvoker = commandInvoker;
@@ -86,11 +94,11 @@ public class EngineImpl implements Engine, EngineControl {
     }
 
     @Override
-    public void run(URL url, Map<String, Object> args,
+    public void run(String urlSpec, Map<String, Object> args,
             Map<String, Object> globals) {
         
-        Package pkg = parse(url);
-        run(pkg, url.getRef(), args, globals);
+        Package pkg = parse(toURL("file:"), urlSpec);
+        run(pkg, toURL(urlSpec).getRef(), args, globals);
     }    
 
     @Override
@@ -144,9 +152,8 @@ public class EngineImpl implements Engine, EngineControl {
 
     @Override
     public void call(String taskRef, Map<String, Object> args) {
-        URL url = getTaskRefUrl(taskRef);
-        Package pkg = parse(url);
-        run(pkg, url.getRef(), args);
+        Package pkg = parse(getCurrentPackage().getUrl(), taskRef);
+        run(pkg, toURL(taskRef).getRef(), args);
     }
 
     @Override
@@ -334,7 +341,7 @@ public class EngineImpl implements Engine, EngineControl {
         }
     }
     
-    private boolean runErrorHandler(URL ref, Throwable error) {
+    private boolean runErrorHandler(String ref, Throwable error) {
         if (m_errorTaskRunning) {
             return false;
         }
@@ -350,8 +357,8 @@ public class EngineImpl implements Engine, EngineControl {
         logger.debug("Starting error handler: {}", ref);
         
         initErrorHandlerVariables(m_firstError);
-        Package pkg = parse(ref);
-        String taskName = ref.getRef();
+        Package pkg = parse(getCurrentPackage().getUrl(), ref);
+        String taskName = toURL(ref).getRef();
         String taskDisplayName = getTaskDisplayName(pkg, taskName);
         
         try {
@@ -375,7 +382,7 @@ public class EngineImpl implements Engine, EngineControl {
         HashMap<String, Object> args = new HashMap<String, Object>();
         args.put(TASK_DEFAULT_CONNECTION_ARG_NAME, cnn);
         
-        runTask(parse(url), taskName, args);
+        runTask(parse(getCurrentPackage().getUrl(), taskRef), taskName, args);
     }
     
     private void initErrorHandlerVariables(Throwable t) {
@@ -418,7 +425,7 @@ public class EngineImpl implements Engine, EngineControl {
             Map<String, Object> args) {
 
         Context globalContext = m_contextStack.getGlobalContext();
-        URL onErrorUrl = evaluateOnError(pkg.getUrl(), globalContext, pkg.getOnError());
+        String onErrorUrlSpec = evaluateOnError(globalContext, pkg.getOnError());
         
         Boolean onErrorResume = m_typeConv.toBoolean(m_exprEval.evaluate(
                 globalContext, pkg.getResume()));
@@ -428,7 +435,7 @@ public class EngineImpl implements Engine, EngineControl {
         }
 
         PackageContext context = new PackageContext(
-                (Context) globalContext, null, pkg, onErrorUrl, onErrorResume);
+                (Context) globalContext, null, pkg, onErrorUrlSpec, onErrorResume);
 
         addParametersToContext(context, pkg.getParameterList(), args);
         addVariablesToContext(context, pkg.getVariableList());
@@ -440,8 +447,7 @@ public class EngineImpl implements Engine, EngineControl {
     private TaskContext createTaskContext(Context upperContext,
             Task task, Map<String, Object> args) {
 
-        URL onErrorUrl = evaluateOnError(upperContext.getPackage().getUrl(),
-                upperContext, task.getOnError());
+        String onErrorUrl = evaluateOnError(upperContext, task.getOnError());
         
         Boolean onErrorResume = m_typeConv.toBoolean(m_exprEval.evaluate(
                 upperContext, task.getResume()));
@@ -687,19 +693,14 @@ public class EngineImpl implements Engine, EngineControl {
         return null;
     }
     
-    private URL evaluateOnError(URL baseUrl, Context context, String onError) {
+    private String evaluateOnError(Context context, String onError) {
         onError = (String) m_exprEval.evaluate(context, onError);
         
-        if (onError == null || onError.length() == 0) {
-            return null;
+        if (onError != null && onError.length() == 0) {
+            onError = null;
         }
         
-        try {
-            return new URL(baseUrl, onError);
-        } catch (MalformedURLException e) {
-            throw new XdtlException("Cannot create onerror url, base='" +
-                    baseUrl + "' onError=" + onError + "'", e);
-        }
+        return onError;
     }
     
     private String getTaskDisplayName(Package pkg, String taskName) {
@@ -710,8 +711,12 @@ public class EngineImpl implements Engine, EngineControl {
         return pkg.getName() + "#" + taskName;
     }
 
-    private Package parse(URL url) {
-        return m_parser.parse(removeRef(url));
+    private Package parse(URL baseUrl, String url) {
+        try {
+            return m_pkgLoader.loadPackage(baseUrl, removeRef(url));
+        } catch (Exception e) {
+            throw new XdtlException(e);
+        }
     }
 
     /**
@@ -719,21 +724,24 @@ public class EngineImpl implements Engine, EngineControl {
      * 
      * @param url The URL.
      * @return An URL without ref part.
+     * @throws MalformedURLException 
      */
-    private static URL removeRef(URL url) {
+    private static String removeRef(String urlSpec) {
+        URL url = toURL(urlSpec);
         String ref = url.getRef();
         
         if (ref == null) {
-            return url; 
+            return urlSpec; 
         }
         
-        String urlstr = url.toString();
-        urlstr = urlstr.substring(0, urlstr.length() - ref.length() - 1);
+        return urlSpec.substring(0, urlSpec.length() - ref.length() - 1);
+    }
+
+    private static URL toURL(String urlSpec) {
         try {
-            return new URL(urlstr);
+            return new URL(DEFAULT_BASE_URL, urlSpec);
         } catch (MalformedURLException e) {
-            throw new XdtlException("Failed to remove ref from url: '" + url +
-                    "'", e);
+            throw new XdtlException(e);
         }
     }
 }

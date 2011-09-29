@@ -1,6 +1,6 @@
 package org.mmx.xdtl.parser;
 
-import java.net.URL;
+import java.net.URLConnection;
 
 import org.mmx.xdtl.model.Package;
 
@@ -16,5 +16,5 @@ public interface Parser {
      * @param url The URL of the document to parse.
      * @return XDTL package.
      */
-    Package parse(URL url);
+    Package parse(URLConnection cnn);
 }

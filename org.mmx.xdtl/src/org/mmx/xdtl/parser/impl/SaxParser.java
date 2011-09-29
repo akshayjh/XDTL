@@ -3,6 +3,7 @@ package org.mmx.xdtl.parser.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 
 import javax.xml.parsers.SAXParser;
 
@@ -32,7 +33,8 @@ public class SaxParser implements Parser {
     }
     
     @Override
-    public Package parse(URL url) {
+    public Package parse(URLConnection cnn) {
+        URL url = cnn.getURL();
         if (url.getRef() != null) {
             throw new XdtlException("Reference is not allowed in package url: url='" + url + "'");
         }
@@ -40,7 +42,7 @@ public class SaxParser implements Parser {
         try {
             Package pkg;
             Handler handler = new Handler(url.toString(), m_elementHandlerSet);
-            InputStream is = url.openStream();
+            InputStream is = cnn.getInputStream();
 
             try {
                 m_logger.info("Parsing '" + url + "'");

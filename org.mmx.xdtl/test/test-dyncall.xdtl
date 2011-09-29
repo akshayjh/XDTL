@@ -4,7 +4,7 @@
  -->
 <package name="test-dyncall" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd" xmlns="http://xdtl.org/xdtl">
   <variable name="callref1">#second</variable>
-  <variable name="callref2">echo.xdtl</variable>
+  <variable name="callref2">echo2.xdtl</variable>
   <connection name="conn" type="FILE">xdtl:connection</connection>
   <tasks>
     <task name="first">

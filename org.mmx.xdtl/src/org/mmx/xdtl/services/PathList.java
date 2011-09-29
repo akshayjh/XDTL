@@ -6,6 +6,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import org.mmx.xdtl.model.XdtlException;
 import org.slf4j.Logger;
@@ -58,6 +60,10 @@ public class PathList {
         }
         
         return null;
+    }
+
+    public List<URL> getRoots() {
+        return Collections.unmodifiableList(m_roots);
     }
 
     public void prepend(URL url) {

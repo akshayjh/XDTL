@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.InvalidPropertiesFormatException;
 import java.util.Map;
@@ -40,7 +39,6 @@ public class Main {
                 System.exit(-1);
             }
 
-            URL taskUrl = new URL(new URL("file:"), args[optionsMap.size()]); 
             HashMap<String, Object> argMap = createArgumentMap(args, optionsMap.size() + 1, null);
             MDC.setContextMap(argMap);
 
@@ -49,7 +47,7 @@ public class Main {
             conf.putAll(optionsMap);
             Injector injector = Guice.createInjector(new XdtlModule(conf));
     
-            
+            String taskUrl = args[optionsMap.size()];
             injector.getInstance(Engine.class).run(taskUrl, argMap, loadGlobals(homeDir));
             m_logger.info("done");
             System.exit(0);

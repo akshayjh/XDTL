@@ -89,6 +89,7 @@ import org.mmx.xdtl.runtime.impl.CommandMappingSet;
 import org.mmx.xdtl.runtime.impl.ConnectionManagerImpl;
 import org.mmx.xdtl.runtime.impl.EngineImpl;
 import org.mmx.xdtl.runtime.impl.ExtensionLoader;
+import org.mmx.xdtl.runtime.impl.PackageLoader;
 import org.mmx.xdtl.runtime.impl.ScriptExpressionEvaluator;
 import org.mmx.xdtl.runtime.impl.TypeConverterImpl;
 import org.mmx.xdtl.runtime.util.StringShortener;
@@ -185,6 +186,7 @@ public class RuntimeModule extends AbstractModule {
         bind(String.class).annotatedWith(Names.named("xdtl.version")).toInstance(ver.getImplementationVersion());
         bind(Injector.class).to(GuiceInjector.class);
         bind(ExtensionLoader.class);
+        bind(PackageLoader.class);
     }
     
     @Provides @Singleton

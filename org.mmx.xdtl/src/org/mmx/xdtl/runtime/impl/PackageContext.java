@@ -1,19 +1,17 @@
 package org.mmx.xdtl.runtime.impl;
 
-import java.net.URL;
-
 import org.mmx.xdtl.model.Package;
 import org.mmx.xdtl.runtime.ConnectionManager;
 import org.mmx.xdtl.runtime.Context;
 
 public class PackageContext extends Context {
     private final Package m_package;
-    private final URL m_onErrorRef;
+    private final String m_onErrorRef;
     private final boolean m_resumeOnErrorEnabled;
     
     public PackageContext(Context upperContext,
             ConnectionManager connectionManager, Package pkg,
-            URL onErrorRef, boolean resumeOnErrorEnabled) {
+            String onErrorRef, boolean resumeOnErrorEnabled) {
         
         super(upperContext, connectionManager);
         m_package = pkg;
@@ -25,7 +23,7 @@ public class PackageContext extends Context {
         return m_package;
     }
 
-    public URL getOnErrorRef() {
+    public String getOnErrorRef() {
         return m_onErrorRef;
     }
 
