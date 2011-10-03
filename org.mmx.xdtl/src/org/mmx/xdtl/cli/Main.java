@@ -34,12 +34,13 @@ public class Main {
         
         try {
             HashMap<String, Object> optionsMap = createArgumentMap(args, 0, "-");
-            if (args.length <= optionsMap.size()) {
+            int numOptions = optionsMap.size();
+            if (args.length <= numOptions) {
                 usage();
                 System.exit(-1);
             }
 
-            HashMap<String, Object> argMap = createArgumentMap(args, optionsMap.size() + 1, null);
+            HashMap<String, Object> argMap = createArgumentMap(args, numOptions + 1, null);
             MDC.setContextMap(argMap);
 
             String homeDir = initXdtlHomeDir(optionsMap);
@@ -47,7 +48,7 @@ public class Main {
             conf.putAll(optionsMap);
             Injector injector = Guice.createInjector(new XdtlModule(conf));
     
-            String taskUrl = args[optionsMap.size()];
+            String taskUrl = args[numOptions];
             injector.getInstance(Engine.class).run(taskUrl, argMap, loadGlobals(homeDir));
             m_logger.info("done");
             System.exit(0);
