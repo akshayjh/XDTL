@@ -93,7 +93,7 @@
 					</xs:attribute>	
 					<xs:attribute name="format" type="xs:string"/>
 					<xs:attribute name="default" type="xs:string"/>
-					<xs:attribute name="required" type="xdtl:check"/>
+					<xs:attribute name="required" type="xdtl:check" default="0"/>
 					<xs:attribute name="hidden" type="xdtl:check" default="0"/>
 				</xs:extension>
 			</xs:simpleContent>
@@ -149,7 +149,7 @@
 							</xs:restriction>
 						</xs:simpleType>
 					</xs:attribute>
-					<xs:attribute name="exists" type="xdtl:check"/>
+					<xs:attribute name="exists" type="xdtl:check" default="0"/>
 					<xs:attribute name="onopen" type="xs:anyURI"/>
 				</xs:extension>
 			</xs:simpleContent>
@@ -308,7 +308,7 @@
 			<xs:attribute name="source" type="xs:string" use="required"/>
 			<xs:attribute name="target" type="xs:string" use="required"/>
 			<xs:attributeGroup ref="xdtl:textFile"/>
-			<xs:attribute name="overwrite" type="xdtl:check"/>
+			<xs:attribute name="overwrite" type="xdtl:check" default="0"/>
 			<xs:attribute name="connection" type="xs:string"/>
 			<xs:attribute name="errors" type="xs:string"/>
 			<xs:attribute name="header" type="xdtl:check" default="0"/>
@@ -328,7 +328,7 @@
 			<xs:attribute name="source" type="xs:string" use="required"/>
 			<xs:attribute name="target" type="xs:anyURI" use="required"/>
 			<xs:attributeGroup ref="xdtl:textFile"/>
-			<xs:attribute name="overwrite" type="xdtl:check"/>
+			<xs:attribute name="overwrite" type="xdtl:check" default="0"/>
 			<xs:attribute name="connection" type="xs:string"/>
 		</xs:complexType>
 	</xs:element>
@@ -399,10 +399,10 @@
 			<xs:attribute name="source" type="xs:string" use="required"/>
 			<xs:attribute name="target" type="xs:string"/>
 			<xs:attributeGroup ref="xdtl:textFile"/>
-			<xs:attribute name="overwrite" type="xdtl:check"/>
+			<xs:attribute name="overwrite" type="xdtl:check" default="0"/>
 			<xs:attribute name="rowset" type="xs:string"/>
 			<xs:attribute name="connection" type="xs:string" use="required"/>
-            <xs:attribute name="destination" type="xs:string"/>
+			<xs:attribute name="destination" type="xs:string"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="if">
