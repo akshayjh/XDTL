@@ -12,6 +12,7 @@ import org.mmx.xdtl.db.converter.DateConverter;
 import org.mmx.xdtl.db.converter.DoubleConverter;
 import org.mmx.xdtl.db.converter.IConverter;
 import org.mmx.xdtl.db.converter.StringConverter;
+import org.mmx.xdtl.model.XdtlException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,6 +79,10 @@ public class Loader {
             close(rs);
         }
 
+        if (m_columns.size() == 0) {
+            throw new XdtlException("init: no columns found in table '" + m_table + "'");
+        }
+        
         sql.setLength(sql.length() - 1);
         sql.append(")");
 
