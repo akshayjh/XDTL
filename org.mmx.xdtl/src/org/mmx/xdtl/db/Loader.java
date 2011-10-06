@@ -38,9 +38,14 @@ public class Loader {
         m_batchSize = batchSize > 0 ? batchSize : DEFAULT_BATCH_SIZE;
 
         DatabaseMetaData metaData = cnn.getMetaData();
-        m_table = metaData.storesUpperCaseIdentifiers()
-                ? table.toUpperCase()
-                : table;
+        if (metaData.storesUpperCaseIdentifiers()) {
+            m_table = table.toUpperCase();
+        } else if (metaData.storesLowerCaseIdentifiers()) {
+            m_table = table.toLowerCase();
+        } else {
+            m_table = table;
+        }
+
         init(metaData);
 
         m_initialAutoCommit = m_cnn.getAutoCommit();

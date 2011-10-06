@@ -10,7 +10,7 @@
         <!-- <write source="public.call" target="/tmp/call-$xdtlDateCode.csv" type="CSV" overwrite="1" delimiter="\t" quote="\'"/>-->
         <!-- <read target="vais_mmx.vahur_test" source="read-testdata-large.xls" type="EXCEL" encoding="cp775" overwrite="1" delimiter=";" quote="\'" header="1" skip="2" batch="5000"/>  -->
         <!-- <fetch source="select * from test" rowset="test" encoding="UTF-8" overwrite="1" connection="$conn"/>  -->
-        <read target="md_object_test" source="md_relation.csv" type="CSV"/>
+        <read target="MD_OBJECT_TEST" source="md_object.csv" type="CSV" overwrite="1"/>
       </steps>
     </task>
   </tasks>
