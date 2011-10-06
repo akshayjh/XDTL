@@ -1,5 +1,6 @@
 package org.mmx.xdtl.db;
 
+import java.sql.BatchUpdateException;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -90,7 +91,7 @@ public class Loader {
     public void close() throws SQLException {
         if (m_rowNum % m_batchSize != 0) {
             logger.debug("close: final batch");
-            m_statement.executeBatch();
+            executeBatch(m_statement);
         }
 
         if (m_rowNum - m_lastCommit != 0) {
@@ -143,7 +144,7 @@ public class Loader {
         m_rowNum++;
         if (m_rowNum % m_batchSize == 0) {
             logger.debug("loadRow: executeBatch, rowNum={}", m_rowNum);
-            m_statement.executeBatch();
+            executeBatch(m_statement);
 
             if (m_commitRowCount != 0
                     && (m_rowNum - m_lastCommit >= m_commitRowCount)) {
@@ -151,6 +152,15 @@ public class Loader {
                 m_cnn.commit();
                 m_lastCommit = m_rowNum;
             }
+        }
+    }
+
+    private void executeBatch(PreparedStatement stmt) throws SQLException {
+        try {
+            stmt.executeBatch();
+        } catch (BatchUpdateException e) {
+            logger.error("executeBatch: failed", e);
+            throw e.getNextException();
         }
     }
 
