@@ -2,7 +2,7 @@ package org.mmx.xdtl.runtime.impl;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.net.URL;
+import java.net.URI;
 import java.util.HashMap;
 
 import org.mmx.xdtl.model.Package;
@@ -42,7 +42,8 @@ public class ExtensionLoader {
             @Override
             public Object execute(File file) {
                 try {
-                    Package pkg = m_parser.parse(new URL("file://" + file.getAbsolutePath()).openConnection());
+                    URI uri = file.getCanonicalFile().toURI();
+                    Package pkg = m_parser.parse(uri.toURL().openConnection());
                     return pkg.getTask(extensionName) != null ? pkg : null;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
