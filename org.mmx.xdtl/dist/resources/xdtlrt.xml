@@ -19,14 +19,14 @@
     <entry key="velocity.path">velocity</entry>
  -->
 <!--
-    A command separated list of directories of extension packages. A relative
+    A comma separated list of directories of extension packages. A relative
     path is relative to xdtl home directory - usually $(HOME)/.xdtl.
     <entry key="extensions.path">extensions</entry>
 -->
 <!--
-    A command separated list of directories of library packages. A relative
+    A comma separated list of directories of library packages. A relative
     path is relative to xdtl home directory - usually $(HOME)/.xdtl.
-    <entry key="extensions.path">extensions</entry>
+    <entry key="library.path">library</entry>
 -->
 <!--
 	<entry key="write.impl">org.mmx.xdtl.runtime.command.PostgresqlWriteCmd</entry>

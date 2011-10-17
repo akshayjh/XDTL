@@ -1,5 +1,6 @@
 package org.mmx.xdtl.conf;
 
+import java.io.File;
 import java.lang.annotation.Annotation;
 import java.util.Properties;
 
@@ -168,7 +169,8 @@ public class RuntimeModule extends AbstractModule {
         bind(StringShortener.class);
         bind(UriSchemeParser.class).in(Singleton.class);
         
-        String homeDirUrl = "file://" + m_properties.getProperty("home");
+        String homeDirUrl = new File(m_properties.getProperty("home")).toURI().toString();
+
         PathList pathList = new PathList(homeDirUrl, m_properties.getProperty("startup.path"));
         bind(PathList.class).annotatedWith(Names.named("startup.path")).toInstance(pathList);
         

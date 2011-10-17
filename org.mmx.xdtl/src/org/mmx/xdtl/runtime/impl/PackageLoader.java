@@ -47,13 +47,13 @@ public class PackageLoader {
     private Package getPackage(URL pkgUrl, String urlSpec) throws Exception {
         boolean urlIsAbsolute = new URI(urlSpec).isAbsolute();
         
-        Package pkg = tryLoadPackage(pkgUrl, urlSpec);
+        Package pkg = tryLoadPackage(pkgUrl);
         if (pkg != null) return pkg;
 
         if (!urlIsAbsolute) {
             for (URL rootUrl: m_libraryPath.getRoots()) {
                 pkgUrl = new URL(rootUrl, urlSpec);
-                pkg = tryLoadPackage(pkgUrl, urlSpec);
+                pkg = tryLoadPackage(pkgUrl);
                 if (pkg != null) return pkg;
             }
         }
@@ -61,7 +61,7 @@ public class PackageLoader {
         throw new XdtlException("Package not found: " + urlSpec);
     }
 
-    private Package tryLoadPackage(URL pkgUrl, String urlSpec) throws IOException {
+    private Package tryLoadPackage(URL pkgUrl) throws IOException {
         logger.debug("tryLoadPackage: loading from '{}'", pkgUrl);
         URLConnection cnn = openConnection(pkgUrl);
         return cnn != null ? m_parser.parse(cnn) : null;
