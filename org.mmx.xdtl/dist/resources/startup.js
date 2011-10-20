@@ -4,6 +4,16 @@
  
 var xdtlDateCode = java.lang.String.format("%1$tY%1$tm%1$td", new Array(new java.util.Date()));
 
+function xdtlDirectoryExists(dir) {
+ var f = new java.io.File(dir);
+ return f.exists() && f.isDirectory();
+}
+
+function xdtlFileExists(fname) {
+ var f = new java.io.File(fname);
+ return f.exists() && f.isFile();
+}
+
 function xdtlArray() {
   var a = new java.util.ArrayList(arguments.length);
   
@@ -12,4 +22,15 @@ function xdtlArray() {
   }
   
   return a;
+}
+
+function xdtlRowsetToString(rowset) {
+   if (rowset.size() == 0) return '';
+   var result = '';
+
+   for (i = 0; i < rowset.size(); i++) {
+       result += rowset.get(i).join(',') + ','
+   }
+
+   return result;
 }
