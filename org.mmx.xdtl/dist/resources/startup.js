@@ -15,13 +15,28 @@ function xdtlFileExists(fname) {
 }
 
 function xdtlArray() {
-  var a = new java.util.ArrayList(arguments.length);
-  
-  for (var i = 0; i < arguments.length; i++) {
-    a.add(arguments[i]);
-  }
-  
-  return a;
+ var a = new java.util.ArrayList(arguments.length);
+
+ for (var i = 0; i < arguments.length; i++) {
+   a.add(arguments[i]);
+ }
+
+ return a;
+}
+
+function xdtlArray2(a) {
+
+ for (var i = 0; i < arguments.length; i++) {
+   a.add(arguments[i]);
+ }
+
+ return a;
+}
+
+function xdtlArrayToString (a) {
+var s='';
+s = a.toString();
+return s;
 }
 
 function xdtlRowsetToString(rowset) {
