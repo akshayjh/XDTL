@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.InvalidPropertiesFormatException;
 import java.util.Map;
@@ -49,7 +50,9 @@ public class Main {
             Injector injector = Guice.createInjector(new XdtlModule(conf));
     
             String taskUrl = args[numOptions];
-            injector.getInstance(Engine.class).run(taskUrl, argMap, loadGlobals(homeDir));
+            Map<String,Object> globals = loadGlobals(homeDir);
+            globals.putAll(argMap);
+            injector.getInstance(Engine.class).run(taskUrl, Collections.<String, Object> emptyMap(), globals);
             m_logger.info("done");
             System.exit(0);
         } catch (Throwable t) {
