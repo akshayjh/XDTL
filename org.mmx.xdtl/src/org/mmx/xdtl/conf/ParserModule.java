@@ -21,6 +21,7 @@ import org.mmx.xdtl.parser.element.IfHandler;
 import org.mmx.xdtl.parser.element.LogHandler;
 import org.mmx.xdtl.parser.element.MappingsHandler;
 import org.mmx.xdtl.parser.element.MoveHandler;
+import org.mmx.xdtl.parser.element.AnnotationElementHandler;
 import org.mmx.xdtl.parser.element.PackHandler;
 import org.mmx.xdtl.parser.element.PackageHandler;
 import org.mmx.xdtl.parser.element.ParameterHandler;
@@ -97,6 +98,7 @@ public class ParserModule extends AbstractModule {
         set.add("send", SendHandler.class);
         set.add("exit", ExitHandler.class);
         set.add("error", ErrorHandler.class);
+        set.add("annotation", AnnotationElementHandler.class);
         set.setDefault(DefaultElementHandler.class);
         return set;
     }
