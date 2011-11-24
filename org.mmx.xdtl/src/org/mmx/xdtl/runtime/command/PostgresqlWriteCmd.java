@@ -9,6 +9,6 @@ public class PostgresqlWriteCmd extends PostgresqlReadWriteCmd {
             Connection cnn) {
         
         super(source, target, type, overwrite, delimiter, quote, encoding, cnn, 
-                false);
+                false, false);
     }
 }

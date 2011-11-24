@@ -17,7 +17,7 @@ public class PostgresqlReadCmd extends PostgresqlReadWriteCmd {
             boolean overwrite, String delimiter, String quote, String encoding,
             Connection cnn, String errors, boolean header, int rowOffset, int batch) {
 
-        super((String) source, target, type, overwrite, delimiter, quote, encoding, cnn, true);
+        super((String) source, target, type, overwrite, delimiter, quote, encoding, cnn, header, true);
         m_errors = errors;        
     }
 

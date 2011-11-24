@@ -20,12 +20,13 @@ public class PostgresqlReadWriteCmd implements RuntimeCommand {
     private final String m_quote;
     private final boolean m_read;
     private final boolean m_overwrite;
+    private final boolean m_header;
     private final Connection m_connection;
     private final String m_encoding;
     
     public PostgresqlReadWriteCmd(String source, String target, String type,
             boolean overwrite, String delimiter, String quote, String encoding,
-            Connection cnn, boolean read) {
+            Connection cnn, boolean header, boolean read) {
 
         m_source = source;
         m_target = target;
@@ -35,6 +36,7 @@ public class PostgresqlReadWriteCmd implements RuntimeCommand {
         m_encoding = encoding;
         m_overwrite = overwrite;
         m_connection = cnn;
+        m_header = header;
         m_read = read;
         
         if (!(m_type.equals("CSV") || m_type.equals("FIXED"))) {
@@ -73,6 +75,10 @@ public class PostgresqlReadWriteCmd implements RuntimeCommand {
         if (m_type.equals("CSV")) {
             options.append(" CSV");
             
+            if (m_header) {
+                options.append(" HEADER");
+            }
+
             if (m_quote.length() != 0) {
                 options.append(" QUOTE '").append(m_quote).append('\'');
             }
