@@ -406,6 +406,9 @@ public class EngineImpl implements Engine, EngineControl {
 
         context.addVariable(new Variable(Context.VARNAME_XDTL_ERRORLOCATION,
                 errorProps.getSourceLocator().toString(), true));
+
+        context.addVariable(new Variable(Context.VARNAME_XDTL_ERRORCONTEXT,
+                errorProps.getErrorContext(), true));
     }
 
     private void removeErrorHandlerVariables() {        

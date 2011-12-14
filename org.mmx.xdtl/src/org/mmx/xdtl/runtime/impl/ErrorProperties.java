@@ -62,4 +62,13 @@ public class ErrorProperties {
         
         return cause.getClass().getName();
     }
+    
+    public String getErrorContext() {
+        Throwable cause = m_exception.getCause();
+        if (cause != null && cause instanceof SQLException) {
+            return ((SQLException) cause).getSQLState();
+        }
+        
+        return "";
+    }
 }
