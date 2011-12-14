@@ -407,8 +407,8 @@ public class EngineImpl implements Engine, EngineControl {
         context.addVariable(new Variable(Context.VARNAME_XDTL_ERRORLOCATION,
                 errorProps.getSourceLocator().toString(), true));
 
-        context.addVariable(new Variable(Context.VARNAME_XDTL_ERRORCONTEXT,
-                errorProps.getErrorContext(), true));
+        context.addVariable(new Variable(Context.VARNAME_XDTL_ERRORCAUSE,
+                errorProps.getErrorCause(), true));
     }
 
     private void removeErrorHandlerVariables() {        
@@ -422,6 +422,7 @@ public class EngineImpl implements Engine, EngineControl {
         context.undefineVariable(Context.VARNAME_XDTL_ERRORTYPE);
         context.undefineVariable(Context.VARNAME_XDTL_ERRORDESC);
         context.undefineVariable(Context.VARNAME_XDTL_ERRORLOCATION);
+        context.undefineVariable(Context.VARNAME_XDTL_ERRORCAUSE);
     }
     
     private PackageContext createPackageContext(Package pkg,

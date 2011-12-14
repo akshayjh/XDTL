@@ -13,7 +13,7 @@ public class Context {
     public static final String VARNAME_XDTL_ERRORDESC     = "xdtlErrorDesc";
     public static final String VARNAME_XDTL_ERRORTYPE     = "xdtlErrorType";
     public static final String VARNAME_XDTL_ERRORLOCATION = "xdtlErrorLocation";
-    public static final String VARNAME_XDTL_ERRORCONTEXT  = "xdtlErrorContext";
+    public static final String VARNAME_XDTL_ERRORCAUSE    = "xdtlErrorCause";
     public static final String VARNAME_XDTL_ROWCOUNT      = "xdtlRowcount";
     public static final String VARNAME_XDTL_ROWID         = "xdtlRowid";
     public static final String VARNAME_XDTL_RESUME        = "xdtlResume";
