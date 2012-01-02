@@ -9,12 +9,14 @@ import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.ExpressionEvaluator;
 import org.mmx.xdtl.runtime.RuntimeCommand;
 import org.mmx.xdtl.runtime.TypeConverter;
+import org.mmx.xdtl.runtime.util.VariableNameValidator;
 
 import com.google.inject.Inject;
 
 public class SendCmdBuilder implements CommandBuilder {
     private final ExpressionEvaluator m_exprEval;
     private final TypeConverter m_typeConv;
+	private VariableNameValidator m_variableNameValidator;
 
     @Inject
     public SendCmdBuilder(ExpressionEvaluator exprEvaluator,
@@ -28,11 +30,22 @@ public class SendCmdBuilder implements CommandBuilder {
             Class<T> runtimeClass, Command cmd) throws Exception {
         
         Send elem = (Send) cmd;
-        String source = m_typeConv.toString(m_exprEval.evaluate(context, elem.getSource()));
-        String target = m_typeConv.toString(m_exprEval.evaluate(context, elem.getTarget()));
+		String target = m_typeConv.toString(m_exprEval.evaluate(context, elem.getTarget()));
+
+		boolean targetIsVariable = m_variableNameValidator.isValidVariableName(target);
+
+        Object source = targetIsVariable ? 
+			m_exprEval.evaluate(context, elem.getSource()) 
+			: m_typeConv.toString(m_exprEval.evaluate(context, elem.getSource()));
+
         Boolean overwrite = m_typeConv.toBoolean(m_exprEval.evaluate(context, elem.getOverwrite()));
         
-        Constructor<T> ctor = runtimeClass.getConstructor(String.class, String.class, Boolean.class);
+        Constructor<T> ctor = runtimeClass.getConstructor(Object.class, String.class, Boolean.class);
         return ctor.newInstance(source, target, overwrite);
+    }
+
+	@Inject
+    public void setVariableNameValidator(VariableNameValidator variableNameValidator) {
+        m_variableNameValidator = variableNameValidator;
     }
 }

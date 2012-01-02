@@ -21,13 +21,13 @@ import com.google.inject.Inject;
 
 public class SendCmd implements RuntimeCommand {
     private final Logger  m_logger = LoggerFactory.getLogger(SendCmd.class);    
-    private final String  m_source;
+    private final Object  m_source;
     private final String  m_target;
     private final boolean m_overwrite;
     private VariableNameValidator m_variableNameValidator;
     private StringShortener m_stringShortener;
     
-    public SendCmd(String source, String target, Boolean overwrite) {
+    public SendCmd(Object source, String target, Boolean overwrite) {
         m_source = source;
         m_target = target;
         m_overwrite = overwrite.booleanValue();
@@ -38,7 +38,7 @@ public class SendCmd implements RuntimeCommand {
         boolean targetIsVariable = m_variableNameValidator.isValidVariableName(m_target);
 
         m_logger.info(String.format("send: source='%s' target='%s' overwrite='%s' targetIsVariable='%s'",
-                m_stringShortener.shorten(m_source),
+                m_source,
                 m_stringShortener.shorten(m_target),
                 Boolean.toString(m_overwrite),
                 Boolean.toString(targetIsVariable)));
@@ -55,7 +55,7 @@ public class SendCmd implements RuntimeCommand {
         Writer writer = new BufferedWriter(new OutputStreamWriter(openTargetForOutput()));
 
         try {
-            writer.write(m_source);
+            writer.write("" + m_source);
         } finally {
             writer.close();
         }

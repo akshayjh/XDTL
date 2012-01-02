@@ -1,6 +1,7 @@
 /*
  * Executed at engine startup. Any variables defined here will be globals. 
  */
+ 
 var xdtlDateCode = java.lang.String.format("%1$tY%1$tm%1$td", new Array(new java.util.Date()));
 
 function xdtlDirectoryExists(dir) {
@@ -24,21 +25,24 @@ function xdtlArrayToArray(arr) {
 function xdtlFileList(fname, filterstring) {
 	var dir = new java.io.File(fname);
 	if (filterstring) {
-		var generic_obj = { filter: filterstring, accept: function (dir, name) { return name.indexOf(filterstring) > -1; } }
-		var filter = new java.io.FilenameFilter(generic_obj);
+	var generic_obj = { 
+		filter: filterstring, 
+		accept: function (dir, name) { return name.indexOf(filterstring) > -1; } 
+	}
+	var filter = new java.io.FilenameFilter(generic_obj);
 	}
 	else
 		filter = null;
-		
+
 	return xdtlArrayToArray(dir.list(filter));
 }
 
 function xdtlArray() {
 	var a = new java.util.ArrayList(arguments.length);
-
 	for (var i = 0; i < arguments.length; i++) {
 		a.add(arguments[i]);
 	}
+
 	return a;
 }
 
@@ -46,6 +50,7 @@ function xdtlArray2(a) {
 	for (var i = 0; i < arguments.length; i++) {
 		a.add(arguments[i]);
 	}
+
 	return a;
 }
 
@@ -58,9 +63,19 @@ function xdtlArrayToString (a) {
 function xdtlRowsetToString(rowset) {
 	if (rowset.size() == 0) return '';
 	var result = '';
-	
+
 	for (i = 0; i < rowset.size(); i++) {
 		result += rowset.get(i).join(',') + ','
 	}
+
 	return result;
 }
+
+function xdtlRowsetAppend(rs, columns) {
+	var row = columns.split(/,/);
+	rs.add(row);
+	return rs;
+}
+
+
+
