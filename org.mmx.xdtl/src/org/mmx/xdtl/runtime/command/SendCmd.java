@@ -14,6 +14,7 @@ import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.RuntimeCommand;
 import org.mmx.xdtl.runtime.util.StringShortener;
 import org.mmx.xdtl.runtime.util.VariableNameValidator;
+import org.mmx.xdtl.services.UriSchemeParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +27,7 @@ public class SendCmd implements RuntimeCommand {
     private final boolean m_overwrite;
     private VariableNameValidator m_variableNameValidator;
     private StringShortener m_stringShortener;
+    private UriSchemeParser m_uriSchemeParser;
     
     public SendCmd(String source, String target, Boolean overwrite) {
         m_source = source;
@@ -62,16 +64,21 @@ public class SendCmd implements RuntimeCommand {
     }
 
     private OutputStream openTargetForOutput() throws Exception {
-        URI uri = new URI(m_target);
+        String scheme = m_uriSchemeParser.getScheme(m_target);
+        if (scheme.length() == 0) {
+            throw new XdtlException("Target URI '" + m_target + "' is without scheme");
+        }
 
-        if ("file:" != uri.getScheme()) {
-            if (uri.isOpaque()) {
-                URI curdir = new File(".").toURI();
-                uri = curdir.resolve(uri.getRawSchemeSpecificPart());
-                m_logger.debug("resolved uri=" + uri);
-            }
+        if (scheme.equals("file")) {
+            String filePath;
+            filePath = m_target.substring(scheme.length() + 1);
+            if (filePath.startsWith("//")) filePath = filePath.substring(2);
             
-            File f = new File(uri);
+            File f = new File(filePath);
+            if (f.isDirectory()) {
+                throw new XdtlException("'" + m_target + "' is a directory");
+            }
+
             if (!m_overwrite && f.exists()) {
                 throw new XdtlException("'" + m_target + "' exists");
             }
@@ -79,6 +86,7 @@ public class SendCmd implements RuntimeCommand {
             return new FileOutputStream(f);
         }
         
+        URI uri = new URI(m_target);
         URLConnection cnn = uri.toURL().openConnection();
         cnn.setDoOutput(true);
         cnn.setDoInput(false);
@@ -93,5 +101,10 @@ public class SendCmd implements RuntimeCommand {
     @Inject
     public void setStringShortener(StringShortener stringShortener) {
         m_stringShortener = stringShortener;
+    }
+
+    @Inject
+    public void setUriSchemeParser(UriSchemeParser uriSchemeParser) {
+        m_uriSchemeParser = uriSchemeParser;
     }
 }

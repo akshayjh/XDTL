@@ -6,13 +6,13 @@
   <tasks>
     <task name="first">
       <steps>
-        <send source="test1" target="file:///c:/temp/test.txt" overwrite="1"/>
-        <render template="paramstest.vm" target="tmp">
+        <send source="test1" target="file:///tmp/test.txt" overwrite="1"/>
+        <!-- <render template="paramstest.vm" target="tmp">
         	<parameter name="param1">p1value</parameter>
         	<parameter name="param2">p2value</parameter>
         </render>
         <send source="$tmp" target="testvar" overwrite="1"/>
-        <log msg="testvar= '$testvar'" />
+        <log msg="testvar= '$testvar'" />-->
       </steps>
     </task>
   </tasks>
