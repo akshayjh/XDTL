@@ -12,6 +12,7 @@ import org.mmx.xdtl.Version;
 import org.mmx.xdtl.model.XdtlException;
 import org.mmx.xdtl.model.command.Call;
 import org.mmx.xdtl.model.command.Clear;
+import org.mmx.xdtl.model.command.Decode;
 import org.mmx.xdtl.model.command.Error;
 import org.mmx.xdtl.model.command.Exec;
 import org.mmx.xdtl.model.command.Exit;
@@ -43,6 +44,8 @@ import org.mmx.xdtl.runtime.command.CallCmd;
 import org.mmx.xdtl.runtime.command.CallCmdBuilder;
 import org.mmx.xdtl.runtime.command.ClearCmd;
 import org.mmx.xdtl.runtime.command.ClearCmdBuilder;
+import org.mmx.xdtl.runtime.command.DecodeCmd;
+import org.mmx.xdtl.runtime.command.DecodeCmdBuilder;
 import org.mmx.xdtl.runtime.command.ErrorCmd;
 import org.mmx.xdtl.runtime.command.ErrorCmdBuilder;
 import org.mmx.xdtl.runtime.command.ExecCmd;
@@ -127,6 +130,7 @@ public class RuntimeModule extends AbstractModule {
         new CommandMapping(If.class, IfCmdBuilder.class, IfCmd.class),
         new CommandMapping(Log.class, LogCmdBuilder.class, LogCmd.class),
         new CommandMapping(Fetch.class, FetchCmdBuilder.class, FetchCmd.class),
+		new CommandMapping(Decode.class, DecodeCmdBuilder.class, DecodeCmd.class),
         new CommandMapping(For.class, ForCmdBuilder.class, ForCmd.class),
         new CommandMapping(Send.class, SendCmdBuilder.class, SendCmd.class),
         new CommandMapping(Exit.class, ExitCmdBuilder.class, ExitCmd.class),

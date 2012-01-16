@@ -10,6 +10,7 @@ import org.mmx.xdtl.parser.element.ClearHandler;
 import org.mmx.xdtl.parser.element.ColumnHandler;
 import org.mmx.xdtl.parser.element.ConditionHandler;
 import org.mmx.xdtl.parser.element.ConnectionHandler;
+import org.mmx.xdtl.parser.element.DecodeHandler;
 import org.mmx.xdtl.parser.element.DefaultElementHandler;
 import org.mmx.xdtl.parser.element.ErrorHandler;
 import org.mmx.xdtl.parser.element.ExecHandler;
@@ -99,6 +100,7 @@ public class ParserModule extends AbstractModule {
         set.add("exit", ExitHandler.class);
         set.add("error", ErrorHandler.class);
         set.add("annotation", AnnotationElementHandler.class);
+        set.add("decode", DecodeHandler.class);
         set.setDefault(DefaultElementHandler.class);
         return set;
     }
