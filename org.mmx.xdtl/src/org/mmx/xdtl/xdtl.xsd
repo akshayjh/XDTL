@@ -5,7 +5,7 @@
 		<xs:documentation xml:lang="en"> This is a schema for XDTL (eXtensible Data Transformation
 			Language) documents. It defines all the elements of the XDTL namespace and provides
 			'links' to their corresponding semantic annotations. This schema is available for use
-			under the conditions of LGPL License. Copyright 2009-2010 Mindworks Industries. All
+			under the conditions of LGPL License. Copyright 2009-2012 Mindworks Industries. All
 			rights reserved. Author(s): margus.kliimask@mindworks.ee </xs:documentation>
 	</xs:annotation>
 	<xs:element name="annotation">
@@ -23,17 +23,6 @@
 	</xs:simpleType>
 	<xs:attributeGroup name="textFile">
 		<xs:attribute name="type" type="xs:string" default="CSV" use="optional"/>
-<!--
-			<xs:simpleType>
-				<xs:restriction base="xs:string">
-					<xs:enumeration value="CSV"/>
-					<xs:enumeration value="FIXED"/>
-					<xs:enumeration value="EXCEL"/>
-					<xs:enumeration value="DBF"/>
-				</xs:restriction>
-			</xs:simpleType>
-		</xs:attribute>
--->
 		<xs:attribute name="delimiter" type="xs:string" default=";"/>
 		<xs:attribute name="quote" type="xs:string" default="&quot;"/>
 		<xs:attribute name="null" type="xs:string"/>
@@ -48,7 +37,7 @@
 		</xs:annotation>
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element ref="xdtl:annotation" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="xdtl:annotation" minOccurs="0"/>
 				<xs:element ref="xdtl:parameter" minOccurs="0"  maxOccurs="unbounded"/>
 				<xs:element ref="xdtl:define" minOccurs="0"  maxOccurs="unbounded"/>
 				<xs:element ref="xdtl:variable" minOccurs="0"  maxOccurs="unbounded"/>
@@ -56,7 +45,7 @@
 				<xs:element ref="xdtl:tasks"/>
 			</xs:sequence>
 			<xs:attribute name="name" type="xs:string" use="required"/>
-			<xs:attribute name="annotation" type="xs:string"/>
+			<xs:attribute name="description" type="xs:string"/>
 			<xs:attribute name="version" type="xs:string"/>
 			<xs:attribute name="resume" type="xdtl:check" default="0"/>
 			<xs:attribute name="onerror" type="xs:anyURI">
@@ -79,15 +68,15 @@
 					<xs:attribute name="type">
 						<xs:simpleType>
 							<xs:restriction base="xs:string">
-								<xs:enumeration value="boolean"/>
-								<xs:enumeration value="byte"/>
-								<xs:enumeration value="short"/>
-								<xs:enumeration value="int"/>
-								<xs:enumeration value="long"/>
-								<xs:enumeration value="string"/>
-								<xs:enumeration value="date"/>
-								<xs:enumeration value="double"/>
-								<xs:enumeration value="float"/>
+								<xs:enumeration value="BOOLEAN"/>
+								<xs:enumeration value="BYTE"/>
+								<xs:enumeration value="SHORT"/>
+								<xs:enumeration value="INT"/>
+								<xs:enumeration value="LONG"/>
+								<xs:enumeration value="STRING"/>
+								<xs:enumeration value="DATE"/>
+								<xs:enumeration value="DOUBLE"/>
+								<xs:enumeration value="FLOAT"/>
 							</xs:restriction>
 						</xs:simpleType>
 					</xs:attribute>	
@@ -174,9 +163,9 @@
 		</xs:annotation>
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element ref="xdtl:annotation" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="xdtl:annotation" minOccurs="0"/>
 				<xs:element ref="xdtl:parameter" minOccurs="0" maxOccurs="unbounded"/>
-				<xs:element ref="xdtl:steps" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="xdtl:steps" minOccurs="1" maxOccurs="unbounded"/>
 			</xs:sequence>
 			<xs:attribute name="name" type="xs:string" use="required"/>
 			<xs:attribute name="annotation" type="xs:string"/>
@@ -212,6 +201,7 @@
 			<xs:element ref="xdtl:transaction"/>
 			<xs:element ref="xdtl:query"/>
 			<xs:element ref="xdtl:fetch"/>
+			<xs:element ref="xdtl:decode"/>
 			<xs:element ref="xdtl:if"/>
 			<xs:element ref="xdtl:for"/>
 			<xs:element ref="xdtl:call"/>
@@ -220,7 +210,7 @@
 			<xs:element ref="xdtl:log"/>
 			<xs:element ref="xdtl:send"/>
 			<!--xs:element ref="xdtl:lineage"/-->
-			<xs:element ref="xdtl:mappings"/>
+			<!--xs:element ref="xdtl:mappings"/-->
 			<xs:element ref="xdtl:error"/>
 			<xs:element ref="xdtl:exit"/>
 			<xs:any namespace="##other" processContents="lax"/>
@@ -405,6 +395,17 @@
 			<xs:attribute name="destination" type="xs:string"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="decode">
+		<xs:annotation>
+			<xs:documentation>Decode a structured, hierarchical file or data stream (XML, JSON).</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:attribute name="source" type="xs:string" use="required"/>
+			<xs:attribute name="target" type="xs:string" use="required"/>
+			<xs:attribute name="overwrite" type="xdtl:check" default="0"/>
+			<xs:attribute name="type" type="xs:string" default="XML" use="optional"/>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="if">
 		<xs:annotation>
 			<xs:documentation>Basic conditional control.</xs:documentation>
@@ -522,7 +523,6 @@
 			<xs:attribute name="target" type="xs:string" use="required"/>
 		</xs:complexType>
 	</xs:element>
-	-->
 	<xs:element name="mappings">
 		<xs:annotation>
 			<xs:documentation>Define or retrieve mappings used to instantiate an SQL statement.</xs:documentation>
@@ -589,6 +589,7 @@
 			<xs:attribute name="repo" type="xs:string"/>
 		</xs:complexType>
 	</xs:element>
+	-->
 	<xs:element name="exit">
 		<xs:annotation>
 			<xs:documentation>Exit</xs:documentation>
