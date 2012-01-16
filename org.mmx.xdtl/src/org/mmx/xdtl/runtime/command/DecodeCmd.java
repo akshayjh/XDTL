@@ -1,12 +1,8 @@
 package org.mmx.xdtl.runtime.command;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URLConnection;
+import java.net.URL;
 import java.util.List;
 
 import org.mmx.xdtl.model.XdtlException;
@@ -63,7 +59,7 @@ public class DecodeCmd implements RuntimeCommand {
 
 	private String readSource() throws Exception {
 		StringBuilder builder = new StringBuilder();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(openSourceForInput())); 
+		BufferedReader reader = new BufferedReader(new InputStreamReader(new URL(m_source).openStream())); 
 		
 		try {
 			String line = null;
@@ -78,24 +74,4 @@ public class DecodeCmd implements RuntimeCommand {
 		
 		return builder.toString();
 	}
-	
-    private InputStream openSourceForInput() throws Exception {
-        URI uri = new URI(m_source);
-
-        if ("file:" != uri.getScheme()) {
-            if (uri.isOpaque()) {
-                URI curdir = new File(".").toURI();
-                uri = curdir.resolve(uri.getRawSchemeSpecificPart());
-                Logger.debug("resolved uri=" + uri);
-            }
-            
-            File f = new File(uri);
-            return new FileInputStream(f);
-        }
-        
-        URLConnection cnn = uri.toURL().openConnection();
-        cnn.setDoOutput(false);
-        cnn.setDoInput(true);
-        return cnn.getInputStream();
-    }
 }
