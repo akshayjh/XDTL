@@ -2,16 +2,23 @@ package org.mmx.xdtl.runtime.command;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.net.URL;
 import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.mmx.xdtl.model.XdtlException;
 import org.mmx.xdtl.model.command.Decode;
 import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.RuntimeCommand;
 import org.mmx.xdtl.runtime.util.JsonDecoder;
+import org.mmx.xdtl.runtime.util.XmlDocumentDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 
 /**
  * Decode reads from given hierarchical source (json, xml) and translates it to List/Map structure
@@ -53,8 +60,15 @@ public class DecodeCmd implements RuntimeCommand {
 		context.assignVariable(m_target, parsed);
 	}
 
-	private void parseXml(String content, Context context) {
-		// TODO Auto-generated method stub
+	private void parseXml(String content, Context context) throws Throwable {
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder builder = factory.newDocumentBuilder();
+		StringReader reader = new StringReader(content);
+		InputSource inputSource = new InputSource(reader);
+		Document document = builder.parse(inputSource);
+		
+		List<Object> parsed = new XmlDocumentDecoder().Decode(document);
+		context.assignVariable(m_target, parsed);
 	}
 
 	private String readSource() throws Exception {
