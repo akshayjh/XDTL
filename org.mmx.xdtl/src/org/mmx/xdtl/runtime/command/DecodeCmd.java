@@ -1,9 +1,6 @@
 package org.mmx.xdtl.runtime.command;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.StringReader;
-import java.net.URL;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -14,6 +11,7 @@ import org.mmx.xdtl.model.command.Decode;
 import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.RuntimeCommand;
 import org.mmx.xdtl.runtime.util.JsonDecoder;
+import org.mmx.xdtl.runtime.util.UrlReader;
 import org.mmx.xdtl.runtime.util.XmlDocumentDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +43,7 @@ public class DecodeCmd implements RuntimeCommand {
 		Logger.info(String.format("decode: source='%s', target='%s', type='%s'",
 				m_source, m_target, m_type));
 		
-		String content = readSource();
+		String content = new UrlReader().read(m_source);
 		
 		if (m_type == Decode.Type.JSON)
 			parseJson(content, context);
@@ -69,23 +67,5 @@ public class DecodeCmd implements RuntimeCommand {
 		
 		List<Object> parsed = new XmlDocumentDecoder().Decode(document);
 		context.assignVariable(m_target, parsed);
-	}
-
-	private String readSource() throws Exception {
-		StringBuilder builder = new StringBuilder();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(new URL(m_source).openStream())); 
-		
-		try {
-			String line = null;
-			while ((line = reader.readLine()) != null) {
-				builder.append(line);
-				builder.append("\n");
-			}
-		}
-		finally {
-			reader.close();
-		}
-		
-		return builder.toString();
 	}
 }
