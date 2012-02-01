@@ -54,8 +54,7 @@ public class DecodeCmd implements RuntimeCommand {
 	}
 	
 	private void parseJson(String content, Context context) {
-		List<Object> parsed = new JsonDecoder().Decode(content);
-		context.assignVariable(m_target, parsed);
+		context.assignVariable(m_target, new JsonDecoder().Decode(content));
 	}
 
 	private void parseXml(String content, Context context) throws Throwable {

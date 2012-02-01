@@ -13,7 +13,7 @@ import java.util.Set;
 
 public class JsonDecoder {
 	
-	public List<Object> Decode(String jsonText) {
+	public Object Decode(String jsonText) {
 		
 		List<Object> result = new ArrayList<Object>();
 		JsonElement root = new JsonParser().parse(jsonText);
@@ -26,12 +26,10 @@ public class JsonDecoder {
 			for (int i = 0; i < list.size(); i++) {
 				result.add(list.get(i));
 			}
-		}
-		else {
-			result.add(o);
+			return result;
 		}
 		
-		return result;
+		return o;
 	}
 	
 	private Object parseElement(JsonElement e) {
@@ -44,7 +42,15 @@ public class JsonDecoder {
 		if (e.isJsonNull())
 			return null;
 			
-		return e.getAsJsonPrimitive().toString();
+		String value = e.getAsJsonPrimitive().toString();
+		
+		if (value != null && value.startsWith("\"") && value.length() > 1)
+			value = value.substring(1);
+		
+		if (value != null && value.endsWith("\"") && value.length() > 1)
+			value = value.substring(0, value.length() - 1);
+		
+		return value;
 	}
 	
 	private Map<String,Object> parseObject(JsonObject o) {
