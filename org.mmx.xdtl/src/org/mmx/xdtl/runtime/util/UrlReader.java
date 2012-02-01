@@ -18,13 +18,16 @@ public class UrlReader {
 		
 		Pattern pattern = Pattern.compile("(http|https)://(\\S+):(\\S+)@([\\S&&[^:]]+)(:(\\d+))?");
 		Matcher matcher = pattern.matcher(uri);
-		
-		URL url = new URL(uri);
-		URLConnection connection = url.openConnection();
+
+		URL url = null;
+		URLConnection connection = null;
 		
 		if (matcher.matches()) {
 			String username = matcher.group(2);
 			String password = matcher.group(3);
+			
+			url = new URL(matcher.group(1) + "://" + matcher.group(4));
+			connection = url.openConnection();
 			
 			if (username != null && username.length() > 0) {
 				String authString = username + ":" + password;
@@ -32,7 +35,11 @@ public class UrlReader {
 								
 				connection.setRequestProperty("Authorization", "Basic " + authHeader);
 			}
+		} else {
+			url = new URL(uri);
+			connection = url.openConnection();
 		}
+		
 		
 		StringBuilder builder = new StringBuilder();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream())); 
