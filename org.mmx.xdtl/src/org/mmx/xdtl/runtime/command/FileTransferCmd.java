@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 public class FileTransferCmd implements RuntimeCommand {
     private final Logger m_logger = LoggerFactory.getLogger(FileTransferCmd.class);
@@ -17,8 +18,10 @@ public class FileTransferCmd implements RuntimeCommand {
     private final String m_target;
     private final boolean m_overwrite;
     private final String m_cmdName;
+    
     private OsProcessRunner m_osProcessRunner;
     private OsArgListBuilder m_argListBuilder;
+    private boolean m_silentNonZeroExitCode;
     
     public FileTransferCmd(String cmd, String source, String target, boolean overwrite, String cmdName) {
         super();
@@ -45,7 +48,7 @@ public class FileTransferCmd implements RuntimeCommand {
         int exitValue = m_osProcessRunner.run(args).getExitCode();
         context.assignVariable(Context.VARNAME_XDTL_EXITCODE, exitValue);
         
-        if (exitValue != 0) {
+        if (exitValue != 0 && !m_silentNonZeroExitCode) {
             throw new OsProcessException("'" + m_cmdName + "' failed with exit value " + exitValue, exitValue);
         }
     }
@@ -66,5 +69,10 @@ public class FileTransferCmd implements RuntimeCommand {
     @Inject
     public void setArgListBuilder(OsArgListBuilder argListBuilder) {
         m_argListBuilder = argListBuilder;
+    }
+    
+    @Inject
+    protected void setSilentNonZeroExitCode(@Named("errors.silentexitcode") boolean value) {
+    	m_silentNonZeroExitCode = value;
     }
 }

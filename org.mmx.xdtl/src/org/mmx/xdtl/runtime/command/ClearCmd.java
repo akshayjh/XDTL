@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 /**
  * @author vsi
@@ -25,6 +26,7 @@ public class ClearCmd implements RuntimeCommand {
     
     private OsProcessRunner m_osProcessRunner;
     private OsArgListBuilder m_argListBuilder;
+    private boolean m_silentNonZeroExitCode;
     
     public ClearCmd(String cmd, String target) {
         super();
@@ -47,7 +49,7 @@ public class ClearCmd implements RuntimeCommand {
         int exitValue = m_osProcessRunner.run(args).getExitCode();
         context.assignVariable(Context.VARNAME_XDTL_EXITCODE, exitValue);
         
-        if (exitValue != 0) {
+        if (exitValue != 0 && !m_silentNonZeroExitCode) {
             throw new OsProcessException("'clear' failed with exit value " + exitValue, exitValue);
         }
     }
@@ -68,5 +70,10 @@ public class ClearCmd implements RuntimeCommand {
     @Inject
     public void setArgListBuilder(OsArgListBuilder argListBuilder) {
         m_argListBuilder = argListBuilder;
+    }
+    
+    @Inject
+    protected void setSilentNonZeroExitCode(@Named("errors.silentexitcode") boolean value) {
+    	m_silentNonZeroExitCode = value;
     }
 }

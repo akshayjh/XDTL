@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 public class ExecCmd implements RuntimeCommand {
     private final Logger m_logger = LoggerFactory.getLogger(ExecCmd.class);
@@ -18,6 +19,7 @@ public class ExecCmd implements RuntimeCommand {
     
     private OsProcessRunner m_processRunner;
     private OsArgListBuilder m_argumentListBuilder;
+    private boolean m_silentNonZeroExitCode;
     
     public ExecCmd(String shell, String cmd) {
     	this(shell, cmd, null);
@@ -42,9 +44,10 @@ public class ExecCmd implements RuntimeCommand {
         	context.assignVariable(m_targetVarName, result.getOutput());
         }
         
-        if (result.getExitCode() != 0) {
-        	context.assignVariable(Context.VARNAME_XDTL_EXITCODE, result.getExitCode());
-            throw new OsProcessException("Process " + args.get(0) + " failed with exit code=" + result.getExitCode(), result.getExitCode());
+        context.assignVariable(Context.VARNAME_XDTL_EXITCODE, result.getExitCode());
+        
+        if (result.getExitCode() != 0 && !m_silentNonZeroExitCode) {
+       		throw new OsProcessException("Process " + args.get(0) + " failed with exit code=" + result.getExitCode(), result.getExitCode());
         }
     }
 
@@ -64,5 +67,10 @@ public class ExecCmd implements RuntimeCommand {
     @Inject
     public void setArgumentListBuilder(OsArgListBuilder cmdLineBuilder) {
         m_argumentListBuilder = cmdLineBuilder;
+    }
+    
+    @Inject
+    protected void setSilentNonZeroExitCode(@Named("errors.silentexitcode") boolean value) {
+    	m_silentNonZeroExitCode = value;
     }
 }

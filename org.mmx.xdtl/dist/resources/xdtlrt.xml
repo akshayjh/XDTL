@@ -6,6 +6,8 @@
     <entry key="useinternalschema">true</entry>
     <entry key="loader.batchsize">1000</entry>
     <entry key="read.impl">org.mmx.xdtl.runtime.command.JdbcReadCmd</entry>
+	<!-- if true, commands doing external calls  (exec, read, write, etc) will not throw error on non-zero exit code -->
+	<entry key="errors.silentexitcode">true</entry>
 <!--
     A comma separated list of directories of javascript files to execute at startup.
     A relative path is relative to xdtl home directory - usually $(HOME)/.xdtl.
