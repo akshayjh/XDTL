@@ -45,6 +45,7 @@ public class ClearCmd implements RuntimeCommand {
         List<String> args = m_argListBuilder.build(m_cmd, true);
 
         int exitValue = m_osProcessRunner.run(args).getExitCode();
+        context.assignVariable(Context.VARNAME_XDTL_EXITCODE, exitValue);
         
         if (exitValue != 0) {
             throw new OsProcessException("'clear' failed with exit value " + exitValue, exitValue);

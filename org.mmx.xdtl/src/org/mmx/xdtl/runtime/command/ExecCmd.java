@@ -43,6 +43,7 @@ public class ExecCmd implements RuntimeCommand {
         }
         
         if (result.getExitCode() != 0) {
+        	context.assignVariable(Context.VARNAME_XDTL_EXITCODE, result.getExitCode());
             throw new OsProcessException("Process " + args.get(0) + " failed with exit code=" + result.getExitCode(), result.getExitCode());
         }
     }

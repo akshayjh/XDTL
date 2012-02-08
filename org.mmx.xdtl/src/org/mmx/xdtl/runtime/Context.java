@@ -17,6 +17,9 @@ public class Context {
     public static final String VARNAME_XDTL_ROWCOUNT      = "xdtlRowcount";
     public static final String VARNAME_XDTL_ROWID         = "xdtlRowid";
     public static final String VARNAME_XDTL_RESUME        = "xdtlResume";
+    
+    // Exit code for last system call
+    public static final String VARNAME_XDTL_EXITCODE      = "xdtlExitCode";
 
     private final EngineControl m_engineControl;
     private final HashMap<String, Variable> m_varmap = new HashMap<String, Variable>();

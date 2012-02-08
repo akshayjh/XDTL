@@ -612,6 +612,7 @@ public class EngineImpl implements Engine, EngineControl {
     private Context createGlobalContext(Map<String, Object> globals) {
         Context context = new Context(this, null);
         context.addVariable(new Variable(Context.VARNAME_XDTL_VERSION, m_version, true));
+        context.addVariable(new Variable(Context.VARNAME_XDTL_EXITCODE, 0, false));
         
         if (globals != null) {
             for (Map.Entry<String, Object> entry: globals.entrySet()) {

@@ -73,6 +73,7 @@ public class ReadCmd implements RuntimeCommand {
         List<String> args = m_argListBuilder.build(cmd, true);
 
         int exitValue = m_osProcessRunner.run(args).getExitCode();
+        context.assignVariable(Context.VARNAME_XDTL_EXITCODE, exitValue);
         
         if (exitValue != 0) {
             throw new OsProcessException("'read' failed with exit value " +
