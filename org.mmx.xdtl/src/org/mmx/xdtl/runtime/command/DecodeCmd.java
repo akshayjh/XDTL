@@ -2,6 +2,9 @@ package org.mmx.xdtl.runtime.command;
 
 import java.io.StringReader;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -64,7 +67,7 @@ public class DecodeCmd implements RuntimeCommand {
 		InputSource inputSource = new InputSource(reader);
 		Document document = builder.parse(inputSource);
 		
-		List<Object> parsed = new XmlDocumentDecoder().Decode(document);
+		Map<String,Object> parsed = new XmlDocumentDecoder().Decode(document);
 		context.assignVariable(m_target, parsed);
 	}
 }

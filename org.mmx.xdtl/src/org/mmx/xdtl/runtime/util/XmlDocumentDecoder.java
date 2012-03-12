@@ -12,15 +12,12 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class XmlDocumentDecoder {
-	public List<Object> Decode(Document document) {
+	public Map<String,Object> Decode(Document document) {
 		
 		Element root = document.getDocumentElement();
 		Map<String, Object> m = new HashMap<String,Object>();
 		m.put(root.getTagName(), parseElement(root));
-		
-		List<Object> result = new ArrayList<Object>();
-		result.add(m);
-		return result;
+		return m;
 	}
 	
 	private static Object parseElement(Element e) {
