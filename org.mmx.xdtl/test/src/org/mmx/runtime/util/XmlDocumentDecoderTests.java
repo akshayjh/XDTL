@@ -27,7 +27,7 @@ public class XmlDocumentDecoderTests {
 		XmlDocumentDecoder decoder = new XmlDocumentDecoder();
 		Map<String,Object> result = decoder.decode(doc);
 		
-		Assert.assertTrue(result.size() == 0);
+		Assert.assertTrue(result.size() == 1);
 	}
 	
 	@Test
@@ -38,7 +38,9 @@ public class XmlDocumentDecoderTests {
 		XmlDocumentDecoder decoder = new XmlDocumentDecoder();
 		Map<String,Object> result = decoder.decode(doc);
 		
-		Assert.assertTrue(result.size() == 2);
+		System.out.println(result.toString());
+		Assert.assertTrue(result.size() == 3);
+		
 	}
 	
 	@Test
@@ -49,7 +51,8 @@ public class XmlDocumentDecoderTests {
 		XmlDocumentDecoder decoder = new XmlDocumentDecoder();
 		Map<String,Object> result = decoder.decode(doc);
 		
-		Assert.assertTrue(result.size() == 4);
+		System.out.println(result.toString());
+		Assert.assertTrue(result.size() == 5);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -61,10 +64,21 @@ public class XmlDocumentDecoderTests {
 		XmlDocumentDecoder decoder = new XmlDocumentDecoder();
 		Map<String,Object> result = decoder.decode(doc);
 		
-		Assert.assertTrue(result.size() == 1);
+		System.out.println(result.toString());
+		Assert.assertTrue(result.size() == 2);
 		Assert.assertTrue(((List<Map<String,Object>>)result.get("projects")).size() == 2);
 	}
 	
+	@Test
+	public void shouldParseSimpleMultichildren() throws ParserConfigurationException, SAXException, IOException {
+		String fragment = "<projects count=\"1\" joke=\"2\"><p>1</p><p>2</p><p>3</p></projects>";
+	
+		Document doc = getDocument(fragment);
+		XmlDocumentDecoder decoder = new XmlDocumentDecoder();
+		Map<String,Object> result = decoder.decode(doc);
+		System.out.println(result.toString());
+		Assert.assertTrue(result.size() == 4);
+	}
 
 	private Document getDocument(String fragment)
 			throws ParserConfigurationException, SAXException, IOException {

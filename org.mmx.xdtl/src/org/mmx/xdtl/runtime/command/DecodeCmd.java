@@ -1,8 +1,6 @@
 package org.mmx.xdtl.runtime.command;
 
 import java.io.StringReader;
-import java.util.List;
-import java.util.HashMap;
 import java.util.Map;
 
 
