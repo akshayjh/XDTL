@@ -67,7 +67,7 @@ public class DecodeCmd implements RuntimeCommand {
 		InputSource inputSource = new InputSource(reader);
 		Document document = builder.parse(inputSource);
 		
-		Map<String,Object> parsed = new XmlDocumentDecoder().Decode(document);
+		Map<String,Object> parsed = new XmlDocumentDecoder().decode(document);
 		context.assignVariable(m_target, parsed);
 	}
 }

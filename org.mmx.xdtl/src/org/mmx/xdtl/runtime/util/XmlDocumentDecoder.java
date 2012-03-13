@@ -12,45 +12,61 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class XmlDocumentDecoder {
-	public Map<String,Object> Decode(Document document) {
+	public Map<String,Object> decode(Document document) {
 		
 		Element root = document.getDocumentElement();
+		return parseObject(root);
+	}
+
+	private Map<String, Object> parseObject(Element node) {
+		
 		Map<String, Object> m = new HashMap<String,Object>();
-		m.put(root.getTagName(), parseElement(root));
+		
+		NamedNodeMap attrs = node.getAttributes();
+		for (int i = 0; i < attrs.getLength(); i++) {
+			Node a = attrs.item(i);
+			m.put(a.getNodeName(), a.getNodeValue());
+		}
+		
+		List<Map<String,Object>> arrayNodes = new ArrayList<Map<String,Object>>();
+		NodeList children = node.getChildNodes();
+		
+		int len = children.getLength();
+		for (int i = 0; i < len; i++) {
+			Node child = children.item(i);
+			
+			if (child.getNodeType() == Node.ELEMENT_NODE) {
+				Element elem = (Element)child;
+				
+				if (isTextValueElement(elem) && !m.containsKey(elem.getTagName())) {
+					m.put(elem.getTagName(), elem.getNodeValue());
+				} else {
+					arrayNodes.add(parseObject(elem));
+				}
+			}
+		}
+		
+		if (arrayNodes.size() > 0) {
+			m.put(node.getTagName(), arrayNodes);
+		}
+		
 		return m;
 	}
-	
-	private static Object parseElement(Element e) {
-		Map<String, Object> m = new HashMap<String,Object>();
+
+	private boolean isTextValueElement(Element elem) {
+		if (elem.hasAttributes()) return false;
 		
-		NamedNodeMap attrs = e.getAttributes();
-		if (attrs != null) {
-			for (int i = 0; i < attrs.getLength(); i++) {
-				Node a = attrs.item(i);
-				m.put(a.getNodeName(), a.getNodeValue());
-			}
-		}
-		
-		List<Map<String, Object>> children = new ArrayList<Map<String, Object>>();
-		m.put("children", children);
-		
-		NodeList childNodes = e.getChildNodes();
-		
-		for (int j = 0; j < childNodes.getLength(); j++) {
-			Node iter = childNodes.item(j);
-			short nodeType = iter.getNodeType();
+		if (elem.hasChildNodes()) {
+			NodeList children = elem.getChildNodes();
+			int len = children.getLength();
 			
-			if (nodeType == Node.ELEMENT_NODE) {
-				Element child = (Element)iter;
-				Map<String, Object> childm = new HashMap<String,Object>();
-				childm.put(child.getTagName(), parseElement(child));
-				children.add(childm);
-			}
-			else if (nodeType == Node.TEXT_NODE) {
-				m.put("text", iter.getNodeValue());
+			for (int i = 0; i < len; i++) {
+				if (children.item(i).getNodeType() == Node.ELEMENT_NODE) {
+					return false;
+				}
 			}
 		}
-				
-		return m;
+		
+		return true;
 	}
 }
