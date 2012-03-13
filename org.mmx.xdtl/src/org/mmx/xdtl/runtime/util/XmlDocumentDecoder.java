@@ -39,7 +39,7 @@ public class XmlDocumentDecoder {
 				Element elem = (Element)child;
 				
 				if (isTextValueElement(elem) && !m.containsKey(elem.getTagName())) {
-					m.put(elem.getTagName(), elem.getNodeValue());
+					m.put(elem.getTagName(), getElementTextValue(elem));
 				} else {
 					arrayNodes.add(parseObject(elem));
 				}
@@ -51,6 +51,20 @@ public class XmlDocumentDecoder {
 		}
 		
 		return m;
+	}
+
+	private String getElementTextValue(Element elem) {
+		StringBuilder builder = new StringBuilder();
+		NodeList nodes = elem.getChildNodes();
+		
+		for (int j = 0; j < nodes.getLength(); j++) {
+			Node node = nodes.item(j);
+			if (node.getNodeType() == Node.TEXT_NODE) {
+				builder.append(node.getNodeValue());
+			}
+		}
+		
+		return builder.toString();
 	}
 
 	private boolean isTextValueElement(Element elem) {
