@@ -21,6 +21,7 @@ public class XmlDocumentDecoder {
 	private Map<String, Object> parseObject(Element node) {
 		
 		Map<String, Object> m = new HashMap<String,Object>();
+		m.put("tagName", node.getTagName());
 		
 		NamedNodeMap attrs = node.getAttributes();
 		for (int i = 0; i < attrs.getLength(); i++) {
