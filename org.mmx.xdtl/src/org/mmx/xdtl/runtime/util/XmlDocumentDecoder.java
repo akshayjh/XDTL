@@ -70,7 +70,15 @@ public class XmlDocumentDecoder {
 			String tagName = (String)arrayNode.get("tagName");
 			Integer count = tagCounts.get(tagName);
 			
-			if (count.intValue() > 1 || arrayNode.size() == 2 && !arrayNode.containsKey("textvalue") || arrayNode.size() > 2) {
+			if (count.intValue() == 1 && !attributeNames.contains(tagName)) {
+				if (arrayNode.size() == 2 && arrayNode.containsKey("textvalue")) {
+					m.put(tagName, arrayNode.get("textvalue"));
+				} else if (arrayNode.size() == 1) {
+					m.put(tagName, null);
+				} else {
+					m.put(tagName, arrayNode);
+				}
+			} else if (count.intValue() > 1 || arrayNode.size() == 2 && !arrayNode.containsKey("textvalue") || arrayNode.size() > 2) {
 				realArrayNodes.add(arrayNode);
 			} else {
 				m.put(tagName, arrayNode.get("textvalue"));

@@ -79,6 +79,26 @@ public class XmlDocumentDecoderTests {
 		System.out.println(result.toString());
 		Assert.assertTrue(result.size() == 4);
 	}
+	
+	@Test
+	public void shouldParseSingleChildToPropertyObject() throws ParserConfigurationException, SAXException, IOException {
+		String fragment = "<p a=\"1\"><p1><p1a>1</p1a></p1><p2>Text</p2></p>";
+	
+		Document doc = getDocument(fragment);
+		XmlDocumentDecoder decoder = new XmlDocumentDecoder();
+		Map<String,Object> result = decoder.decode(doc);
+		System.out.println(result.toString());
+	}
+
+	@Test
+	public void shouldParseAll() throws ParserConfigurationException, SAXException, IOException {
+		String fragment = "<projects count=\"2\"><project><id>34</id><name>Project öäüe</name><identifier>demo-demo1</identifier><description/><parent name=\"Something parent\" id=\"21\"/><created_on>2011-12-15T17:31:21+02:00</created_on><updated_on>2011-12-15T17:31:21+02:00</updated_on></project><project><id>35</id><name>Öärk</name><identifier>eas-ajakirjad</identifier><description/><parent name=\"Plumps\" id=\"11\"/><created_on>2011-12-15T17:31:21+02:00</created_on><updated_on>2011-12-15T17:31:21+02:00</updated_on></project></projects>";
+	
+		Document doc = getDocument(fragment);
+		XmlDocumentDecoder decoder = new XmlDocumentDecoder();
+		Map<String,Object> result = decoder.decode(doc);
+		System.out.println(result.toString());
+	}
 
 	private Document getDocument(String fragment)
 			throws ParserConfigurationException, SAXException, IOException {
