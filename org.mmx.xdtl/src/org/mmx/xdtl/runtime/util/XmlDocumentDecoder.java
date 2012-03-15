@@ -23,72 +23,79 @@ public class XmlDocumentDecoder {
 		Map<String, Object> m = new HashMap<String,Object>();
 		m.put("tagName", node.getTagName());
 		
-		List<String> attributeNames = new ArrayList<String>();
+		// map attributes to properties
 		NamedNodeMap attrs = node.getAttributes();
 		for (int i = 0; i < attrs.getLength(); i++) {
 			Node a = attrs.item(i);
 			m.put(a.getNodeName(), a.getNodeValue());
-			attributeNames.add(a.getNodeName());
 		}
 		
-		List<Map<String,Object>> arrayNodes = new ArrayList<Map<String,Object>>();
 		NodeList children = node.getChildNodes();
-		
 		int len = children.getLength();
-		Map<String,Integer> tagCounts = new HashMap<String,Integer>();
-		StringBuilder builder = new StringBuilder(); 
+		
+		Map<String, List<Object>> tagmap = new HashMap<String, List<Object>>();
+		StringBuilder builder = new StringBuilder();
 		
 		for (int i = 0; i < len; i++) {
 			Node child = children.item(i);
 			
 			if (child.getNodeType() == Node.ELEMENT_NODE) {
-				Element elem = (Element)child;
-				arrayNodes.add(parseObject(elem));
-				
-				if (!tagCounts.containsKey(elem.getTagName())) {
-					Integer count = new Integer(1);
-					tagCounts.put(elem.getTagName(), count);
-				} else {
-					Integer count = tagCounts.get(elem.getTagName());
-					tagCounts.put(elem.getTagName(), new Integer(count.intValue()+1));
-				}
+				addToTagmap(tagmap, (Element)child);
 			} else if (child.getNodeType() == Node.TEXT_NODE) {
 				builder.append(child.getNodeValue());
 			}
 		}
 		
-		// compression
+		String textvalue = builder.toString().trim();
+		if (textvalue.length() > 0) {
+			m.put("textvalue", textvalue);
+		}
+	
+		return m;
+	}
+
+	private void addToTagmap(Map<String, List<Object>> tagmap, Element elem) {
+		String tag = elem.getTagName();
 		
-		String text = builder.toString();
-		if (text.length() > 0) {
-			m.put("textvalue", text);
+		if (!tagmap.containsKey(tag)) {
+			tagmap.put(tag, new ArrayList<Object>());
 		}
 		
-		List<Map<String,Object>> realArrayNodes = new ArrayList<Map<String,Object>>();
-		for (int i = 0; i < arrayNodes.size(); i++) {
-			Map<String, Object> arrayNode = arrayNodes.get(i);
-			String tagName = (String)arrayNode.get("tagName");
-			Integer count = tagCounts.get(tagName);
-			
-			if (count.intValue() == 1 && !attributeNames.contains(tagName)) {
-				if (arrayNode.size() == 2 && arrayNode.containsKey("textvalue")) {
-					m.put(tagName, arrayNode.get("textvalue"));
-				} else if (arrayNode.size() == 1) {
-					m.put(tagName, null);
-				} else {
-					m.put(tagName, arrayNode);
-				}
-			} else if (count.intValue() > 1 || arrayNode.size() == 2 && !arrayNode.containsKey("textvalue") || arrayNode.size() > 2) {
-				realArrayNodes.add(arrayNode);
-			} else {
-				m.put(tagName, arrayNode.get("textvalue"));
+		if (isObject(elem)) {
+			tagmap.get(tag).add(parseObject(elem));
+		} else {
+			tagmap.get(tag).add(getText(elem));
+		}
+	}
+
+	private boolean isObject(Element elem) {
+		
+		if (elem.hasAttributes()) return true;
+		
+		NodeList children = elem.getChildNodes();
+		int len = children.getLength();
+		
+		for (int i = 0; i < len; i++) {
+			Node child = children.item(i);
+			if (child.getNodeType() == Node.ELEMENT_NODE) {
+				return true;
 			}
 		}
+		return false;
+	}
+	
+	private String getText(Element elem) {
 		
-		if (realArrayNodes.size() > 0) {
-			m.put(node.getTagName(), realArrayNodes);
+		NodeList children = elem.getChildNodes();
+		int len = children.getLength();
+		
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < len; i++) {
+			Node child = children.item(i);
+			if (child.getNodeType() == Node.TEXT_NODE) {
+				builder.append(child.getNodeValue());
+			}
 		}
-		
-		return m;
+		return builder.toString();
 	}
 }
