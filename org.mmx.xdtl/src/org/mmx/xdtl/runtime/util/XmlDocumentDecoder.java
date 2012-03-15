@@ -46,6 +46,26 @@ public class XmlDocumentDecoder {
 			}
 		}
 		
+		List<Object> items = new ArrayList<Object>();
+	
+		for (String key : tagmap.keySet()) {
+			List<Object> value = tagmap.get(key);
+			
+			if (value.size() == 1 && !m.containsKey(key)) {
+				m.put(key, value.get(0));
+			} else if (m.containsKey(key)) {
+				for (int j = 0; j < value.size(); j++) {
+					items.add(value.get(j));
+				}
+			} else {
+				m.put(key, value);
+			}
+		}
+		
+		if (items.size() > 0) {
+			m.put("items", items);
+		}
+		
 		String textvalue = builder.toString().trim();
 		if (textvalue.length() > 0) {
 			m.put("textvalue", textvalue);
