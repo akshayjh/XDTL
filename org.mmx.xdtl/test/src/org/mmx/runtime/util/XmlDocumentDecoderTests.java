@@ -66,7 +66,7 @@ public class XmlDocumentDecoderTests {
 		
 		System.out.println(result.toString());
 		Assert.assertTrue(result.size() == 2);
-		Assert.assertTrue(((List<Map<String,Object>>)result.get("projects")).size() == 2);
+		Assert.assertTrue(((List<Map<String,Object>>)result.get("project")).size() == 2);
 	}
 	
 	@Test
