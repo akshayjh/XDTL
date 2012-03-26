@@ -68,7 +68,7 @@ public class XmlDocumentDecoder {
 		
 		String textvalue = builder.toString().trim();
 		if (textvalue.length() > 0) {
-			m.put("textvalue", textvalue);
+			m.put("$t", textvalue);
 		}
 	
 		return m;
