@@ -174,6 +174,9 @@ public class RuntimeModule extends AbstractModule {
         bind(UriSchemeParser.class).in(Singleton.class);
         
         String homeDirUrl = new File(m_properties.getProperty("home")).toURI().toString();
+        if (!homeDirUrl.endsWith("/")) {
+            homeDirUrl += "/";
+        }
 
         PathList pathList = new PathList(homeDirUrl, m_properties.getProperty("startup.path"));
         bind(PathList.class).annotatedWith(Names.named("startup.path")).toInstance(pathList);
