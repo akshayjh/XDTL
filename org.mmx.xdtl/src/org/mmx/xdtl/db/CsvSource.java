@@ -35,12 +35,15 @@ public class CsvSource implements Source {
     }
 
     @Override
-    public String[] readNext() throws IOException {
-        return m_csvReader.readNext();
+    public void close() throws Exception {
+        m_csvReader.close();
     }
 
     @Override
-    public void close() throws Exception {
-        m_csvReader.close();
+    public void fetchRows(RowHandler rowHandler) throws Exception {
+        String[] data;
+        while ((data = m_csvReader.readNext()) != null) {
+            rowHandler.handleRow(data, null);
+        }
     }
 }

@@ -6,7 +6,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import org.mmx.xdtl.db.converter.DateConverter;
 import org.mmx.xdtl.db.converter.DoubleConverter;
@@ -23,6 +25,7 @@ public class Loader {
     private final JdbcConnection m_cnn;
     private final String m_table;
     private final ArrayList<Column> m_columns = new ArrayList<Column>();
+    private final HashMap<String, Integer> m_columnMap = new HashMap<String, Integer>();
     private final int m_commitRowCount;
     private final int m_batchSize;
     private PreparedStatement m_statement;
@@ -30,6 +33,8 @@ public class Loader {
     private int m_rowNum;
     private int m_lastCommit;
     private boolean m_initialAutoCommit;
+    private Object[] m_tempRowBuffer;
+    private IdentifierConverter m_identifierConverter;
 
     public Loader(JdbcConnection cnn, String table, int batchSize,
             int commitRowCount) throws SQLException {
@@ -38,13 +43,8 @@ public class Loader {
         m_batchSize = batchSize > 0 ? batchSize : DEFAULT_BATCH_SIZE;
 
         DatabaseMetaData metaData = cnn.getMetaData();
-        if (metaData.storesUpperCaseIdentifiers()) {
-            m_table = table.toUpperCase();
-        } else if (metaData.storesLowerCaseIdentifiers()) {
-            m_table = table.toLowerCase();
-        } else {
-            m_table = table;
-        }
+        m_identifierConverter = new IdentifierConverter(metaData);
+        m_table = m_identifierConverter.toDbIdentifier(table);
 
         init(metaData);
 
@@ -74,10 +74,10 @@ public class Loader {
 
         try {
             while (rs.next()) {
-                m_columns.add(new Column(rs.getInt("DATA_TYPE"), rs
-                        .getString("TYPE_NAME"), rs.getString("COLUMN_NAME")));
-                // m_logger.debug(rs.getString("COLUMN_NAME") + " " +
-                // rs.getInt("DATA_TYPE") + " " + rs.getString("TYPE_NAME"));
+                String columnName = rs.getString("COLUMN_NAME");
+                m_columns.add(new Column(rs.getInt("DATA_TYPE"),
+                        rs.getString("TYPE_NAME"), columnName));
+                m_columnMap.put(columnName, m_columns.size() - 1);
                 sql.append("?,");
             }
         } finally {
@@ -126,7 +126,7 @@ public class Loader {
         }
     }
 
-    public void loadRow(Object[] values) throws Exception {
+    public void loadRow(Object[] values, List<String> columnNames) throws Exception {
         int count = m_columns.size();
 
         if (logger.isTraceEnabled()) {
@@ -138,6 +138,10 @@ public class Loader {
                 buf.append(value);
             }
             logger.trace("row {}: {}", m_rowNum, buf.toString());
+        }
+
+        if (columnNames != null) {
+            values = remapValues(values, columnNames);
         }
 
         for (int i = 0; i < count; i++) {
@@ -165,6 +169,41 @@ public class Loader {
         }
     }
 
+    private Object[] remapValues(Object[] values, List<String> columnNames) {
+        Object[] result = getTempRowBuffer();
+        
+        int i = 0;
+        for (String columnName: columnNames) {
+            String dbColumnName = m_identifierConverter.toDbIdentifier(columnName);
+            Integer columnIndex = m_columnMap.get(dbColumnName);
+            if (columnIndex == null) {
+                throw new XdtlException("Column not found: " + dbColumnName);
+            }
+            
+            result[columnIndex.intValue()] = values[i++];
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns the number of rows loaded.
+     * @return number of rows loaded.
+     */
+    public int getRowCount() {
+        return m_rowNum;
+    }
+
+    private Object[] getTempRowBuffer() {
+        if (m_tempRowBuffer == null) {
+            m_tempRowBuffer = new Object[m_columns.size()];
+        } else {
+            Arrays.fill(m_tempRowBuffer, null);
+        }
+        
+        return m_tempRowBuffer;
+    }
+    
     private void executeBatch(PreparedStatement stmt) throws SQLException {
         try {
             stmt.executeBatch();

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animals>
+	<animal name="dog">
+		<legs>4</legs>
+		<breed>
+			<type>hound</type>
+			<subbreed>greyhound</subbreed>
+		</breed>
+		<puppies>
+			<puppie>Mauh</puppie>
+			<puppie>Krauh</puppie>
+		</puppies>
+		<!--
+		<color>blue</color>
+		<parents>
+			<papa>Juhan</papa>
+			<mama>Sandra</mama>
+		</parents>
+		-->
+	</animal>
+	<animal name="pig">
+		<legs>4</legs>
+		<type>domestic</type>
+	</animal>
+</animals>

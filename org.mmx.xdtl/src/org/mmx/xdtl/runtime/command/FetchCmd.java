@@ -248,7 +248,7 @@ public class FetchCmd implements RuntimeCommand {
         @Override
         public void write(MyResultSet rs) throws Exception {
             rs.toArray(m_rowBuf);
-            m_loader.loadRow(m_rowBuf);
+            m_loader.loadRow(m_rowBuf, null);
         }
 
         @Override

@@ -9,11 +9,9 @@ import org.xBaseJ.fields.Field;
 public class DbfSource implements Source {
     private DBF m_dbf;
     private SimpleDateFormat m_dateFormat = new SimpleDateFormat("yyyyMMdd");
-    private Object[] m_fields;
     
     public DbfSource(String path, String encoding, int skip) throws Exception {
         m_dbf = new DBF(path, DBF.READ_ONLY, encoding);
-        m_fields = new Object[m_dbf.getFieldCount()];
         skipRows(skip);
     }
     
@@ -25,22 +23,28 @@ public class DbfSource implements Source {
     }
 
     @Override
-    public Object[] readNext() throws Exception {
-        if (m_dbf.getCurrentRecordNumber() >= m_dbf.getRecordCount()) return null;
-        
+    public void fetchRows(RowHandler rowHandler) throws Exception {
+        Object[] data = new Object[m_dbf.getFieldCount()];;
+        while (m_dbf.getCurrentRecordNumber() < m_dbf.getRecordCount()) {
+            fetchRow(data);
+            rowHandler.handleRow(data, null);
+        }
+    }
+
+    private Object[] fetchRow(Object[] data) throws Exception {
         m_dbf.read();
         
-        for (int i = 0; i < m_dbf.getFieldCount(); i++) {
+        for (int i = 0; i < data.length; i++) {
             Field field = m_dbf.getField(i + 1);
             
             if (field instanceof DateField) {
-                m_fields[i] = m_dateFormat.parse(field.get());
+                data[i] = m_dateFormat.parse(field.get());
             } else {
-                m_fields[i] = rtrim(field.get());
+                data[i] = rtrim(field.get());
             }
         }
         
-        return m_fields;
+        return data;
     }
 
     private Object rtrim(String value) {

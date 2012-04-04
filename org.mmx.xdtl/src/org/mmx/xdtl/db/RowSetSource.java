@@ -12,11 +12,13 @@ public class RowSetSource implements Source {
     }
     
     @Override
-    public Object[] readNext() throws Exception {
-        return m_iterator.hasNext() ? m_iterator.next() : null;
+    public void close() throws Exception {
     }
 
     @Override
-    public void close() throws Exception {
+    public void fetchRows(RowHandler rowHandler) throws Exception {
+        while (m_iterator.hasNext()) {
+            rowHandler.handleRow(m_iterator.next(), null);
+        }
     }
 }

@@ -21,7 +21,8 @@ public class ExcelSource implements Source {
     private int m_rowNum;
     private int m_cellNum;
     
-    public ExcelSource(InputStream stream, String sheetName, boolean header, int skip) throws Exception {
+    public ExcelSource(InputStream stream, String sheetName, boolean header,
+            int skip) throws Exception {
         m_stream = stream;
         m_workbook = WorkbookFactory.create(m_stream);
 
@@ -46,7 +47,14 @@ public class ExcelSource implements Source {
     }
 
     @Override
-    public Object[] readNext() throws IOException {
+    public void fetchRows(RowHandler rowHandler) throws Exception {
+        Object[] data;
+        while ((data = readNext()) != null) {
+            rowHandler.handleRow(data, null);
+        }
+    }
+
+    private Object[] readNext() throws IOException {
         Row row = m_sheet.getRow(m_rowNum);
         if (row == null) return null;
         

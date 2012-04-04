@@ -10,8 +10,10 @@ import org.mmx.xdtl.db.DbfSource;
 import org.mmx.xdtl.db.ExcelSource;
 import org.mmx.xdtl.db.JdbcConnection;
 import org.mmx.xdtl.db.Loader;
+import org.mmx.xdtl.db.RowHandler;
 import org.mmx.xdtl.db.RowSetSource;
 import org.mmx.xdtl.db.Source;
+import org.mmx.xdtl.db.XmlSource;
 import org.mmx.xdtl.model.Connection;
 import org.mmx.xdtl.model.XdtlException;
 import org.mmx.xdtl.runtime.Context;
@@ -23,7 +25,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 public class JdbcReadCmd implements RuntimeCommand {
-    private final Logger m_logger = LoggerFactory.getLogger(JdbcReadCmd.class);
+    private static final Logger logger = LoggerFactory.getLogger(JdbcReadCmd.class);
     
     private final Object m_source;
     private final String m_target;
@@ -43,7 +45,8 @@ public class JdbcReadCmd implements RuntimeCommand {
         CSV,
         EXCEL,
         DBF,
-        ROWSET;
+        ROWSET,
+        XML;
         
         public static SourceType valueOfIgnoreCase(String name) {
             for (SourceType type: values()) {
@@ -78,7 +81,7 @@ public class JdbcReadCmd implements RuntimeCommand {
     @SuppressWarnings("unchecked")
     @Override
 	public void run(Context context) throws Throwable {
-        m_logger.info(String.format(
+        logger.info(String.format(
                 "read: source='%s', target='%s', " +
                 "type='%s', delimiter='%s', quote='%s', encoding='%s', " +
                 "connection='%s', errors='%s', header=%s, skip=%d, batch=%d",
@@ -109,6 +112,9 @@ public class JdbcReadCmd implements RuntimeCommand {
         case ROWSET:
             source = new RowSetSource((List<Object[]>)m_source, m_skip);
             break;
+        case XML:
+            source = new XmlSource((String) m_source);
+            break;
         }
 
         try {
@@ -117,46 +123,47 @@ public class JdbcReadCmd implements RuntimeCommand {
             try {
                 source.close();
             } catch (IOException e) {
-                m_logger.warn("Failed to close source", e);
+                logger.warn("Failed to close source", e);
             }
         }
 	}
 
 	private void loadTarget(JdbcConnection cnn, Source source) throws Exception {
-        Loader loader = new Loader(cnn, m_target, m_batchSize, m_commitRowCount);
-        int rowCount = 0;
-        
+        final Loader loader = new Loader(cnn, m_target, m_batchSize, m_commitRowCount);
+
         try {
-            Object[] values;
-            
-            while ((values = source.readNext()) != null) {
-                handleNulls(values);
-                loader.loadRow(values);
-                rowCount++;
-            }
+            source.fetchRows(new RowHandler() {
+                @Override
+                public void handleRow(Object[] data, List<String> columnNames) throws Exception {
+                    replaceEmptyStringsWithNulls(data);
+                    logger.trace("handleRow: data={}, columnNames={}", data, columnNames);
+                    loader.loadRow(data, columnNames);
+                }
+
+                private void replaceEmptyStringsWithNulls(Object[] values) {
+                    for (int i = 0; i < values.length; i++) {
+                        Object obj = values[i];
+                        if (obj instanceof String) {
+                            String str = (String) obj;
+                            if (str != null && str.length() == 0) {
+                                values[i] = null;
+                            }
+                        }
+                    }
+                }
+
+            });
         } finally {
             loader.close();
         }
-        
-        m_logger.info(String.format("%d row(s) loaded", rowCount));
-    }
 
-    private void handleNulls(Object[] values) {
-	    for (int i = 0; i < values.length; i++) {
-	        Object obj = values[i];
-	        if (obj instanceof String) {
-    	        String str = (String) obj;
-    	        if (str != null && str.length() == 0) {
-    	            values[i] = null;
-    	        }
-	        }
-	    }
+        logger.info(String.format("%d row(s) loaded", loader.getRowCount()));
     }
 
     private void truncateTarget(JdbcConnection cnn) throws Exception {
         Statement stmt = cnn.createStatement();
         try {
-            m_logger.info("Truncating table '{}'", m_target);
+            logger.info("Truncating table '{}'", m_target);
             stmt.execute(getTruncateSql(m_target));
         } finally {
             close(stmt);
@@ -171,7 +178,7 @@ public class JdbcReadCmd implements RuntimeCommand {
         try {
             stmt.close();
         } catch (Throwable t) {
-            m_logger.warn("Failed to close statement", t);
+            logger.warn("Failed to close statement", t);
         }
 	}
     
