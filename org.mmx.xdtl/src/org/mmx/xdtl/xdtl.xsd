@@ -592,8 +592,12 @@
 	-->
 	<xs:element name="exit">
 		<xs:annotation>
-			<xs:documentation>Exit</xs:documentation>
+			<xs:documentation>Exits current package or optionally XDTL runtime</xs:documentation>
 		</xs:annotation>
+		<xs:complexType>
+			<xs:attribute name="code" type="xs:string" default="0" />
+			<xs:attribute name="global" type="xs:boolean" default="0"/>
+		</xs:complexType>
 	</xs:element>
 	<xs:element name="error">
 		<xs:annotation>
