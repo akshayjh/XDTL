@@ -15,6 +15,7 @@ public class TaskRunResult {
 	}
 
 	public TaskRunResult(int code, boolean exitRuntime) {
+		super();
 		m_exit = true;
 		m_exitCode = code;
 		m_exitRuntime = exitRuntime;

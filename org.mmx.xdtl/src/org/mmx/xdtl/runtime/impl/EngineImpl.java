@@ -133,21 +133,29 @@ public class EngineImpl implements Engine, EngineControl {
             throw new XdtlException("Task '" + taskname
                     + "' was not found in package '" + pkg.getName() + "'");
         }
-        
+
         PackageContext packageContext = m_contextStack.getTopPackageContext();
+	TaskRunResult result = null;
+
         if (packageContext != null && packageContext.getPackage() == pkg) {
             // same package
-            runTask(task, args);
+            result = runTask(task, args);
         } else {
             // different or new package
             packageContext = createPackageContext(pkg, args);
             m_contextStack.push(packageContext);
             try {
-                runTask(task, args);
+                result = runTask(task, args);
             } finally {
                 m_contextStack.pop();
             }
         }
+
+	if (result.getExitRuntime()) {
+		logger.info("Package '" + pkg.getName() +
+			"' terminated runtime in task '" + task.getName() + "'");
+		System.exit(result.getExitCode());
+	}
     }
 
     @Override
@@ -278,9 +286,8 @@ public class EngineImpl implements Engine, EngineControl {
             	
                 if (result.getExit()) {
                 	if (result.getExitRuntime()) {
-                    	logger.info("Package '" + pkg.getName() + 
+				logger.info("Package '" + pkg.getName() + 
                     			"' terminated runtime in task '" + task.getName() + "'");
-                    	
                 		System.exit(result.getExitCode());
                 	}
                 	
@@ -351,7 +358,7 @@ public class EngineImpl implements Engine, EngineControl {
             execute(task.getCommandList());
             return TaskRunResult.success();
         } catch (XdtlExitException e) {
-            logger.debug("Task '" + task.getName() + "' was terminated by 'exit'");
+            logger.debug("Task '" + task.getName() + "' was terminated by command 'exit'");
             return new TaskRunResult(e.getCode(), e.getGlobal());
         } finally {
             m_contextStack.pop();
