@@ -15,6 +15,9 @@ public class ExitHandler extends AbstractElementHandler {
 
     @Override
     protected void startElement(Attributes attr) {
-        m_exit = new Exit();
+        m_exit = new Exit(
+        		attr.getStringValue("code"), 
+        		attr.getStringValue("global")
+        	);
     }
 }

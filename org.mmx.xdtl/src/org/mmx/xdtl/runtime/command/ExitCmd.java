@@ -7,10 +7,23 @@ import org.slf4j.LoggerFactory;
 
 public class ExitCmd implements RuntimeCommand {
     private final Logger m_logger = LoggerFactory.getLogger(ExitCmd.class);
-
+    
+    private final int m_code;
+    private final boolean m_global;
+    
+    public ExitCmd(int code, boolean global) {
+        m_code = code;
+        m_global = global;
+    }
+    
     @Override
     public void run(Context context) throws Throwable {
-        m_logger.info("exit");
-        context.getEngineControl().exit();
+    	if (m_global) {
+    		m_logger.info("exit runtime");
+    		context.getEngineControl().exit(m_code);
+    	} else {
+    		m_logger.info("exit current package");
+    		context.getEngineControl().exit();
+    	}
     }
 }

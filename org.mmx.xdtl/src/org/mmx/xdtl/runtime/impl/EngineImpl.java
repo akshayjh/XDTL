@@ -163,7 +163,7 @@ public class EngineImpl implements Engine, EngineControl {
         Package pkg = m_extensionLoader.getExtensionPackage(nsUri, name);
         if (pkg == null) {
             throw new XdtlException("Extension package not found: nsUri="
-                    + nsUri + ", name=" + name);
+            		+ nsUri + ", name=" + name);
         }
 
         Context upperCtx = m_contextStack.getTop();
@@ -253,7 +253,18 @@ public class EngineImpl implements Engine, EngineControl {
         
         throw new XdtlExitException();
     }
-
+    
+    @Override
+    public void exit(int code) {
+        Context ctx = m_contextStack.getTop();
+        
+        if (ctx == null || !((ctx instanceof TaskContext) || (ctx instanceof PackageContext))) {
+            throw new XdtlException("exit must be called from within package or task context");
+        }
+        
+        throw new XdtlExitException(code, true);
+    }
+    
     private void runPackage(Package pkg, Map<String, Object> args) {
         logger.info("{} Running package '{}'", pkg.getSourceLocator(), pkg.getName());
         
@@ -262,10 +273,20 @@ public class EngineImpl implements Engine, EngineControl {
 
         try {
             for (Task task : pkg.getTasks()) {
-                if (!runPackageTask(pkg, packageContext, task)) {
-                    logger.debug("Package '" + pkg.getName()
-                            + "' was terminated by 'exit'");
-                    return;
+ 	
+            	TaskRunResult result = runPackageTask(pkg, packageContext, task);
+            	
+                if (result.getExit()) {
+                	if (result.getExitRuntime()) {
+                    	logger.info("Package '" + pkg.getName() + 
+                    			"' terminated runtime in task '" + task.getName() + "'");
+                    	
+                		System.exit(result.getExitCode());
+                	}
+                	
+                	logger.debug("Package '" + pkg.getName() + 
+                    		"' was terminated by 'exit'");
+                	return;
                 }
             }
         } finally {
@@ -280,20 +301,21 @@ public class EngineImpl implements Engine, EngineControl {
      * @param packageContext the package context
      * @param task the task
      */
-    private boolean runPackageTask(Package pkg, PackageContext packageContext,
+    private TaskRunResult runPackageTask(Package pkg, PackageContext packageContext,
             Task task) {
         try {
             return runTask(task, null);
         } catch (Throwable t) {
             String msg = "Package '" + pkg.getName() + "' failed";
             logError(msg, pkg.getSourceLocator(), t);
-            if (runErrorHandler(packageContext.getOnErrorRef(), t)
-                    && packageContext.isResumeOnErrorEnabled()) {
-                // Clear error info before resuming
+            if (runErrorHandler(packageContext.getOnErrorRef(), t) 
+            		&& packageContext.isResumeOnErrorEnabled()) {
+
+            	// Clear error info before resuming
                 m_firstError = null;
                 removeErrorHandlerVariables();
                 logger.debug("Resuming from error");
-                return true;
+                return TaskRunResult.success();
             } else {
                 throw new XdtlException(msg, pkg.getSourceLocator(), t);
             }
@@ -310,7 +332,7 @@ public class EngineImpl implements Engine, EngineControl {
      * @return true, if task was terminated normally, false, if task was
      *         terminated by 'exit'
      */
-    private boolean runTask(Task task, Map<String, Object> args) {
+    private TaskRunResult runTask(Task task, Map<String, Object> args) {
         logger.info("{} Running task '{}'", task.getSourceLocator(),
                 task.getName());
         
@@ -319,7 +341,7 @@ public class EngineImpl implements Engine, EngineControl {
         return runTaskInContext(taskContext, args);
     }
 
-    private boolean runTaskInContext(TaskContext taskContext, Map<String, Object> args) {
+    private TaskRunResult runTaskInContext(TaskContext taskContext, Map<String, Object> args) {
         Task task = taskContext.getTask();
         m_contextStack.push(taskContext);
         
@@ -327,10 +349,10 @@ public class EngineImpl implements Engine, EngineControl {
             PackageContext pkgContext = m_contextStack.getTopPackageContext();
             initTaskDefaultConnection(pkgContext, taskContext, args);
             execute(task.getCommandList());
-            return true;
+            return TaskRunResult.success();
         } catch (XdtlExitException e) {
             logger.debug("Task '" + task.getName() + "' was terminated by 'exit'");
-            return false;
+            return new TaskRunResult(e.getCode(), e.getGlobal());
         } finally {
             m_contextStack.pop();
             try {
