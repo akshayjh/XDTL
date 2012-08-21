@@ -165,7 +165,7 @@
 			<xs:sequence>
 				<xs:element ref="xdtl:annotation" minOccurs="0"/>
 				<xs:element ref="xdtl:parameter" minOccurs="0" maxOccurs="unbounded"/>
-				<xs:element ref="xdtl:steps" minOccurs="1" maxOccurs="unbounded"/>
+				<xs:element ref="xdtl:steps" minOccurs="0" maxOccurs="unbounded"/>
 			</xs:sequence>
 			<xs:attribute name="name" type="xs:string" use="required"/>
 			<xs:attribute name="annotation" type="xs:string"/>
