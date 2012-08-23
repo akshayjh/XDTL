@@ -23,4 +23,4 @@ for i in "$LIB_DIR"/*.jar; do
 done
 
 export CLASSPATH
-java -Djava.security.egd=file:/dev/../dev/urandom org.mmx.xdtl.cli.Main $@
+java -Xmx512M -Djava.security.egd=file:/dev/../dev/urandom org.mmx.xdtl.cli.Main $@
