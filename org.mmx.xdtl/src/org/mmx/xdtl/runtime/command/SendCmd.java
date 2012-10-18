@@ -79,11 +79,12 @@ public class SendCmd implements RuntimeCommand {
                 throw new XdtlException("'" + m_target + "' is a directory");
             }
 
+            boolean append = false;
             if (!m_overwrite && f.exists()) {
-                throw new XdtlException("'" + m_target + "' exists");
+                append = true;
             }
 
-            return new FileOutputStream(f);
+            return new FileOutputStream(f, append);
         }
         
         URI uri = new URI(m_target);
