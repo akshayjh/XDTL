@@ -37,10 +37,6 @@
 		<path location="${build.dir}/bin"/>
 	</path>
 
-	<!--
-	Get git revision number and store it
-	-->
-		
 	<!-- - - - - - - - - - - - - - - - - - 
           target: compile                      
 	- - - - - - - - - - - - - - - - - -->
