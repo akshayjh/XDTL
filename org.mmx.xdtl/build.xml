@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project name="xdtl" default="dist">
 
-	<available file=".git" type="dir" property="git.present"/>
-
 	<property file="src/org/mmx/xdtl/Version.properties"/>
 
 	<property name="jarfile"                     value="xdtl-${xdtl.implementation.version}.jar"/>
@@ -42,20 +40,6 @@
 	<!--
 	Get git revision number and store it
 	-->
-	<target name="git.revision" description="Store git revision in ${repository.version}" if="git.present">
-	    <exec executable="git" outputproperty="git.revision" failifexecutionfails="false" errorproperty="">
-	        <arg value="describe"/>
-        	<arg value="--tags"/>
-	        <arg value="--always"/>
-	        <arg value="HEAD"/>
-	    </exec>
-	    <condition property="repository.version" value="${git.revision}" else="unknown">
-        	<and>
-	            <isset property="git.revision"/>
-        	    <length string="${git.revision}" trim="yes" length="0" when="greater"/>
-	        </and>
-	    </condition>
-	</target>
 		
 	<!-- - - - - - - - - - - - - - - - - - 
           target: compile                      
