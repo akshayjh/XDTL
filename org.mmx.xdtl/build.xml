@@ -5,14 +5,6 @@
 	
 	<property file="src/org/mmx/xdtl/Version.properties"/>
 	
-	<exec executable="git" outputproperty="xdtl.implementation.version" failifexecutionfails="false" errorproperty="">
-		<arg value="describe"/>
-		<arg value="--match"/>
-		<arg value="build"/>
-	</exec>
-	
-	<property name="jarfile"                     value="xdtl-${xdtl.implementation.version}.jar"/>
-	<property name="zipfile"                     value="xdtlrt-${xdtl.implementation.version}.zip"/>
 	<property name="build.dir"                   value="build"/>
 	<property name="bin.dir"                     value="${build.dir}/bin"/>
 	<property name="javadoc.dir"                 value="${build.dir}/javadoc"/>
@@ -44,6 +36,18 @@
 		<path refid="test-libs"/>
 		<path location="${build.dir}/bin"/>
 	</path>
+	
+	
+	<target name="revision">
+		<exec executable="git" outputproperty="xdtl.implementation.version" failifexecutionfails="false" errorproperty="">
+			<arg value="describe"/>
+			<arg value="--match"/>
+			<arg value="build"/>
+		</exec>
+		
+		<property name="jarfile"                     value="xdtl-${xdtl.implementation.version}.jar"/>
+		<property name="zipfile"                     value="xdtlrt-${xdtl.implementation.version}.zip"/>
+	</target>
 
 	<!-- - - - - - - - - - - - - - - - - - 
           target: compile                      
@@ -75,7 +79,7 @@
 	<!-- ================================= 
           target: build-jar              
          ================================= -->
-	<target name="build-jar" depends="compile" description="Build project">
+	<target name="build-jar" depends="compile,revision" description="Build project">
 		<jar destfile="${build.dir}/${jarfile}" basedir="${bin.dir}">
 			<fileset dir="${src.dir}">
 			    <include name="**/*.xsd"/>
