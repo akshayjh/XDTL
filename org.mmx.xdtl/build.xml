@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project name="xdtl" default="dist">
 
+	<available file="../.git" type="dir" property="git.present"/>
+	
 	<property file="src/org/mmx/xdtl/Version.properties"/>
-
+	
+	<exec executable="git" outputproperty="xdtl.implementation.version" failifexecutionfails="false" errorproperty="">
+		<arg value="describe"/>
+		<arg value="--match"/>
+		<arg value="build"/>
+	</exec>
+	
 	<property name="jarfile"                     value="xdtl-${xdtl.implementation.version}.jar"/>
 	<property name="zipfile"                     value="xdtlrt-${xdtl.implementation.version}.zip"/>
 	<property name="build.dir"                   value="build"/>
