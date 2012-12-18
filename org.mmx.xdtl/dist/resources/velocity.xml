@@ -5,4 +5,7 @@
 	<entry key="resource.loader">url</entry>
 	<entry key="url.resource.loader.class">org.apache.velocity.runtime.resource.loader.URLResourceLoader</entry>
 	<entry key="velocimacro.library" />
+    <entry key="output.encoding">UTF-8</entry>
+    <entry key="input.encoding">UTF-8</entry>
+    <entry key="default.contentType">UTF-8</entry>
 </properties>
