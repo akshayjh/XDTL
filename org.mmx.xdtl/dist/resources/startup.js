@@ -3,6 +3,7 @@
  */
  
 var xdtlDateCode = java.lang.String.format("%1$tY%1$tm%1$td", new Array(new java.util.Date()));
+var xdtlTimeCode = java.lang.String.format("%1$TH%1$TM%1$TS", new Array(new java.util.Date()));
 
 function xdtlDirectoryExists(dir) {
 	var f = new java.io.File(dir);
