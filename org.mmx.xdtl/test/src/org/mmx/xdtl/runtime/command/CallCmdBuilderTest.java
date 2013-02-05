@@ -49,6 +49,11 @@ public class CallCmdBuilderTest {
                     Map<String, Object> args) {
                 Assert.fail();
             }
+
+            @Override
+            public void exit(int code) {
+                Assert.fail();
+            }
         }, null);
         
         context.addVariable(new Variable("var", "varvalue"));
