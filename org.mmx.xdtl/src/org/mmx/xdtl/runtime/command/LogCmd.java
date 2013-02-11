@@ -12,7 +12,7 @@ import org.mmx.xdtl.runtime.RuntimeCommand;
  * @author vsi
  */
 public class LogCmd implements RuntimeCommand {
-    private static final Logger logger = Logger.getLogger("log");
+    private static final Logger logger = Logger.getLogger("xdtl.cmd.log");
 
     private final Level m_level;
     private final String m_msg;

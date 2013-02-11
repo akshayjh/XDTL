@@ -9,8 +9,8 @@ import org.mmx.xdtl.model.XdtlException;
 import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.RuntimeCommand;
 
-public class PostgresqlReadWriteCmd implements RuntimeCommand {
-    private final Logger m_logger = Logger.getLogger(PostgresqlReadWriteCmd.class);
+public abstract class PostgresqlReadWriteCmd implements RuntimeCommand {
+    private static final Logger logger = Logger.getLogger(PostgresqlReadWriteCmd.class);
     
     private final String m_source;
     private final String m_target;
@@ -46,16 +46,22 @@ public class PostgresqlReadWriteCmd implements RuntimeCommand {
 
     @Override
     public void run(Context context) throws Throwable {
+        logCmdStart();
         JdbcConnection cnn = context.getConnectionManager().getJdbcConnection(m_connection);
         String sql = createSql();
+        if (logger.isDebugEnabled()) {
+            logger.debug(sql);
+        }
+
         Statement stmt = cnn.createStatement();
         try {
-            m_logger.info("COPY: sql=" + sql);
             stmt.execute(sql);
         } finally {
             close(stmt);
         }
     }
+
+    protected abstract void logCmdStart();
 
     protected String createSql() {
         String str;
@@ -94,7 +100,7 @@ public class PostgresqlReadWriteCmd implements RuntimeCommand {
         try {
             stmt.close();
         } catch (Throwable t) {
-            m_logger.warn("Failed to close statement", t);
+            logger.warn("Failed to close statement", t);
         }
     }
 
@@ -128,5 +134,9 @@ public class PostgresqlReadWriteCmd implements RuntimeCommand {
 
     protected String getEncoding() {
         return m_encoding;
+    }
+    
+    protected boolean getHeader() {
+        return m_header;
     }
 }

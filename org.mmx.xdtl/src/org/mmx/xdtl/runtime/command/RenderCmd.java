@@ -17,7 +17,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 public class RenderCmd implements RuntimeCommand {
-    private static final Logger logger = Logger.getLogger(RenderCmd.class);
+    private static final Logger logger = Logger.getLogger("xdtl.cmd.render");
 
     private final String m_template;
     private final Mappings m_source;
@@ -40,7 +40,10 @@ public class RenderCmd implements RuntimeCommand {
 
     @Override
     public void run(Context context) throws Throwable {
-        logger.info(String.format("render: template='%s', source='%s'", m_template, m_source));
+        if (logger.isDebugEnabled()) {
+            logger.debug(String.format("template=%s, parameters=%s", m_template, m_parameters));
+        }
+        
         initVelocityEngine(context);
         
         Template t = m_velocity.getTemplate(m_template);
@@ -73,7 +76,9 @@ public class RenderCmd implements RuntimeCommand {
         }
         
         result = result.trim();
-        logger.debug("render result: " + result);
+        if (logger.isDebugEnabled()) {
+            logger.debug("result: " + result);
+        }
         context.assignVariable(m_targetVarName, result);
     }
 

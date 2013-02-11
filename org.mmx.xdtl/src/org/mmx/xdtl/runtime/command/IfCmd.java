@@ -12,7 +12,7 @@ import org.mmx.xdtl.runtime.RuntimeCommand;
  * @author vsi
  */
 public class IfCmd implements RuntimeCommand {
-    private static final Logger logger = Logger.getLogger(IfCmd.class);
+    private static final Logger logger = Logger.getLogger("xdtl.cmd.if");
     
     private final boolean m_condition;
     private final CommandList m_commandList;
@@ -29,10 +29,10 @@ public class IfCmd implements RuntimeCommand {
     @Override
     public void run(Context context) throws Throwable {
         if (m_condition) {
-            logger.debug("Condition is true, executing commands");
+            logger.debug("true");
             context.getEngineControl().execute(m_commandList);
         } else {
-            logger.debug("Condition is false, skipping commands");
+            logger.debug("false");
         }
     }
 }

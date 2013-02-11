@@ -2,6 +2,7 @@ package org.mmx.xdtl.runtime.command;
 
 import java.util.List;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.OsProcessException;
@@ -11,8 +12,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 public class ExecCmd implements RuntimeCommand {
-    private static final Logger logger = Logger.getLogger(ExecCmd.class);
-    private final String m_shell;
+    private static final Logger logger = Logger.getLogger("xdtl.cmd.exec");
     private final String m_cmd;
     private final String m_targetVarName;
     
@@ -26,23 +26,28 @@ public class ExecCmd implements RuntimeCommand {
     
     public ExecCmd(String shell, String cmd, String targetVarName)
     {
-        m_shell = shell;
         m_cmd = cmd;
     	m_targetVarName = targetVarName;
     }
     
     @Override
     public void run(Context context) throws Exception {
-        logger.debug(String.format("Exec: shell='%s', cmd='%s', target='%s'",
-                m_shell, m_cmd, m_targetVarName));
-
         List<String> args = m_argumentListBuilder.build(m_cmd, false);
+        if (logger.isDebugEnabled()) {
+            logger.debug(m_argumentListBuilder.toCmdline(args));
+        } else if (m_targetVarName == null){
+            logger.info(m_argumentListBuilder.toCmdline(args));
+        }
+
         OsRunnerResult result = m_processRunner.run(args);
         
         if (m_targetVarName != null) {
         	context.assignVariable(m_targetVarName, result.getOutput());
+        } else {
+            logger.log(logger.isDebugEnabled() ? Level.DEBUG : Level.INFO,
+                    "exitCode=" + result.getExitCode());
         }
-        
+
         context.assignVariable(Context.VARNAME_XDTL_EXITCODE, result.getExitCode());
         
         if (result.getExitCode() != 0 && !m_silentNonZeroExitCode) {

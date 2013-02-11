@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.sql.Statement;
 import java.util.List;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.mmx.xdtl.db.CsvSource;
 import org.mmx.xdtl.db.DbfSource;
@@ -24,7 +25,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 public class JdbcReadCmd implements RuntimeCommand {
-    private static final Logger logger = Logger.getLogger(JdbcReadCmd.class);
+    private static final Logger logger = Logger.getLogger("xdtl.cmd.read");
     
     private final Object m_source;
     private final String m_target;
@@ -80,14 +81,7 @@ public class JdbcReadCmd implements RuntimeCommand {
     @SuppressWarnings("unchecked")
     @Override
 	public void run(Context context) throws Throwable {
-        logger.info(String.format(
-                "read: source='%s', target='%s', " +
-                "type='%s', delimiter='%s', quote='%s', encoding='%s', " +
-                "connection='%s', errors='%s', header=%s, skip=%d, batch=%d",
-                (m_source instanceof String) ? m_source : "<rowset>", m_target,
-                m_sourceType, m_delimiter, m_quote, m_encoding, m_connection,
-                m_errors, m_header, m_skip, m_commitRowCount));
-
+        logCmdStart();
         JdbcConnection cnn = context.getConnectionManager().getJdbcConnection(m_connection);
         if (m_overwrite)
         	truncateTarget(cnn);
@@ -127,7 +121,25 @@ public class JdbcReadCmd implements RuntimeCommand {
         }
 	}
 
-	private void loadTarget(JdbcConnection cnn, Source source) throws Exception {
+	private void logCmdStart() {
+        if (logger.isDebugEnabled()) {
+            if (m_sourceType.equals(SourceType.ROWSET)) {
+                logger.debug(String.format("rowsetType=%s, target='%s'",
+                        m_source.getClass().getName(), m_target));
+            } else {
+                logger.debug(String.format("source=%s, type=%s, target=%s," +
+                		" delimiter=%s, quote=%s, errors=%s, overwrite=%s," +
+                		" encoding=%s, header=%s, skip=%d, batch=%d" +
+                		m_source, m_sourceType, m_target, m_delimiter, m_quote,
+                		m_errors, m_overwrite, m_encoding, m_header, m_skip,
+                		m_commitRowCount));
+            }
+        } else {
+            logger.info("target=" + m_target);
+        }
+    }
+
+    private void loadTarget(JdbcConnection cnn, Source source) throws Exception {
         final Loader loader = new Loader(cnn, m_target, m_batchSize, m_commitRowCount);
 
         try {
@@ -159,14 +171,15 @@ public class JdbcReadCmd implements RuntimeCommand {
             loader.close();
         }
 
-        logger.info(String.format("%d row(s) loaded", loader.getRowCount()));
+        logger.log( logger.isDebugEnabled() ? Level.DEBUG : Level.INFO,
+                String.format("%d row(s) loaded", loader.getRowCount()));
     }
 
     private void truncateTarget(JdbcConnection cnn) throws Exception {
         Statement stmt = cnn.createStatement();
         try {
             if (logger.isTraceEnabled()) {
-                logger.trace("Truncating table '" + m_target + "'");
+                logger.trace("Truncating table " + m_target);
             }
             stmt.execute(getTruncateSql(m_target));
         } finally {

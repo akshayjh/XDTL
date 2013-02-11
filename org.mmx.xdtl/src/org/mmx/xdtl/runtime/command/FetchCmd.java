@@ -34,7 +34,7 @@ import au.com.bytecode.opencsv.CSVWriter;
  * @author vsi
  */
 public class FetchCmd implements RuntimeCommand {
-    private static final Logger logger = Logger.getLogger(FetchCmd.class);
+    private static final Logger logger = Logger.getLogger("xdtl.cmd.fetch");
         
     private String m_source;
     private JdbcConnection m_connection;
@@ -64,13 +64,7 @@ public class FetchCmd implements RuntimeCommand {
 
     @Override
     public void run(Context context) throws Throwable {
-        logger.info(String.format(
-                "fetch: source='%s', connection='%s' target='%s', encoding='%s', " +
-                "type='%s', rowset='%s', overwrite='%s', delimiter='%s', " +
-                "quote='%s', destination='%s'",
-                m_source, m_connection.getName(), m_target, m_encoding,
-                m_type, m_rowset, m_overwrite, m_delimiter, m_quote,
-                m_destination != null ? m_destination.getName() : ""));
+        logCmdStart();
         
         RowsetRowHandler rowsetRowHandler = null; 
         Statement stmt = m_connection.createStatement();
@@ -99,7 +93,7 @@ public class FetchCmd implements RuntimeCommand {
                 }
                 
                 rowHandlers.close();
-                logger.info(String.format("%d row(s) fetched", rowCount));
+                logCmdEnd(rowCount);
             } finally {
                 close(rs);
             }
@@ -109,6 +103,39 @@ public class FetchCmd implements RuntimeCommand {
         
         if (rowsetRowHandler != null) {
             context.assignVariable(m_rowset, rowsetRowHandler.getRows());
+        }
+    }
+
+    private void logCmdStart() {
+        if (logger.isDebugEnabled()) {
+            if (m_target != null) {
+                if (m_destination != null) {
+                    logger.debug(String.format("source=%s, target=%s", m_source,
+                            m_target));
+                } else {
+                    logger.debug(String.format("source=%s, target=%s," +
+                    		" type=%s, encoding=%s, overwrite=%s," +
+                    		" delimiter=%s, quote=%s", m_source, m_target,
+                    		m_type, m_encoding, m_overwrite, m_delimiter,
+                    		m_quote));
+                }
+            } else {
+                logger.debug(String.format("source=%s", m_source));
+            }
+        } else {
+            if (m_target != null) {
+                if (m_destination != null) {
+                    logger.info(String.format("target=%s", m_target));
+                }
+            }
+        }
+    }
+
+    private void logCmdEnd(int rowCount) {
+        if (logger.isDebugEnabled()) {
+            logger.debug(String.format("%d row(s) fetched", rowCount));
+        } else if (m_rowset == null){
+            logger.info(String.format("%d row(s) fetched", rowCount));
         }
     }
 

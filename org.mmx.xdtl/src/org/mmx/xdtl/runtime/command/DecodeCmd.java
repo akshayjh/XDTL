@@ -1,6 +1,7 @@
 package org.mmx.xdtl.runtime.command;
 
 import java.io.StringReader;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -25,7 +26,7 @@ import org.xml.sax.InputSource;
  *
  */
 public class DecodeCmd implements RuntimeCommand {
-	private static final Logger logger = Logger.getLogger(DecodeCmd.class);
+	private static final Logger logger = Logger.getLogger("xdtl.cmd.decode");
 
 	private String m_source;
 	private String m_target;
@@ -39,24 +40,36 @@ public class DecodeCmd implements RuntimeCommand {
 
 	@Override
 	public void run(Context context) throws Throwable {
-		logger.info(String.format("decode: source='%s', target='%s', type='%s'",
-				m_source, m_target, m_type));
+		logger.info("source=" + m_source);
 		
-		String content = new UrlReader().read(m_source);
+		UrlReader reader = new UrlReader();
+		String content = reader.read(m_source);
 		
+		int rootNodeCount;
 		if (m_type == Decode.Type.JSON)
-			parseJson(content, context);
+			rootNodeCount = parseJson(content, context);
 		else if (m_type == Decode.Type.XML)
-			parseXml(content, context);
+			rootNodeCount = parseXml(content, context);
 		else
 			throw new XdtlException(String.format("Unknown Decode type: '%s'", m_type));
+		
+		logger.info(String.format("bytes read=%d, root elements parsed=%d",
+		        reader.getBytesRead(), rootNodeCount));
 	}
 	
-	private void parseJson(String content, Context context) {
-		context.assignVariable(m_target, new JsonDecoder().Decode(content));
+	private int parseJson(String content, Context context) {
+	    Object result = new JsonDecoder().Decode(content);
+		context.assignVariable(m_target, result);
+		if (result instanceof List<?>) {
+		    return ((List<?>) result).size();
+		} else if (result != null) {
+		    return 1;
+		}
+
+		return 0;
 	}
 
-	private void parseXml(String content, Context context) throws Throwable {
+	private int parseXml(String content, Context context) throws Throwable {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = factory.newDocumentBuilder();
 		StringReader reader = new StringReader(content);
@@ -65,5 +78,12 @@ public class DecodeCmd implements RuntimeCommand {
 		
 		Map<String,Object> parsed = new XmlDocumentDecoder().decode(document);
 		context.assignVariable(m_target, parsed);
+
+		List<?> items = (List<?>) parsed.get("items");
+		if (items != null) {
+		    return items.size();
+		}
+		
+		return 0;
 	}
 }

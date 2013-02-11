@@ -8,7 +8,7 @@ import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.RuntimeCommand;
 
 public class TransactionCmd implements RuntimeCommand {
-    private static final Logger m_logger = Logger.getLogger(TransactionCmd.class);
+    private static final Logger logger = Logger.getLogger("xdtl.cmd.transaction");
     
     private final JdbcConnection m_connection;
     private final CommandList m_commandList;
@@ -20,7 +20,7 @@ public class TransactionCmd implements RuntimeCommand {
     
     @Override
     public void run(Context context) throws Throwable {
-        m_logger.info("Starting transaction");
+        logger.info("Starting transaction");
         boolean prevAutoCommit = m_connection.getAutoCommit();
         m_connection.setAutoCommit(false);
 
@@ -31,13 +31,13 @@ public class TransactionCmd implements RuntimeCommand {
         try {
             try {
                 context.getEngineControl().execute(m_commandList);
-                m_logger.debug("Committing");
+                logger.trace("Committing");
                 m_connection.commit();
-                m_logger.info("Transaction committed");
+                logger.info("Transaction committed");
             } catch (Throwable t) {
-                m_logger.error("Rolling back", t);
+                logger.trace("Rolling back");
                 m_connection.rollback();
-                m_logger.info("Transaction rolled back");
+                logger.info("Transaction rolled back");
                 throw t;
             }
         } finally {

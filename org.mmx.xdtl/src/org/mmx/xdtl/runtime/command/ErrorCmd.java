@@ -6,7 +6,7 @@ import org.mmx.xdtl.runtime.RuntimeCommand;
 import org.mmx.xdtl.runtime.XdtlError;
 
 public class ErrorCmd implements RuntimeCommand {
-    private static final Logger logger = Logger.getLogger(ErrorCmd.class);
+    private static final Logger logger = Logger.getLogger("xdtl.cmd.error");
 
     private final String m_code;
     private final String m_msg;
@@ -18,7 +18,7 @@ public class ErrorCmd implements RuntimeCommand {
     
     @Override
     public void run(Context context) throws Throwable {
-        logger.info("ErrorCmd: code=" + m_code + ", msg=" + m_msg);
+        logger.info("code=" + m_code + ", msg=" + m_msg);
         throw new XdtlError(m_code, m_msg);
     }
 }

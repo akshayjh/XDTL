@@ -7,4 +7,5 @@ public interface OsArgListBuilder {
     public abstract void addVariableEscaped(String name, String value);
     public abstract String escape(String str);
     public abstract List<String> build(String cmdline, boolean resolveVariables);
+    public abstract String toCmdline(List<String> args);
 }

@@ -186,4 +186,18 @@ public class OsArgListBuilderImpl implements OsArgListBuilder {
         
         return m_variables;
     }
+
+    @Override
+    public String toCmdline(List<String> args) {
+        StringBuilder buf = new StringBuilder();
+        for (String arg: args) {
+            buf.append(arg).append(" ");
+        }
+        
+        if (buf.length() > 0) {
+            buf.setLength(buf.length() - 1);
+        }
+        
+        return buf.toString();
+    }
 }

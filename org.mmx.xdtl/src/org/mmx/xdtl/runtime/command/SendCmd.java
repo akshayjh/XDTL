@@ -13,20 +13,18 @@ import org.apache.log4j.Logger;
 import org.mmx.xdtl.model.XdtlException;
 import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.RuntimeCommand;
-import org.mmx.xdtl.runtime.util.StringShortener;
 import org.mmx.xdtl.runtime.util.VariableNameValidator;
 import org.mmx.xdtl.services.UriSchemeParser;
 
 import com.google.inject.Inject;
 
 public class SendCmd implements RuntimeCommand {
-    private static final Logger logger = Logger.getLogger(SendCmd.class);
+    private static final Logger logger = Logger.getLogger("xdtl.cmd.send");
 
     private final Object  m_source;
     private final String  m_target;
     private final boolean m_overwrite;
     private VariableNameValidator m_variableNameValidator;
-    private StringShortener m_stringShortener;
     private UriSchemeParser m_uriSchemeParser;
     
     public SendCmd(Object source, String target, Boolean overwrite) {
@@ -39,11 +37,9 @@ public class SendCmd implements RuntimeCommand {
     public void run(Context context) throws Throwable {
         boolean targetIsVariable = m_variableNameValidator.isValidVariableName(m_target);
 
-        logger.info(String.format("send: source='%s' target='%s' overwrite='%s' targetIsVariable='%s'",
-                m_source,
-                m_stringShortener.shorten(m_target),
-                Boolean.toString(m_overwrite),
-                Boolean.toString(targetIsVariable)));
+        if (logger.isDebugEnabled()) {
+            logger.debug(String.format("source='%s', target='%s'", m_source, m_target));
+        }
         
         if (targetIsVariable) {
             context.assignVariable(m_target, m_source);
@@ -97,11 +93,6 @@ public class SendCmd implements RuntimeCommand {
     @Inject
     public void setVariableNameValidator(VariableNameValidator variableNameValidator) {
         m_variableNameValidator = variableNameValidator;
-    }
-
-    @Inject
-    public void setStringShortener(StringShortener stringShortener) {
-        m_stringShortener = stringShortener;
     }
 
     @Inject

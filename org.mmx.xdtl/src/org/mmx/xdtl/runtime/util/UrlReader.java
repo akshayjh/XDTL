@@ -11,8 +11,11 @@ import java.util.regex.Pattern;
 import org.apache.xmlbeans.impl.util.Base64;
 
 public class UrlReader {
-	
+    private long m_bytesRead;
+    
 	public String read(String uri) throws IOException {
+	    m_bytesRead = 0L;
+
 		if (uri == null || uri.length() == 0)
 			return null;
 		
@@ -42,7 +45,8 @@ public class UrlReader {
 		
 		
 		StringBuilder builder = new StringBuilder();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream())); 
+		CountingInputStream is = new CountingInputStream(connection.getInputStream());
+		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 		
 		try {
 			String line = null;
@@ -54,7 +58,12 @@ public class UrlReader {
 		finally {
 			reader.close();
 		}
-		
+	
+		m_bytesRead = is.getCount();
 		return builder.toString();
+	}
+	
+	public long getBytesRead() {
+	    return m_bytesRead;
 	}
 }
