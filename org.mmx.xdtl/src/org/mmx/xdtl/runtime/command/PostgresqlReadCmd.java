@@ -2,14 +2,13 @@ package org.mmx.xdtl.runtime.command;
 
 import java.sql.Statement;
 
+import org.apache.log4j.Logger;
 import org.mmx.xdtl.db.JdbcConnection;
 import org.mmx.xdtl.model.Connection;
 import org.mmx.xdtl.runtime.Context;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PostgresqlReadCmd extends PostgresqlReadWriteCmd {
-    private final Logger m_logger = LoggerFactory.getLogger(PostgresqlReadCmd.class);
+    private static final Logger logger = Logger.getLogger(PostgresqlReadCmd.class);
     
     private final String m_errors;
 
@@ -27,7 +26,7 @@ public class PostgresqlReadCmd extends PostgresqlReadWriteCmd {
         if (isOverwrite()) {           
             Statement stmt = cnn.createStatement();
             try {
-                m_logger.info("Truncating table '{}'", getTarget());
+                logger.info("Truncating table '" +  getTarget() + "'");
                 stmt.execute("truncate " + getTarget());
             } finally {
                 close(stmt);

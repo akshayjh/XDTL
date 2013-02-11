@@ -6,18 +6,24 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.mmx.xdtl.db.JdbcConnection;
 import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.RuntimeCommand;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.mmx.xdtl.runtime.util.StringShortener;
+
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 public class QueryCmd implements RuntimeCommand {
-    private final Logger m_logger = LoggerFactory.getLogger(QueryCmd.class);    
+    private static final Logger logger = Logger.getLogger("xdtl.cmd.query");
+
     private final JdbcConnection m_connection;
     private final String m_sqlStatement;
     private final String m_target;
     private final List<Object> m_params;
+    private StringShortener m_shortener;
     
     public QueryCmd(JdbcConnection connection, String sqlStatement, String target, List<Object> params) {
         m_connection = connection;
@@ -28,15 +34,29 @@ public class QueryCmd implements RuntimeCommand {
     
     @Override
     public void run(Context context) throws SQLException {
-        m_logger.info("query: '{}'", m_sqlStatement);
+        Level logLevel = Level.DEBUG;
+        String logSql = m_sqlStatement;
+        
+        if (!logger.isDebugEnabled()) {
+            logLevel = Level.INFO;
+            logSql = m_shortener.shorten(m_sqlStatement);
+        }
 
-        if (m_target == null || m_target.length() == 0) {
-            executeStatement();
-            return;
+        logger.log(logLevel, "sql='" + logSql);
+
+        Object result;
+        String resultName;
+
+        if (m_target != null && m_target.length() > 0) {
+            result = executeStatement();
+            resultName = "rowcount";
+        } else {
+            result = executeStatementReturnScalar();
+            context.assignVariable(m_target, result);
+            resultName = "result";
         }
         
-        Object result = executeStatementReturnScalar();
-        context.assignVariable(m_target, result);
+        logger.log(logLevel, resultName + "=" + result);
     }
 
     private Object executeStatementReturnScalar() throws SQLException {
@@ -70,12 +90,13 @@ public class QueryCmd implements RuntimeCommand {
         }
     }
 
-    private void executeStatement() throws SQLException {
+    private Object executeStatement() throws SQLException {
         PreparedStatement statement = m_connection.prepareStatement(m_sqlStatement);
 
         try {
             setParameters(statement);
             statement.execute();
+            return statement.getUpdateCount();
         } finally {
             close(statement);
         }
@@ -85,7 +106,7 @@ public class QueryCmd implements RuntimeCommand {
         try {
             stmt.close();
         } catch (Throwable t) {
-            m_logger.warn("Failed to close statement", t);
+            logger.warn("Failed to close statement", t);
         }
     }
 
@@ -93,7 +114,12 @@ public class QueryCmd implements RuntimeCommand {
         try {
             rs.close();
         } catch (Throwable t) {
-            m_logger.warn("Failed to close result set", t);
+            logger.warn("Failed to close result set", t);
         }
+    }
+    
+    @Inject @Named("SqlShortener")
+    protected void setStringShortener(StringShortener shortener) {
+        m_shortener = shortener;
     }
 }

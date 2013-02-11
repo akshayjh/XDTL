@@ -6,16 +6,15 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.apache.log4j.Logger;
 import org.mmx.xdtl.model.XdtlException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class JdbcConnection {
-    private final Logger m_logger = LoggerFactory.getLogger(JdbcConnection.class);
+    private static final Logger logger = Logger.getLogger("xdtl.rt.db.jdbcConnection");
     
     private String m_name;
     private Connection m_connection;
-    private int refcount = 1;
+    private int m_refcount = 1;
     
     public JdbcConnection(String name, Connection connection) {
         m_connection = connection;
@@ -23,18 +22,20 @@ public class JdbcConnection {
     }
 
     public void addRef() {
-        refcount++;
+        m_refcount++;
     }
     
     public void release() {
-        if (refcount == 0) {
+        if (m_refcount == 0) {
             return;
         }
         
-        refcount--;
+        m_refcount--;
         
-        if (refcount == 0) {
-            m_logger.debug("{}: closing connection", m_name);
+        if (m_refcount == 0) {
+            if (logger.isTraceEnabled()) {
+                logger.trace(m_name + ": closing connection");
+            }
             
             try {
                 m_connection.close();

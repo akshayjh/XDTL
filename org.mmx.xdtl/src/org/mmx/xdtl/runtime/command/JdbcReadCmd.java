@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.sql.Statement;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.mmx.xdtl.db.CsvSource;
 import org.mmx.xdtl.db.DbfSource;
 import org.mmx.xdtl.db.ExcelSource;
@@ -18,14 +19,12 @@ import org.mmx.xdtl.model.Connection;
 import org.mmx.xdtl.model.XdtlException;
 import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.RuntimeCommand;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 public class JdbcReadCmd implements RuntimeCommand {
-    private static final Logger logger = LoggerFactory.getLogger(JdbcReadCmd.class);
+    private static final Logger logger = Logger.getLogger(JdbcReadCmd.class);
     
     private final Object m_source;
     private final String m_target;
@@ -136,7 +135,10 @@ public class JdbcReadCmd implements RuntimeCommand {
                 @Override
                 public void handleRow(Object[] data, List<String> columnNames) throws Exception {
                     replaceEmptyStringsWithNulls(data);
-                    logger.trace("handleRow: data={}, columnNames={}", data, columnNames);
+
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("handleRow: data=" + data + ", columnNames=" + columnNames);
+                    }
                     loader.loadRow(data, columnNames);
                 }
 
@@ -163,7 +165,9 @@ public class JdbcReadCmd implements RuntimeCommand {
     private void truncateTarget(JdbcConnection cnn) throws Exception {
         Statement stmt = cnn.createStatement();
         try {
-            logger.info("Truncating table '{}'", m_target);
+            if (logger.isTraceEnabled()) {
+                logger.trace("Truncating table '" + m_target + "'");
+            }
             stmt.execute(getTruncateSql(m_target));
         } finally {
             close(stmt);

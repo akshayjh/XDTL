@@ -1,15 +1,14 @@
 package org.mmx.xdtl.runtime.command;
 
+import org.apache.log4j.Logger;
 import org.mmx.xdtl.db.JdbcConnection;
 import org.mmx.xdtl.model.CommandList;
 import org.mmx.xdtl.runtime.ConnectionManager;
 import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.RuntimeCommand;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TransactionCmd implements RuntimeCommand {
-    private final Logger m_logger = LoggerFactory.getLogger(TransactionCmd.class);
+    private static final Logger m_logger = Logger.getLogger(TransactionCmd.class);
     
     private final JdbcConnection m_connection;
     private final CommandList m_commandList;

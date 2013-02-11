@@ -5,9 +5,8 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.mmx.xdtl.model.XdtlException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -15,7 +14,7 @@ import com.google.inject.name.Named;
 public class OsProcessRunnerImpl implements OsProcessRunner {
     private static final String DEFAULT_LOGGER_PREFIX = "process.";
     
-    private final Logger m_logger = LoggerFactory.getLogger(OsProcessRunnerImpl.class);
+    private static final Logger logger = Logger.getLogger(OsProcessRunnerImpl.class);
     private final String m_streamEncoding;
     private final String m_loggerPrefix;
     
@@ -39,11 +38,10 @@ public class OsProcessRunnerImpl implements OsProcessRunner {
         pb.redirectErrorStream(true);
         
         File file = new File(args.get(0));
-        Logger logger = LoggerFactory.getLogger(m_loggerPrefix + file.getName());
+        Logger procLogger = Logger.getLogger(m_loggerPrefix + file.getName());
 
-        m_logger.info("Starting process: {}", args);
-        m_logger.debug("Stream encoding: '{}', logger name='{}'",
-                m_streamEncoding, logger.getName());
+        logger.info("Starting process: " + args);
+        logger.debug("Stream encoding: '" + m_streamEncoding + ", logger name='" + procLogger.getName() + "'");
 
         Process proc = pb.start();
         InputStreamReader reader;
@@ -72,7 +70,7 @@ public class OsProcessRunnerImpl implements OsProcessRunner {
         proc.waitFor();
         
         int exitValue = proc.exitValue();
-        m_logger.info("Process ended with exit value {}", exitValue);
+        logger.info("Process ended with exit value " + exitValue);
         
         return new OsRunnerResult(exitValue, builder.toString());
     }

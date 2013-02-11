@@ -7,11 +7,10 @@ import java.net.URLConnection;
 
 import javax.xml.parsers.SAXParser;
 
+import org.apache.log4j.Logger;
 import org.mmx.xdtl.model.Package;
 import org.mmx.xdtl.model.XdtlException;
 import org.mmx.xdtl.parser.Parser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
@@ -22,7 +21,7 @@ import com.google.inject.Inject;
  * @author vsi
  */
 public class SaxParser implements Parser {
-    private final Logger m_logger = LoggerFactory.getLogger(SaxParser.class);    
+    private static final Logger logger = Logger.getLogger("xdtl.rt.parser.saxParser");    
     private final SAXParser m_saxParser;
     private final ElementHandlerSet m_elementHandlerSet;
 
@@ -45,7 +44,7 @@ public class SaxParser implements Parser {
             InputStream is = cnn.getInputStream();
 
             try {
-                m_logger.info("Parsing '" + url + "'");
+                logger.trace("Parsing '" + url + "'");
                 m_saxParser.parse(is, handler);
             } finally {
                 closeInputStream(is);
@@ -53,7 +52,7 @@ public class SaxParser implements Parser {
             
             pkg = handler.getPackage();
             pkg.setUrl(url);
-            m_logger.debug("Parsed package '" + pkg.getName() + "' from '" + url + "'");
+            logger.trace("Parsed package '" + pkg.getName() + "' from '" + url + "'");
             return pkg;
         } catch (Exception e) {
             throw new XdtlException(e);
@@ -64,7 +63,7 @@ public class SaxParser implements Parser {
         try {
             is.close();
         } catch (IOException e) {
-            m_logger.warn("Failed to close input stream", e);
+            logger.warn("Failed to close input stream", e);
         }
     }
 }

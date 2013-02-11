@@ -8,19 +8,20 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.InvalidPropertiesFormatException;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+import org.apache.log4j.MDC;
 import org.mmx.xdtl.conf.XdtlModule;
+import org.mmx.xdtl.model.XdtlException;
 import org.mmx.xdtl.runtime.Engine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 public class Main {
-    private static final Logger m_logger = LoggerFactory.getLogger(Main.class);
+    private static final Logger m_logger = Logger.getLogger("xdtl.main");
     private static final String GLOBALS_NAME = "globals.xml";
     private static final String CONFIG_NAME = "xdtlrt.xml";
     
@@ -42,7 +43,7 @@ public class Main {
             }
 
             HashMap<String, Object> argMap = createArgumentMap(args, numOptions + 1, null);
-            MDC.setContextMap(argMap);
+            initMDC(argMap);
 
             String homeDir = initXdtlHomeDir(optionsMap);
             Properties conf = loadProperties(homeDir, CONFIG_NAME);
@@ -56,11 +57,19 @@ public class Main {
             m_logger.info("done");
             System.exit(0);
         } catch (Throwable t) {
-            m_logger.error("execution failed", t);
+            if (!(t instanceof XdtlException) || !((XdtlException)t).isLogged()) { 
+                m_logger.error("execution failed", t);
+            }
             System.exit(-1);
         }
     }
-    
+
+    private static void initMDC(HashMap<String, Object> argMap) {
+        for (Entry<String,Object> entry: argMap.entrySet()) {
+            MDC.put(entry.getKey(), entry.getValue());
+        }
+    }
+
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private static Map<String, Object> loadGlobals(String homeDir) throws Exception {
         return (Map) loadProperties(homeDir, GLOBALS_NAME);

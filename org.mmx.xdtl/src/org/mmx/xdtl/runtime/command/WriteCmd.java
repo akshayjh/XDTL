@@ -2,18 +2,17 @@ package org.mmx.xdtl.runtime.command;
 
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.mmx.xdtl.model.Connection;
 import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.OsProcessException;
 import org.mmx.xdtl.runtime.RuntimeCommand;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 public class WriteCmd implements RuntimeCommand {
-    private final Logger m_logger = LoggerFactory.getLogger(WriteCmd.class);
+    private static final Logger logger = Logger.getLogger(WriteCmd.class);
     
     private final String m_source;
     private final String m_target;
@@ -42,7 +41,7 @@ public class WriteCmd implements RuntimeCommand {
 
     @Override
     public void run(Context context) throws Throwable {
-        m_logger.info(String.format(
+        logger.info(String.format(
                 "write: source='%s', target='%s', " +
                 "type='%s', delimiter='%s', quote='%s', connection='%s'",
                 m_source, m_target,

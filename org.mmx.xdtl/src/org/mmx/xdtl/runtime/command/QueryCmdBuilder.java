@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.mmx.xdtl.db.JdbcConnection;
 import org.mmx.xdtl.model.Command;
 import org.mmx.xdtl.model.Connection;
@@ -21,8 +22,6 @@ import org.mmx.xdtl.runtime.ExpressionEvaluator;
 import org.mmx.xdtl.runtime.RuntimeCommand;
 import org.mmx.xdtl.runtime.TypeConverter;
 import org.mmx.xdtl.services.UriSchemeParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
@@ -30,8 +29,8 @@ public class QueryCmdBuilder extends AbstractCmdBuilder {
     private static final int STREAM_BUF_SIZE = 4096;
     private static final String DEFAULT_DATE_PATTERN = "yyyy-MM-dd";
     
-    private final Logger m_logger = LoggerFactory.getLogger(QueryCmdBuilder.class);
-    
+    private static final Logger logger = Logger.getLogger("xdtl.cmd.query");
+
     private final ExpressionEvaluator m_exprEval;
     private final TypeConverter m_typeConv;
     private final UriSchemeParser m_uriSchemeParser;
@@ -161,7 +160,7 @@ public class QueryCmdBuilder extends AbstractCmdBuilder {
     }
 
     private String loadQuery(String source) {
-        m_logger.debug("Loading query from '" + source + "'");
+        logger.trace("Loading query from '" + source + "'");
         
         try {
             URL url = new URL(source);
@@ -190,7 +189,7 @@ public class QueryCmdBuilder extends AbstractCmdBuilder {
         try {
             is.close();
         } catch (IOException e) {
-            m_logger.warn("Failed to close input stream");
+            logger.warn("Failed to close input stream");
         }
     }
     

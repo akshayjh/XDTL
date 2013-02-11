@@ -1,6 +1,7 @@
 package org.mmx.xdtl.runtime.impl;
 
 import org.mmx.xdtl.model.Package;
+import org.mmx.xdtl.model.SourceLocator;
 import org.mmx.xdtl.runtime.ConnectionManager;
 import org.mmx.xdtl.runtime.Context;
 
@@ -29,5 +30,12 @@ public class PackageContext extends Context {
 
     public boolean isResumeOnErrorEnabled() {
         return m_resumeOnErrorEnabled;
+    }
+
+    @Override
+    public String getTraceLine() {
+        SourceLocator loc = m_package.getSourceLocator();
+        return "pckg: " + m_package.getName() + "@" + loc.getDocumentUrl()
+                + ":" + loc.getLineNumber();
     }
 }

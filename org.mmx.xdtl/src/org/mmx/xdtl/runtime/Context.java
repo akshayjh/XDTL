@@ -120,4 +120,8 @@ public class Context {
     public ConnectionManager getConnectionManager() {
         return m_connectionManager;
     }
+    
+    public String getTraceLine() {
+        return "";
+    }
 }

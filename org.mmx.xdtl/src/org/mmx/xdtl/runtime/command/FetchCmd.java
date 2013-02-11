@@ -17,14 +17,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.mmx.xdtl.db.JdbcConnection;
 import org.mmx.xdtl.db.Loader;
 import org.mmx.xdtl.model.XdtlException;
 import org.mmx.xdtl.model.command.Fetch;
 import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.RuntimeCommand;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
@@ -35,7 +34,7 @@ import au.com.bytecode.opencsv.CSVWriter;
  * @author vsi
  */
 public class FetchCmd implements RuntimeCommand {
-    private static final Logger logger = LoggerFactory.getLogger(FetchCmd.class);
+    private static final Logger logger = Logger.getLogger(FetchCmd.class);
         
     private String m_source;
     private JdbcConnection m_connection;
@@ -263,7 +262,7 @@ public class FetchCmd implements RuntimeCommand {
      * @author vsi
      */
     private static class RowHandlerList {
-        private static final Logger logger = LoggerFactory.getLogger(RowHandlerList.class);
+        private static final Logger logger = Logger.getLogger(RowHandlerList.class);
         private ArrayList<RowHandler> m_list = new ArrayList<RowHandler>(3);
         
         public void add(RowHandler rowHandler) {

@@ -5,11 +5,10 @@ package org.mmx.xdtl.runtime.command;
 
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.OsProcessException;
 import org.mmx.xdtl.runtime.RuntimeCommand;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -20,7 +19,7 @@ import com.google.inject.name.Named;
  * @author vsi
  */
 public class StripCmd implements RuntimeCommand {
-    private final Logger m_logger = LoggerFactory.getLogger(StripCmd.class);
+    private static final Logger logger = Logger.getLogger(StripCmd.class);
     
     private final String  m_cmd;
     private final String  m_source;
@@ -47,7 +46,7 @@ public class StripCmd implements RuntimeCommand {
      */
     @Override
     public void run(Context context) throws Throwable {
-        m_logger.debug(String.format("strip: cmd='%s', source='%s', " +
+        logger.debug(String.format("strip: cmd='%s', source='%s', " +
                 "target='%s', overwrite='%s', expr='%s'",
                 m_cmd, m_source, m_target, Boolean.toString(m_overwrite),
                 m_expr));

@@ -3,17 +3,16 @@
  */
 package org.mmx.xdtl.runtime.command;
 
+import org.apache.log4j.Logger;
 import org.mmx.xdtl.model.CommandList;
 import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.RuntimeCommand;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author vsi
  */
 public class IfCmd implements RuntimeCommand {
-    private final Logger m_logger = LoggerFactory.getLogger(IfCmd.class);
+    private static final Logger logger = Logger.getLogger(IfCmd.class);
     
     private final boolean m_condition;
     private final CommandList m_commandList;
@@ -30,10 +29,10 @@ public class IfCmd implements RuntimeCommand {
     @Override
     public void run(Context context) throws Throwable {
         if (m_condition) {
-            m_logger.debug("Condition is true, executing commands");
+            logger.debug("Condition is true, executing commands");
             context.getEngineControl().execute(m_commandList);
         } else {
-            m_logger.debug("Condition is false, skipping commands");
+            logger.debug("Condition is false, skipping commands");
         }
     }
 }

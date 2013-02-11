@@ -2,16 +2,15 @@ package org.mmx.xdtl.runtime.command;
 
 import java.sql.Statement;
 
+import org.apache.log4j.Logger;
 import org.mmx.xdtl.db.JdbcConnection;
 import org.mmx.xdtl.model.Connection;
 import org.mmx.xdtl.model.XdtlException;
 import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.RuntimeCommand;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PostgresqlReadWriteCmd implements RuntimeCommand {
-    private final Logger m_logger = LoggerFactory.getLogger(PostgresqlReadWriteCmd.class);
+    private final Logger m_logger = Logger.getLogger(PostgresqlReadWriteCmd.class);
     
     private final String m_source;
     private final String m_target;
@@ -51,7 +50,7 @@ public class PostgresqlReadWriteCmd implements RuntimeCommand {
         String sql = createSql();
         Statement stmt = cnn.createStatement();
         try {
-            m_logger.info("COPY: sql={}", sql);
+            m_logger.info("COPY: sql=" + sql);
             stmt.execute(sql);
         } finally {
             close(stmt);

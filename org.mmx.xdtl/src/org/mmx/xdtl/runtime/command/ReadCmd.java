@@ -2,18 +2,17 @@ package org.mmx.xdtl.runtime.command;
 
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.mmx.xdtl.model.Connection;
 import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.OsProcessException;
 import org.mmx.xdtl.runtime.RuntimeCommand;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 public class ReadCmd implements RuntimeCommand {
-    private final Logger m_logger = LoggerFactory.getLogger(ReadCmd.class);
+    private final Logger m_logger = Logger.getLogger(ReadCmd.class);
     
     private final Object m_source;
     private final String m_target;

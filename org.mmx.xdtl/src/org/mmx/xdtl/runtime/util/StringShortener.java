@@ -1,13 +1,26 @@
 package org.mmx.xdtl.runtime.util;
 
 public class StringShortener {
-    private static final int MAX_LENGTH = 100; 
+    private static final int DEFAULT_MAX_LENGTH = 100;
+    private final int m_maxLength;
     
+    public StringShortener() {
+        this(DEFAULT_MAX_LENGTH);
+    }
+    
+    public StringShortener(int maxLength) {
+        m_maxLength = maxLength;
+    }
+
     public String shorten(String src) {
-        if (src != null && src.length() <= MAX_LENGTH) {
+        return shorten(src, m_maxLength);
+    }
+
+    public String shorten(String src, int maxLength) {
+        if (src != null && src.length() <= maxLength) {
             return src;
         }
         
-        return src.substring(0, MAX_LENGTH - 3) + "...";
+        return src.substring(0, maxLength - 3) + "...";
     }
 }

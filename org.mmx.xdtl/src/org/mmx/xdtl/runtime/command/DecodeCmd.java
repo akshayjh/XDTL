@@ -3,10 +3,10 @@ package org.mmx.xdtl.runtime.command;
 import java.io.StringReader;
 import java.util.Map;
 
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.log4j.Logger;
 import org.mmx.xdtl.model.XdtlException;
 import org.mmx.xdtl.model.command.Decode;
 import org.mmx.xdtl.runtime.Context;
@@ -14,8 +14,6 @@ import org.mmx.xdtl.runtime.RuntimeCommand;
 import org.mmx.xdtl.runtime.util.JsonDecoder;
 import org.mmx.xdtl.runtime.util.UrlReader;
 import org.mmx.xdtl.runtime.util.XmlDocumentDecoder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -27,8 +25,8 @@ import org.xml.sax.InputSource;
  *
  */
 public class DecodeCmd implements RuntimeCommand {
-	
-	private final Logger Logger = LoggerFactory.getLogger(DecodeCmd.class);
+	private static final Logger logger = Logger.getLogger(DecodeCmd.class);
+
 	private String m_source;
 	private String m_target;
 	private Decode.Type m_type;
@@ -41,7 +39,7 @@ public class DecodeCmd implements RuntimeCommand {
 
 	@Override
 	public void run(Context context) throws Throwable {
-		Logger.info(String.format("decode: source='%s', target='%s', type='%s'",
+		logger.info(String.format("decode: source='%s', target='%s', type='%s'",
 				m_source, m_target, m_type));
 		
 		String content = new UrlReader().read(m_source);

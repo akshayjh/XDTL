@@ -5,19 +5,19 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.apache.log4j.Logger;
 import org.mmx.xdtl.db.JdbcConnection;
 import org.mmx.xdtl.model.Connection;
 import org.mmx.xdtl.model.XdtlException;
 import org.mmx.xdtl.runtime.ConnectionManager;
 import org.mmx.xdtl.runtime.ConnectionManagerEvent;
 import org.mmx.xdtl.runtime.ConnectionManagerListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
 public class ConnectionManagerImpl implements ConnectionManager {
-    private final Logger m_logger = LoggerFactory.getLogger(ConnectionManagerImpl.class);
+    private static final Logger logger = Logger.getLogger("xdtl.rt.connectionManager");
+
     private final JdbcConnectionCache m_cache;
     private final ArrayList<ConnectionManagerListener> m_listeners = new ArrayList<ConnectionManagerListener>();
     private JdbcConnection m_defaultConnection;
@@ -60,7 +60,10 @@ public class ConnectionManagerImpl implements ConnectionManager {
                     modelCnn.getSourceLocator());
         }
 
-        m_logger.debug("Creating JDBC connection from URL '{}'", modelCnn.getValue());
+        if (logger.isTraceEnabled()) {
+            logger.debug("Creating JDBC connection from URL '" + modelCnn.getValue() + "'");
+        }
+
         java.sql.Connection cnn = DriverManager.getConnection(modelCnn.getValue());
         JdbcConnection result = new JdbcConnection(modelCnn.getName(), cnn);
 
@@ -84,7 +87,7 @@ public class ConnectionManagerImpl implements ConnectionManager {
         try {
             cnn.close();
         } catch (SQLException e) {
-            m_logger.warn("Failed to close connection", e);
+            logger.warn("Failed to close connection", e);
         }
     }
 

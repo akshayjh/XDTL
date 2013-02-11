@@ -10,6 +10,7 @@ public class XdtlException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
     private final SourceLocator m_sourceLocator;
+    private boolean m_logged;
 
     /**
      * 
@@ -63,6 +64,14 @@ public class XdtlException extends RuntimeException {
     
     public SourceLocator getSourceLocator() {
         return m_sourceLocator;
+    }
+
+    public boolean isLogged() {
+        return m_logged;
+    }
+
+    public void setLogged(boolean logged) {
+        m_logged = logged;
     }
 
     @Override

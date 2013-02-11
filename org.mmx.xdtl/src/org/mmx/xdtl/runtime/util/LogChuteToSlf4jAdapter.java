@@ -1,8 +1,9 @@
 package org.mmx.xdtl.runtime.util;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.apache.velocity.runtime.RuntimeServices;
 import org.apache.velocity.runtime.log.LogChute;
-import org.slf4j.Logger;
 
 public class LogChuteToSlf4jAdapter implements LogChute {
     private final Logger m_logger; 
@@ -17,47 +18,34 @@ public class LogChuteToSlf4jAdapter implements LogChute {
 
     @Override
     public boolean isLevelEnabled(int level) {
-        switch (level) {
-        case LogChute.TRACE_ID:
-            return m_logger.isTraceEnabled();
-        case LogChute.DEBUG_ID:
-            return m_logger.isDebugEnabled();
-        case LogChute.INFO_ID:
-            return m_logger.isInfoEnabled();
-        case LogChute.WARN_ID:
-            return m_logger.isWarnEnabled();
-        case LogChute.ERROR_ID:
-            return m_logger.isErrorEnabled();
-        }
-
-        return false;
+        return m_logger.isEnabledFor(logChuteLevelToLog4jLevel(level));
     }
 
     @Override
     public void log(int level, String msg) {
-        log(level, msg, null);
+        m_logger.log(logChuteLevelToLog4jLevel(level), msg);
     }
 
     @Override
     public void log(int level, String msg, Throwable t) {
-        switch (level) {
+        m_logger.log(logChuteLevelToLog4jLevel(level), msg, t);
+    }
+    
+    private Level logChuteLevelToLog4jLevel(int logChuteLevel) {
+        switch (logChuteLevel) {
         case LogChute.TRACE_ID:
-            m_logger.trace(msg, t);
-            break;
+            return Level.TRACE;
         case LogChute.DEBUG_ID:
-            m_logger.debug(msg, t);
-            break;
+            return Level.DEBUG;
         case LogChute.INFO_ID:
-            m_logger.info(msg, t);
-            break;
+            return Level.INFO;
         case LogChute.WARN_ID:
-            m_logger.warn(msg, t);
-            break;
+            return Level.WARN;
         case LogChute.ERROR_ID:
-            m_logger.error(msg, t);
-            break;
+            return Level.ERROR;
         default:
-            // ??
+            // never reached
+            return Level.INFO;
         }
     }
 }

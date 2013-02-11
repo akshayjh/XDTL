@@ -5,6 +5,7 @@ package org.mmx.xdtl.runtime.command;
 
 import java.lang.reflect.Constructor;
 
+import org.apache.log4j.Logger;
 import org.mmx.xdtl.model.Command;
 import org.mmx.xdtl.model.CommandList;
 import org.mmx.xdtl.model.XdtlException;
@@ -14,8 +15,6 @@ import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.ExpressionEvaluator;
 import org.mmx.xdtl.runtime.RuntimeCommand;
 import org.mmx.xdtl.runtime.TypeConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
@@ -23,7 +22,7 @@ import com.google.inject.Inject;
  * @author vsi
  */
 public class ForCmdBuilder implements CommandBuilder {
-    private final Logger m_logger = LoggerFactory.getLogger(ForCmdBuilder.class);
+    private static final Logger logger = Logger.getLogger(ForCmdBuilder.class);
     private final ExpressionEvaluator m_exprEval;
     private final TypeConverter m_typeConv;
 
@@ -48,7 +47,7 @@ public class ForCmdBuilder implements CommandBuilder {
 
         Object obj = m_exprEval.evaluate(context, elem.getIterable());
         if (obj != null) {
-            m_logger.debug("Iterable is of class=" + obj.getClass().getName());
+            logger.debug("Iterable is of class=" + obj.getClass().getName());
         }
 
         if (!(obj instanceof Iterable)) {

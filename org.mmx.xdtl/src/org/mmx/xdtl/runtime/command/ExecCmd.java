@@ -2,17 +2,16 @@ package org.mmx.xdtl.runtime.command;
 
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.OsProcessException;
 import org.mmx.xdtl.runtime.RuntimeCommand;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 public class ExecCmd implements RuntimeCommand {
-    private final Logger m_logger = LoggerFactory.getLogger(ExecCmd.class);
+    private static final Logger logger = Logger.getLogger(ExecCmd.class);
     private final String m_shell;
     private final String m_cmd;
     private final String m_targetVarName;
@@ -34,7 +33,7 @@ public class ExecCmd implements RuntimeCommand {
     
     @Override
     public void run(Context context) throws Exception {
-        m_logger.debug(String.format("Exec: shell='%s', cmd='%s', target='%s'",
+        logger.debug(String.format("Exec: shell='%s', cmd='%s', target='%s'",
                 m_shell, m_cmd, m_targetVarName));
 
         List<String> args = m_argumentListBuilder.build(m_cmd, false);

@@ -7,18 +7,17 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
 
+import org.apache.log4j.Logger;
 import org.mmx.xdtl.model.Package;
 import org.mmx.xdtl.model.XdtlException;
 import org.mmx.xdtl.parser.Parser;
 import org.mmx.xdtl.services.PathList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 public class PackageLoader {
-    private static final Logger logger = LoggerFactory.getLogger(PackageLoader.class);
+    private static final Logger logger = Logger.getLogger("xdtl.rt.packageLoader");
 
     private HashMap<URL, Package> m_cache = new HashMap<URL, Package>();
     private PathList m_libraryPath;
@@ -31,11 +30,14 @@ public class PackageLoader {
     }
     
     public Package loadPackage(URL baseUrl, String urlSpec) throws Exception {
-        logger.debug("loadPackage: baseUrl={}, urlSpec={}", baseUrl, urlSpec);
+        if (logger.isTraceEnabled()) {
+            logger.trace("loadPackage: baseUrl=" + baseUrl + ", urlSpec=" + urlSpec);
+        }
+
         URL pkgUrl = new URL(baseUrl, urlSpec);
         Package pkg = m_cache.get(pkgUrl);
         if (pkg != null) {
-            logger.debug("loadPackage: package in cache");
+            logger.trace("loadPackage: package in cache");
             return pkg;
         }
         
@@ -62,7 +64,10 @@ public class PackageLoader {
     }
 
     private Package tryLoadPackage(URL pkgUrl) throws IOException {
-        logger.debug("tryLoadPackage: loading from '{}'", pkgUrl);
+        if (logger.isTraceEnabled()) {
+            logger.trace("tryLoadPackage: loading from '" + pkgUrl + "'");
+        }
+
         URLConnection cnn = openConnection(pkgUrl);
         return cnn != null ? m_parser.parse(cnn) : null;
     }
@@ -73,7 +78,7 @@ public class PackageLoader {
             cnn.connect();
             return cnn;
         } catch (FileNotFoundException e) {
-            logger.debug("openConnection: file not found");
+            logger.trace("openConnection: file not found");
         }
         
         return null;

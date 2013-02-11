@@ -9,7 +9,6 @@ import java.sql.Types;
 import org.mmx.xdtl.db.Column;
 
 public class StringConverter implements IConverter<String> {
-	//private final Logger m_logger = LoggerFactory.getLogger(StringConverter.class);
 	
     @Override
     public Object convert(String str, Column column) throws SQLException {
@@ -26,7 +25,6 @@ public class StringConverter implements IConverter<String> {
         case Types.NCLOB:
         case Types.NVARCHAR:
         case Types.VARCHAR:
-			//m_logger.debug("No parsing needed for " + str + " for column " + column.getName());
             return str;
         
         case Types.BIGINT:
@@ -40,7 +38,6 @@ public class StringConverter implements IConverter<String> {
         case Types.ROWID:
         case Types.SMALLINT:
         case Types.TINYINT:
-			//m_logger.debug("About to parse " + str + " for column " + column.getName());
             str = str.replace(',', '.');
 			return Double.parseDouble(str);
         case Types.DATE:

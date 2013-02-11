@@ -4,13 +4,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 
 public class Version {
     private static final String PROPERTIES_RESOURCE = "Version.properties";
-        
-    private final Logger m_logger = LoggerFactory.getLogger(Version.class);
+    private static final Logger logger = Logger.getLogger("xdtl.version");
     
     private String m_specificationVersion;
     private String m_specificationTitle;
@@ -47,7 +45,7 @@ public class Version {
                 try {
                     is.close();
                 } catch (IOException e) {
-                    m_logger.warn("Failed to close input stream", e);
+                    logger.warn("Failed to close input stream", e);
                 }
             }
             

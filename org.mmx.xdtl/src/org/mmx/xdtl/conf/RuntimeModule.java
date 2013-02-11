@@ -170,9 +170,10 @@ public class RuntimeModule extends AbstractModule {
         bind(OsArgListBuilder.class).to(OsArgListBuilderImpl.class);
         bind(CommandMappingSet.class).toInstance(m_commandMappings);
         bind(VariableNameValidator.class);
-        bind(StringShortener.class);
+        bind(StringShortener.class).in(Singleton.class);
+        bind(StringShortener.class).annotatedWith(Names.named("SqlShortener")).toInstance(new StringShortener(60));
         bind(UriSchemeParser.class).in(Singleton.class);
-        
+
         String homeDirUrl = new File(m_properties.getProperty("home")).toURI().toString();
         if (!homeDirUrl.endsWith("/")) {
             homeDirUrl += "/";

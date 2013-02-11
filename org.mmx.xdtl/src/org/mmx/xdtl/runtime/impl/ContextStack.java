@@ -2,39 +2,39 @@ package org.mmx.xdtl.runtime.impl;
 
 import java.util.ArrayList;
 
+import org.apache.log4j.MDC;
 import org.mmx.xdtl.runtime.Context;
-import org.slf4j.MDC;
 
 public class ContextStack {
-    private final ArrayList<Context> m_contextStack = new ArrayList<Context>();
+    private final ArrayList<Context> m_stack = new ArrayList<Context>();
 
     public ContextStack(Context globalContext) {
         push(globalContext);
     }
 
     public Context getGlobalContext() {
-        return m_contextStack.get(0);
+        return m_stack.get(0);
     }
 
     public void push(Context context) {
-        m_contextStack.add(context);
+        m_stack.add(context);
         updateMDC();
     }
 
     public Context pop() {
-        Context result = m_contextStack.remove(m_contextStack.size() - 1);
+        Context result = m_stack.remove(m_stack.size() - 1);
         updateMDC();
         return result;
     }
 
     public Context getTop() {
-        if (m_contextStack.size() == 0) return null;
-        return m_contextStack.get(m_contextStack.size() - 1);
+        if (m_stack.size() == 0) return null;
+        return m_stack.get(m_stack.size() - 1);
     }    
 
     public PackageContext getTopPackageContext() {
-        for (int i = m_contextStack.size() - 1; i > 0; i--) {
-            Context context = m_contextStack.get(i);
+        for (int i = m_stack.size() - 1; i > 0; i--) {
+            Context context = m_stack.get(i);
             if (context instanceof PackageContext) {
                 return (PackageContext) context;
             }
@@ -44,8 +44,8 @@ public class ContextStack {
     }
     
     public TaskContext getTopTaskContext() {
-        for (int i = m_contextStack.size() - 1; i > 0; i--) {
-            Context context = m_contextStack.get(i);
+        for (int i = m_stack.size() - 1; i > 0; i--) {
+            Context context = m_stack.get(i);
             if (context instanceof TaskContext) {
                 return (TaskContext) context;
             }
@@ -55,7 +55,7 @@ public class ContextStack {
     }
 
     public int size() {
-        return m_contextStack.size();
+        return m_stack.size();
     }
     
     private void updateMDC() {
@@ -76,5 +76,12 @@ public class ContextStack {
         MDC.put("xdtlTask", taskName);
         MDC.put("xdtlPackage", packageName);
         MDC.put("xdtlStep", "");
+    }
+
+    public void writeTrace(StringBuilder buf) {
+        for (int i = m_stack.size() - 1; i > 0; i--) {
+            Context ctx = m_stack.get(i);
+            buf.append(i).append(". ").append(ctx.getTraceLine()).append('\n');
+        }
     }
 }

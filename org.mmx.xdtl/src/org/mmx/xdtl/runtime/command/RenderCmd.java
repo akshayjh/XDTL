@@ -4,6 +4,7 @@ import java.io.StringWriter;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
@@ -11,14 +12,13 @@ import org.mmx.xdtl.model.Variable;
 import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.RuntimeCommand;
 import org.mmx.xdtl.services.PathList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 public class RenderCmd implements RuntimeCommand {
-    private final Logger m_logger = LoggerFactory.getLogger(RenderCmd.class);
+    private static final Logger logger = Logger.getLogger(RenderCmd.class);
+
     private final String m_template;
     private final Mappings m_source;
     private final Object m_rowset;
@@ -40,7 +40,7 @@ public class RenderCmd implements RuntimeCommand {
 
     @Override
     public void run(Context context) throws Throwable {
-        m_logger.info(String.format("render: template='%s', source='%s'", m_template, m_source));
+        logger.info(String.format("render: template='%s', source='%s'", m_template, m_source));
         initVelocityEngine(context);
         
         Template t = m_velocity.getTemplate(m_template);
@@ -73,7 +73,7 @@ public class RenderCmd implements RuntimeCommand {
         }
         
         result = result.trim();
-        m_logger.debug("render result: {}", result);
+        logger.debug("render result: " + result);
         context.assignVariable(m_targetVarName, result);
     }
 

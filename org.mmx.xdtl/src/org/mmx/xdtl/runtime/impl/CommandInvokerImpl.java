@@ -1,5 +1,7 @@
 package org.mmx.xdtl.runtime.impl;
 
+import org.apache.log4j.Logger;
+import org.apache.log4j.MDC;
 import org.mmx.xdtl.model.Command;
 import org.mmx.xdtl.model.SourceLocator;
 import org.mmx.xdtl.model.XdtlException;
@@ -8,14 +10,11 @@ import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.RuntimeCommand;
 import org.mmx.xdtl.runtime.XdtlError;
 import org.mmx.xdtl.services.Injector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 import com.google.inject.Inject;
 
 public class CommandInvokerImpl implements CommandInvoker {
-    private static final Logger logger = LoggerFactory.getLogger(CommandInvokerImpl.class);
+    private static final Logger logger = Logger.getLogger("xdtl.rt.commandInvoker");
     private final CommandMappingSet m_mappings;
     private final Injector m_injector;
     
@@ -59,14 +58,17 @@ public class CommandInvokerImpl implements CommandInvoker {
                 
                 m_injector.injectMembers(runtimeCmd);
     
-                logger.debug("{} running command '{}'", cmd.getSourceLocator(),
-                        runtimeCmd.getClass().getName());
+                if (logger.isTraceEnabled()) {
+                    logger.trace("running command '" + runtimeCmd.getClass().getName() + "'");
+                }
                 
                 runtimeCmd.run(context);
             } catch (XdtlExitException e) {
                 throw e;
             } catch (XdtlError e) {
                 throw new XdtlException(e.getMessage(), cmd.getSourceLocator(), e);
+            } catch (XdtlException e) {
+                throw e;
             } catch (Throwable t) {
                 throw new XdtlException("Command '" + cmd.getClass().getName()
                         + "' failed", cmd.getSourceLocator(), t);

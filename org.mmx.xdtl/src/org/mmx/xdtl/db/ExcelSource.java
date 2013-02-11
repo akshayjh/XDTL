@@ -3,17 +3,16 @@ package org.mmx.xdtl.db;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ExcelSource implements Source {
-    private static final Logger logger = LoggerFactory.getLogger(ExcelSource.class);
+    private static final Logger logger = Logger.getLogger("xdtl.rt.db.excelSource");
     
     private Workbook m_workbook;
     private Sheet m_sheet;

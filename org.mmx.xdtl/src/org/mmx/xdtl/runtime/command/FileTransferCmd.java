@@ -2,17 +2,17 @@ package org.mmx.xdtl.runtime.command;
 
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.OsProcessException;
 import org.mmx.xdtl.runtime.RuntimeCommand;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 public class FileTransferCmd implements RuntimeCommand {
-    private final Logger m_logger = LoggerFactory.getLogger(FileTransferCmd.class);
+    private static final Logger logger = Logger.getLogger(FileTransferCmd.class);
+
     private final String m_cmd;
     private final String m_source;
     private final String m_target;
@@ -34,7 +34,7 @@ public class FileTransferCmd implements RuntimeCommand {
 
     @Override
     public void run(Context context) throws Exception {
-        m_logger.debug(m_cmdName + ": cmd='" + m_cmd +
+        logger.debug(m_cmdName + ": cmd='" + m_cmd +
                 "', source='" + m_source +
                 "', target='" + m_target +
                 "', overwrite='" + m_overwrite + "'");

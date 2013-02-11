@@ -1,5 +1,6 @@
 package org.mmx.xdtl.runtime.impl;
 
+import org.mmx.xdtl.model.SourceLocator;
 import org.mmx.xdtl.model.Task;
 import org.mmx.xdtl.model.Variable;
 import org.mmx.xdtl.runtime.ConnectionManager;
@@ -37,5 +38,12 @@ public class TaskContext extends Context {
         }
         
         return m_typeConverter.toBoolean(var.getValue());
+    }
+
+    @Override
+    public String getTraceLine() {
+        SourceLocator loc = m_task.getSourceLocator();
+        return "task: " + m_task.getName() + "@" + loc.getDocumentUrl() + ":"
+                + loc.getLineNumber();
     }
 }

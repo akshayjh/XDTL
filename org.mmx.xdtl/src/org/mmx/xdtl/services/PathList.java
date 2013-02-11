@@ -9,12 +9,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.mmx.xdtl.model.XdtlException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PathList {
-    private static final Logger logger = LoggerFactory.getLogger(PathList.class); 
+    private static final Logger logger = Logger.getLogger("xdtl.rt.pathList"); 
     private static final String PATH_SEPARATOR = ",";
     
     private ArrayList<URL> m_roots = new ArrayList<URL>();
@@ -47,7 +46,10 @@ public class PathList {
         for (URL root: m_roots) {
             if (!root.getProtocol().equalsIgnoreCase("file")) continue;
     
-            logger.debug("forEachFile: directory={}", root.getPath());
+            if (logger.isTraceEnabled()) {
+                logger.trace("forEachFile: directory=" + root.getPath());
+            }
+
             File directory = new File(root.getPath());
             if (!directory.exists() || !directory.isDirectory()) continue;
             File[] files = directory.listFiles(filter);
@@ -95,7 +97,10 @@ public class PathList {
             buf.setLength(buf.length() - 1);
         }
         
-        logger.debug("toCsv: result={}", buf);
+        if (logger.isTraceEnabled()) {
+            logger.trace("toCsv: result=" + buf);
+        }
+
         return buf.toString();
     }
 

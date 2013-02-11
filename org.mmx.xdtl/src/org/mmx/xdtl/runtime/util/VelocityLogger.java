@@ -1,10 +1,10 @@
 package org.mmx.xdtl.runtime.util;
 
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 
 public class VelocityLogger extends LogChuteToSlf4jAdapter {
 
     public VelocityLogger() {
-        super(LoggerFactory.getLogger("velocity"));
+        super(Logger.getLogger("velocity"));
     }
 }
