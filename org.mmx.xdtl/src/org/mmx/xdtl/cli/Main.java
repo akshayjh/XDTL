@@ -16,12 +16,13 @@ import org.apache.log4j.MDC;
 import org.mmx.xdtl.conf.XdtlModule;
 import org.mmx.xdtl.model.XdtlException;
 import org.mmx.xdtl.runtime.Engine;
+import org.mmx.xdtl.runtime.impl.XdtlMdc;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 public class Main {
-    private static final Logger m_logger = Logger.getLogger("xdtl.main");
+    private static final Logger logger = Logger.getLogger("xdtl.main");
     private static final String GLOBALS_NAME = "globals.xml";
     private static final String CONFIG_NAME = "xdtlrt.xml";
     
@@ -54,13 +55,30 @@ public class Main {
             Map<String,Object> globals = loadGlobals(homeDir);
             globals.putAll(argMap);
             injector.getInstance(Engine.class).run(taskUrl, Collections.<String, Object> emptyMap(), globals);
-            m_logger.info("done");
+            logger.info("done");
             System.exit(0);
         } catch (Throwable t) {
-            if (!(t instanceof XdtlException) || !((XdtlException)t).isLogged()) { 
-                m_logger.error("execution failed", t);
-            }
+            logError(t);
             System.exit(-1);
+        }
+    }
+
+    private static void logError(Throwable t) {
+        if (t instanceof XdtlException) {
+            XdtlException e = (XdtlException) t;
+            if (e.isLogged()) return;
+
+            if (e.getCause() != null) {
+                t = e.getCause();
+            }
+            
+            XdtlMdc.setState("", e.getSourceLocator());
+        }
+
+        if (logger.isTraceEnabled()) {
+            logger.error("Execution failed", t);
+        } else {
+            logger.error(t.getMessage());
         }
     }
 
@@ -169,7 +187,7 @@ public class Main {
         try {
             is.close();
         } catch (IOException e) {
-            m_logger.warn("Failed to close input stream", e);
+            logger.warn("Failed to close input stream", e);
         }
     }
 

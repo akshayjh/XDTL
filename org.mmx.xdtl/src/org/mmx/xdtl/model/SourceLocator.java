@@ -32,4 +32,8 @@ public class SourceLocator {
         
         return m_tagName + '@' + m_documentUrl + ':' + m_lineNumber;
     }
+    
+    public boolean isNull() {
+        return this == NULL;
+    }
 }

@@ -1,7 +1,6 @@
 package org.mmx.xdtl.runtime.impl;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.MDC;
 import org.mmx.xdtl.model.Command;
 import org.mmx.xdtl.model.SourceLocator;
 import org.mmx.xdtl.model.XdtlException;
@@ -9,6 +8,7 @@ import org.mmx.xdtl.runtime.CommandBuilder;
 import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.RuntimeCommand;
 import org.mmx.xdtl.runtime.XdtlError;
+import org.mmx.xdtl.runtime.impl.XdtlMdc.MdcState;
 import org.mmx.xdtl.services.Injector;
 
 import com.google.inject.Inject;
@@ -28,19 +28,12 @@ public class CommandInvokerImpl implements CommandInvoker {
      * @see org.mmx.xdtl.runtime.CommandInvoker#invoke(org.mmx.xdtl.model.Command, org.mmx.xdtl.runtime.Context)
      */
     public void invoke(Command cmd, Context context) {
-        String oldStepName = (String) MDC.get("xdtlStep");
-        String oldDocument = (String) MDC.get("xdtlDocument");
-        String oldLineNo   = (String) MDC.get("xdtlLine");
+        MdcState mdcState = XdtlMdc.saveState();
         
         SourceLocator locator = cmd.getSourceLocator();
-        
         String stepName = locator.getTagName();
-        String documentUrl = locator.getDocumentUrl();
+        XdtlMdc.setState(stepName, locator);
 
-        MDC.put("xdtlStep", stepName == null ? "" : stepName);
-        MDC.put("xdtlDocument", documentUrl == null ? "" : documentUrl);
-        MDC.put("xdtlLine", Integer.toString(locator.getLineNumber()));
-        
         try {
             CommandMapping mapping = m_mappings.findByModelClass(cmd.getClass());
             if (mapping == null) {
@@ -67,16 +60,17 @@ public class CommandInvokerImpl implements CommandInvoker {
                 throw e;
             } catch (XdtlError e) {
                 throw new XdtlException(e.getMessage(), cmd.getSourceLocator(), e);
-            } catch (XdtlException e) {
+            } catch (XdtlException e) {                
+                if (e.getSourceLocator().isNull()) {
+                    e.setSourceLocator(cmd.getSourceLocator());
+                }
                 throw e;
             } catch (Throwable t) {
                 throw new XdtlException("Command '" + cmd.getClass().getName()
                         + "' failed", cmd.getSourceLocator(), t);
             }
         } finally {
-            MDC.put("xdtlStep", oldStepName != null ? oldStepName : "");
-            MDC.put("xdtlDocument", oldDocument != null ? oldDocument : "");
-            MDC.put("xdtlLine", oldLineNo != null ? oldLineNo : "");
+            XdtlMdc.restoreState(mdcState);
         }
     }
 }

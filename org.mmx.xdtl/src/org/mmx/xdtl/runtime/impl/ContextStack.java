@@ -2,7 +2,6 @@ package org.mmx.xdtl.runtime.impl;
 
 import java.util.ArrayList;
 
-import org.apache.log4j.MDC;
 import org.mmx.xdtl.runtime.Context;
 
 public class ContextStack {
@@ -18,12 +17,10 @@ public class ContextStack {
 
     public void push(Context context) {
         m_stack.add(context);
-        updateMDC();
     }
 
     public Context pop() {
         Context result = m_stack.remove(m_stack.size() - 1);
-        updateMDC();
         return result;
     }
 
@@ -58,26 +55,6 @@ public class ContextStack {
         return m_stack.size();
     }
     
-    private void updateMDC() {
-        String taskName = "";
-        String packageName = "";
-        
-        Context top = getTop();
-        
-        if (top instanceof TaskContext) {
-            taskName = ((TaskContext) top).getTask().getName();
-        }
-        
-        PackageContext pkgCtx = getTopPackageContext();
-        if (pkgCtx != null) {
-            packageName = pkgCtx.getPackage().getName();
-        }
-        
-        MDC.put("xdtlTask", taskName);
-        MDC.put("xdtlPackage", packageName);
-        MDC.put("xdtlStep", "");
-    }
-
     public void writeTrace(StringBuilder buf) {
         for (int i = m_stack.size() - 1; i > 0; i--) {
             Context ctx = m_stack.get(i);

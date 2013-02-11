@@ -9,7 +9,7 @@ package org.mmx.xdtl.model;
 public class XdtlException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
-    private final SourceLocator m_sourceLocator;
+    private SourceLocator m_sourceLocator;
     private boolean m_logged;
 
     /**
@@ -49,8 +49,8 @@ public class XdtlException extends RuntimeException {
      * @param arg1
      */
     public XdtlException(String arg0, SourceLocator sourceLocator) {
-        super(arg0);
-        m_sourceLocator = sourceLocator;
+        super(arg0);        
+        setSourceLocator(sourceLocator);
     }
     
     /**
@@ -64,6 +64,13 @@ public class XdtlException extends RuntimeException {
     
     public SourceLocator getSourceLocator() {
         return m_sourceLocator;
+    }
+
+    public void setSourceLocator(SourceLocator sourceLocator) {
+        if (sourceLocator == null) {
+            throw new NullPointerException("Sourcelocator cannot be null");
+        }
+        m_sourceLocator = sourceLocator;
     }
 
     public boolean isLogged() {

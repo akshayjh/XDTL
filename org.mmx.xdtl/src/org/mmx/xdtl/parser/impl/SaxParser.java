@@ -9,8 +9,10 @@ import javax.xml.parsers.SAXParser;
 
 import org.apache.log4j.Logger;
 import org.mmx.xdtl.model.Package;
+import org.mmx.xdtl.model.SourceLocator;
 import org.mmx.xdtl.model.XdtlException;
 import org.mmx.xdtl.parser.Parser;
+import org.xml.sax.SAXParseException;
 
 import com.google.inject.Inject;
 
@@ -54,6 +56,9 @@ public class SaxParser implements Parser {
             pkg.setUrl(url);
             logger.trace("Parsed package '" + pkg.getName() + "' from '" + url + "'");
             return pkg;
+        } catch (SAXParseException e) {
+            SourceLocator locator = new SourceLocator(url.toString(), e.getLineNumber(), "");
+            throw new XdtlException("", locator, e);
         } catch (Exception e) {
             throw new XdtlException(e);
         }        

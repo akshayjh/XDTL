@@ -34,6 +34,7 @@ import org.mmx.xdtl.runtime.Engine;
 import org.mmx.xdtl.runtime.EngineControl;
 import org.mmx.xdtl.runtime.ExpressionEvaluator;
 import org.mmx.xdtl.runtime.TypeConverter;
+import org.mmx.xdtl.runtime.impl.XdtlMdc.MdcState;
 import org.mmx.xdtl.runtime.util.ContextToBindingsAdapter;
 import org.mmx.xdtl.services.PathList;
 import org.mmx.xdtl.services.PathList.ForEachCallback;
@@ -102,6 +103,8 @@ public class EngineImpl implements Engine, EngineControl {
     @Override
     public void run(Package pkg, String taskname, Map<String, Object> args,
             Map<String, Object> globals) {
+        
+        XdtlMdc.setState(pkg.getName(), null, null, pkg.getSourceLocator());
         m_contextStack = new ContextStack(createGlobalContext(globals));
         try {
             runStartupScripts();
@@ -134,27 +137,33 @@ public class EngineImpl implements Engine, EngineControl {
                     + "' was not found in package '" + pkg.getName() + "'");
         }
 
-        PackageContext packageContext = m_contextStack.getTopPackageContext();
-        TaskRunResult result = null;
-
-        if (packageContext != null && packageContext.getPackage() == pkg) {
-            // same package
-            result = runTask(task, args);
-        } else {
-            // different or new package
-            packageContext = createPackageContext(pkg, args);
-            m_contextStack.push(packageContext);
-            try {
+        MdcState mdcState = XdtlMdc.saveState();
+        try {
+            XdtlMdc.setState(pkg.getName(), task.getName(), null, task.getSourceLocator());
+            PackageContext packageContext = m_contextStack.getTopPackageContext();
+            TaskRunResult result = null;
+    
+            if (packageContext != null && packageContext.getPackage() == pkg) {
+                // same package
                 result = runTask(task, args);
-            } finally {
-                m_contextStack.pop();
+            } else {
+                // different or new package
+                packageContext = createPackageContext(pkg, args);
+                m_contextStack.push(packageContext);
+                try {
+                    result = runTask(task, args);
+                } finally {
+                    m_contextStack.pop();
+                }
             }
-        }
-
-        if (result.getExitRuntime()) {
-            logger.info("Package '" + pkg.getName()
-                    + "' terminated runtime in task '" + task.getName() + "'");
-            System.exit(result.getExitCode());
+    
+            if (result.getExitRuntime()) {
+                logger.info("Package '" + pkg.getName()
+                        + "' terminated runtime in task '" + task.getName() + "'");
+                System.exit(result.getExitCode());
+            }
+        } finally {
+            XdtlMdc.restoreState(mdcState);
         }
     }
 
@@ -194,22 +203,6 @@ public class EngineImpl implements Engine, EngineControl {
         runTaskInContext(context, null);
     }
 
-    private URL getTaskRefUrl(String taskRef) {
-        URL url;
-        
-        Package currentPkg = getCurrentPackage();
-        if (currentPkg == null) {
-            throw new XdtlException("No current package!");
-        }
-        
-        try {
-            url = new URL(currentPkg.getUrl(), taskRef);
-        } catch (MalformedURLException e) {
-            throw new XdtlException("Invalid url: '" + taskRef + "'", e);
-        }
-        return url;
-    }
-    
     /**
      * Execute a list of commands in current task context.
      */
@@ -230,7 +223,8 @@ public class EngineImpl implements Engine, EngineControl {
                 logger.trace("command list execution stopped");
                 throw e;
             } catch (Throwable t) {
-                logError("", cmd.getSourceLocator(), t);
+                logError("", cmd.getSourceLocator().getTagName(),
+                        cmd.getSourceLocator(), t);
                 
                 if (runErrorHandler(taskContext.getOnErrorRef(), t) && taskContext.isOnErrorResumeEnabled()) {
                     // Clear error info before resuming
@@ -271,30 +265,36 @@ public class EngineImpl implements Engine, EngineControl {
     }
     
     private void runPackage(Package pkg, Map<String, Object> args) {
-        logger.info("Running package '" + pkg.getName() + "'");
-        
-        PackageContext packageContext = createPackageContext(pkg, args);
-        m_contextStack.push(packageContext);
-
+        MdcState mdcState = XdtlMdc.saveState();
+        XdtlMdc.setState(pkg.getName(), "", "", pkg.getSourceLocator());
         try {
-            for (Task task : pkg.getTasks()) {
-            	TaskRunResult result = runPackageTask(pkg, packageContext, task);
-            	
-                if (result.getExit()) {
-                    if (result.getExitRuntime()) {
-                        logger.info("Package '" + pkg.getName()
-                                + "' terminated runtime in task '"
-                                + task.getName() + "'");
-                        System.exit(result.getExitCode());
+            logger.info("Running package '" + pkg.getName() + "'");
+            
+            PackageContext packageContext = createPackageContext(pkg, args);
+            m_contextStack.push(packageContext);
+    
+            try {
+                for (Task task : pkg.getTasks()) {
+                	TaskRunResult result = runPackageTask(pkg, packageContext, task);
+                	
+                    if (result.getExit()) {
+                        if (result.getExitRuntime()) {
+                            logger.info("Package '" + pkg.getName()
+                                    + "' terminated runtime in task '"
+                                    + task.getName() + "'");
+                            System.exit(result.getExitCode());
+                        }
+    
+                        logger.trace("Package '" + pkg.getName()
+                                + "' was terminated by 'exit'");
+                        return;
                     }
-
-                    logger.trace("Package '" + pkg.getName()
-                            + "' was terminated by 'exit'");
-                    return;
                 }
+            } finally {
+                m_contextStack.pop();
             }
         } finally {
-            m_contextStack.pop();
+            XdtlMdc.restoreState(mdcState);
         }
     }
 
@@ -307,10 +307,12 @@ public class EngineImpl implements Engine, EngineControl {
      */
     private TaskRunResult runPackageTask(Package pkg, PackageContext packageContext,
             Task task) {
+        MdcState mdcState = XdtlMdc.saveState();
+        XdtlMdc.setState(pkg.getName(), task.getName(), "", task.getSourceLocator());
         try {
             return runTask(task, null);
         } catch (Throwable t) {
-            logError("", pkg.getSourceLocator(), t);
+            logError("", "", pkg.getSourceLocator(), t);
             if (runErrorHandler(packageContext.getOnErrorRef(), t) 
             		&& packageContext.isResumeOnErrorEnabled()) {
 
@@ -327,6 +329,8 @@ public class EngineImpl implements Engine, EngineControl {
                 
                 throw (RuntimeException) t;
             }
+        } finally {
+            XdtlMdc.restoreState(mdcState);
         }
     }
 
@@ -394,7 +398,8 @@ public class EngineImpl implements Engine, EngineControl {
             m_errorTaskRunning = true;
             run(pkg, taskName, null);
         } catch (Throwable t) {
-            logger.error("Error handler '" + taskDisplayName + "' failed", t);
+            logError("Error handler '" + taskDisplayName + "' failed", "",
+                    pkg.getSourceLocator(), t);
         } finally {
             m_errorTaskRunning = false;
         }
@@ -405,15 +410,11 @@ public class EngineImpl implements Engine, EngineControl {
 
     private void runOnOpenHandler(String taskRef, Connection cnn) {
         logger.trace("Starting onOpen handler: " + taskRef);
-        URL url = getTaskRefUrl(taskRef);
-        String taskName = url.getRef();
-
         HashMap<String, Object> args = new HashMap<String, Object>();
         args.put(TASK_DEFAULT_CONNECTION_ARG_NAME, cnn);
-        
-        runTask(parse(getCurrentPackage().getUrl(), taskRef), taskName, args);
+        call(taskRef, args);
     }
-    
+
     private void initErrorHandlerVariables(Throwable t) {
         ErrorProperties errorProps = new ErrorProperties(t);
         initErrorHandlerVariables(m_contextStack.getGlobalContext(), errorProps);
@@ -718,14 +719,20 @@ public class EngineImpl implements Engine, EngineControl {
         }
     }
 
-    private void logError(String msg, SourceLocator sourceLocator, Throwable t) {
+    private void logError(String msg, String step, SourceLocator sourceLocator, Throwable t) {
         if (t instanceof XdtlException) {
             XdtlException e = (XdtlException) t;
             if (e.isLogged()) return;
             e.setLogged(true);
+            if (e.getSourceLocator() != null) {
+                sourceLocator = e.getSourceLocator();
+            }
         }
 
+        MdcState state = XdtlMdc.saveState();
+        XdtlMdc.setState(step, sourceLocator);
         logger.error(createErrorMessage(t));
+        XdtlMdc.restoreState(state);
     }
 
     private String createErrorMessage(Throwable t) {
