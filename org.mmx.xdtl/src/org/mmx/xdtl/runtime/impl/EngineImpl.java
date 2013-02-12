@@ -731,12 +731,23 @@ public class EngineImpl implements Engine, EngineControl {
 
         MdcState state = XdtlMdc.saveState();
         XdtlMdc.setState(step, sourceLocator);
-        logger.error(createErrorMessage(t));
+
+        String errorMsg = createErrorMessage(msg, t);
+        if (logger.isTraceEnabled()) {
+            logger.error(errorMsg, t);
+        } else {
+            logger.error(errorMsg);
+        }
+
         XdtlMdc.restoreState(state);
     }
 
-    private String createErrorMessage(Throwable t) {
+    private String createErrorMessage(String msg, Throwable t) {
         StringBuilder buf = new StringBuilder();
+        if (msg != null && msg.length() > 0) {
+            buf.append(msg).append(": ");
+        }
+
         buf.append(t.getMessage());
         buf.append("\nXDTL context stack:\n");
         m_contextStack.writeTrace(buf);
