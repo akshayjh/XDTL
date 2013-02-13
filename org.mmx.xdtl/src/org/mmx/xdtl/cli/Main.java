@@ -68,13 +68,17 @@ public class Main {
             XdtlException e = (XdtlException) t;
             if (e.isLogged()) return;
 
-            if (e.getCause() != null) {
-                t = e.getCause();
-            }
-            
             XdtlMdc.setState("", e.getSourceLocator());
         }
 
+        String msg = t.getMessage();
+        if (msg == null || msg.length() == 0) {
+            Throwable cause = t.getCause();
+            if (cause != null) {
+                t = cause;
+            }
+        }
+        
         if (logger.isTraceEnabled()) {
             logger.error("Execution failed", t);
         } else {

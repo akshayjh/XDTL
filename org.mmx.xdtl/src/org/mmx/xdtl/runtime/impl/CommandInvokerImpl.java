@@ -66,8 +66,7 @@ public class CommandInvokerImpl implements CommandInvoker {
                 }
                 throw e;
             } catch (Throwable t) {
-                throw new XdtlException("Command '" + cmd.getClass().getName()
-                        + "' failed", cmd.getSourceLocator(), t);
+                throw new XdtlException(cmd.getSourceLocator(), t);
             }
         } finally {
             XdtlMdc.restoreState(mdcState);

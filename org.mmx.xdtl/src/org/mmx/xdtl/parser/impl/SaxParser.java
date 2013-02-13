@@ -58,7 +58,7 @@ public class SaxParser implements Parser {
             return pkg;
         } catch (SAXParseException e) {
             SourceLocator locator = new SourceLocator(url.toString(), e.getLineNumber(), "");
-            throw new XdtlException("", locator, e);
+            throw new XdtlException(locator, e);
         } catch (Exception e) {
             throw new XdtlException(e);
         }        

@@ -748,7 +748,15 @@ public class EngineImpl implements Engine, EngineControl {
             buf.append(msg).append(": ");
         }
 
-        buf.append(t.getMessage());
+        String errmsg = t.getMessage();
+        if (errmsg == null || errmsg.length() == 0) {
+            t = t.getCause();
+            if (t != null) {
+                errmsg = t.getMessage();
+            }
+        }
+
+        buf.append(errmsg);
         buf.append("\nXDTL context stack:\n");
         m_contextStack.writeTrace(buf);
         return buf.toString();

@@ -38,7 +38,7 @@ public class SendCmd implements RuntimeCommand {
         boolean targetIsVariable = m_variableNameValidator.isValidVariableName(m_target);
 
         if (logger.isDebugEnabled()) {
-            logger.debug(String.format("source='%s', target='%s'", m_source, m_target));
+            logger.debug(String.format("source=%s, target=%s", m_source, m_target));
         }
         
         if (targetIsVariable) {

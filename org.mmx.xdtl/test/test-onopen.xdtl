@@ -3,16 +3,16 @@
 	Test onopen attribute on a connection.
  -->
 <package name="test-onopen" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd" xmlns="http://xdtl.org/xdtl">
-  <connection name="test" type="DB" onopen="#onopen">jdbc:postgresql://localhost/test?user=postgres&amp;password=postgres</connection>
+  <connection name="test" type="DB" onopen="#onopen">$testdb</connection>
   <tasks>
     <task name="first" connection="$test">
       <steps>
-        <query source="select count(*) from call"/>
+        <query source="select count(*) from dual"/>
       </steps>
     </task>
     <task name="onopen">
       <steps>
-        <query source="select count(*) from call"/>
+        <query source="select count(*) from dual"/>
       </steps>
     </task>
   </tasks>

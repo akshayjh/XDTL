@@ -3,12 +3,12 @@
 	Fetch element test.
  -->
 <package name="test-fetch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd" xmlns="http://xdtl.org/xdtl">
-  <variable name="table">test</variable>
+  <variable name="table">vahur_test</variable>
   <connection name="conn" type="DB">$testdb</connection>
   <tasks>
     <task name="first" connection="$conn">
       <steps>
-        <fetch source="select * from $table" target="test2" encoding="UTF-8" overwrite="1" connection="$conn" destination="$conn"/>
+        <fetch source="select * from $table" target="vahur_test2" encoding="UTF-8" overwrite="1" connection="$conn" destination="$conn"/>
         <!-- <read source="/temp/test.csv" type="CSV" target="$table" overwrite="1"/> -->
       </steps>
     </task>
