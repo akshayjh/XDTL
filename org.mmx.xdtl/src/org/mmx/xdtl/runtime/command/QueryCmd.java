@@ -23,7 +23,7 @@ public class QueryCmd implements RuntimeCommand {
     private final String m_sqlStatement;
     private final String m_target;
     private final List<Object> m_params;
-    private StringShortener m_shortener;
+    private StringShortener m_sqlShortener;
     
     public QueryCmd(JdbcConnection connection, String sqlStatement, String target, List<Object> params) {
         m_connection = connection;
@@ -39,21 +39,21 @@ public class QueryCmd implements RuntimeCommand {
         
         if (!logger.isDebugEnabled()) {
             logLevel = Level.INFO;
-            logSql = m_shortener.shorten(m_sqlStatement);
+            logSql = m_sqlShortener.shorten(m_sqlStatement);
         }
 
-        logger.log(logLevel, "sql='" + logSql);
+        logger.log(logLevel, "sql=" + logSql);
 
         Object result;
         String resultName;
 
         if (m_target != null && m_target.length() > 0) {
+            result = executeStatementReturnScalar();
+            resultName = "result";
+            context.assignVariable(m_target, result);
+        } else {
             result = executeStatement();
             resultName = "rowcount";
-        } else {
-            result = executeStatementReturnScalar();
-            context.assignVariable(m_target, result);
-            resultName = "result";
         }
         
         logger.log(logLevel, resultName + "=" + result);
@@ -118,8 +118,8 @@ public class QueryCmd implements RuntimeCommand {
         }
     }
     
-    @Inject @Named("SqlShortener")
-    protected void setStringShortener(StringShortener shortener) {
-        m_shortener = shortener;
+    @Inject
+    protected void setSqlShortener(@Named("SqlShortener") StringShortener sqlShortener) {
+        m_sqlShortener = sqlShortener;
     }
 }

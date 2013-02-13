@@ -8,8 +8,8 @@
     <task name="first" connection="$conn">
       <steps>
         <query source="select nvl(to_char(?, 'dd.mm.yyyy'), 'null') || ', ' || to_char(?) from dual" target="tmp">
-          <parameter name="p1" type="date">2011-02-01</parameter>
-          <parameter name="p2" type="double"></parameter>
+          <parameter name="p1" type="DATE">2011-02-01</parameter>
+          <parameter name="p2" type="DOUBLE">10</parameter>
         </query>
         <log msg="Query result=$tmp"/>
       </steps>
