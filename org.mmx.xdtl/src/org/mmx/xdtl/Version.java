@@ -53,7 +53,7 @@ public class Version {
             m_specificationVersion  = props.getProperty("xdtl.specification.version");
             m_specificationVendor   = props.getProperty("xdtl.specification.vendor");
             m_implementationTitle   = props.getProperty("xdtl.implementation.title");
-            m_implementationVersion = props.getProperty("xdtl.implementation.version.prefix") + ".00";
+            m_implementationVersion = "dev";
             m_implementationVendor  = props.getProperty("xdtl.implementation.vendor");
         }
     }
