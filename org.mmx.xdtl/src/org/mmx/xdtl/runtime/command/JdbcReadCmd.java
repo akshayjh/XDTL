@@ -129,7 +129,7 @@ public class JdbcReadCmd implements RuntimeCommand {
             } else {
                 logger.debug(String.format("source=%s, type=%s, target=%s," +
                 		" delimiter=%s, quote=%s, errors=%s, overwrite=%s," +
-                		" encoding=%s, header=%s, skip=%d, batch=%d" +
+                		" encoding=%s, header=%s, skip=%d, batch=%d",
                 		m_source, m_sourceType, m_target, m_delimiter, m_quote,
                 		m_errors, m_overwrite, m_encoding, m_header, m_skip,
                 		m_commitRowCount));
