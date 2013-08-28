@@ -12,12 +12,13 @@ public class SendHandler extends AbstractElementHandler {
     public Element endElement() {
         return m_elem;
     }
-
+    
     @Override
     public void startElement(Attributes attr) {
         m_elem = new Send(
                 attr.getStringValue("source"),
                 attr.getStringValue("target"),
-                attr.getStringValue("overwrite"));
+                attr.getStringValue("overwrite"),
+                attr.getStringValue("encoding"));
     }
 }

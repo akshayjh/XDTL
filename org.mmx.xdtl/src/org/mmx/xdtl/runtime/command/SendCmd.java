@@ -24,15 +24,17 @@ public class SendCmd implements RuntimeCommand {
     private final Logger  m_logger = LoggerFactory.getLogger(SendCmd.class);    
     private final Object  m_source;
     private final String  m_target;
+    private final String  m_encoding;
     private final boolean m_overwrite;
     private VariableNameValidator m_variableNameValidator;
     private StringShortener m_stringShortener;
     private UriSchemeParser m_uriSchemeParser;
     
-    public SendCmd(Object source, String target, Boolean overwrite) {
+    public SendCmd(Object source, String target, Boolean overwrite, String encoding) {
         m_source = source;
         m_target = target;
         m_overwrite = overwrite.booleanValue();
+        m_encoding = encoding;
     }
     
     @Override
@@ -54,8 +56,8 @@ public class SendCmd implements RuntimeCommand {
     }
 
     private void sendSourceToUrl() throws Exception {
-        Writer writer = new BufferedWriter(new OutputStreamWriter(openTargetForOutput()));
-
+        Writer writer = new BufferedWriter(new OutputStreamWriter(openTargetForOutput(), m_encoding));
+        
         try {
             writer.write("" + m_source);
         } finally {

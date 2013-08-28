@@ -27,21 +27,22 @@ public class SendCmdBuilder implements CommandBuilder {
 
     @Override
     public <T extends RuntimeCommand> RuntimeCommand build(Context context,
-            Class<T> runtimeClass, Command cmd) throws Exception {
+      Class<T> runtimeClass, Command cmd) throws Exception {
         
-        Send elem = (Send) cmd;
-		String target = m_typeConv.toString(m_exprEval.evaluate(context, elem.getTarget()));
+      Send elem = (Send) cmd;
+      String target = m_typeConv.toString(m_exprEval.evaluate(context, elem.getTarget()));
+      String encoding = m_typeConv.toString(m_exprEval.evaluate(context, elem.getEncoding()));
 
-		boolean targetIsVariable = m_variableNameValidator.isValidVariableName(target);
+      boolean targetIsVariable = m_variableNameValidator.isValidVariableName(target);
 
-        Object source = targetIsVariable ? 
-			m_exprEval.evaluate(context, elem.getSource()) 
-			: m_typeConv.toString(m_exprEval.evaluate(context, elem.getSource()));
+      Object source = targetIsVariable 
+        ? m_exprEval.evaluate(context, elem.getSource()) 
+        : m_typeConv.toString(m_exprEval.evaluate(context, elem.getSource()));
 
-        Boolean overwrite = m_typeConv.toBoolean(m_exprEval.evaluate(context, elem.getOverwrite()));
+      Boolean overwrite = m_typeConv.toBoolean(m_exprEval.evaluate(context, elem.getOverwrite()));
         
-        Constructor<T> ctor = runtimeClass.getConstructor(Object.class, String.class, Boolean.class);
-        return ctor.newInstance(source, target, overwrite);
+      Constructor<T> ctor = runtimeClass.getConstructor(Object.class, String.class, Boolean.class);
+      return ctor.newInstance(source, target, overwrite);
     }
 
 	@Inject
