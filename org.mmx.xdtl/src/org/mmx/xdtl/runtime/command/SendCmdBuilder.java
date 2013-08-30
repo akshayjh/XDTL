@@ -42,7 +42,7 @@ public class SendCmdBuilder implements CommandBuilder {
       Boolean overwrite = m_typeConv.toBoolean(m_exprEval.evaluate(context, elem.getOverwrite()));
         
       Constructor<T> ctor = runtimeClass.getConstructor(Object.class, String.class, Boolean.class, String.class);
-      return ctor.newInstance(source, target, overwrite);
+      return ctor.newInstance(source, target, overwrite, encoding);
     }
 
 	@Inject
