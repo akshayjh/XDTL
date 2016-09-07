@@ -19,6 +19,7 @@ public class UnpackHandler extends AbstractElementHandler {
                 attr.getStringValue("cmd"),
                 attr.getStringValue("source"),
                 attr.getStringValue("target"),
-                attr.getStringValue("overwrite"));
+                attr.getStringValue("overwrite"),
+                attr.getStringValue("options"));
     }
 }

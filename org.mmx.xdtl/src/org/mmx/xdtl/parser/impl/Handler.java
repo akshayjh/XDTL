@@ -1,8 +1,9 @@
 /**
- * 
+ *
  */
 package org.mmx.xdtl.parser.impl;
 
+import org.mmx.xdtl.debugger.Debugger;
 import org.mmx.xdtl.model.Element;
 import org.mmx.xdtl.model.Package;
 import org.mmx.xdtl.model.SourceLocator;
@@ -16,7 +17,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * Event handler for SAX events.
- * 
+ *
  * @author vsi
  */
 class Handler extends DefaultHandler {
@@ -25,61 +26,70 @@ class Handler extends DefaultHandler {
     private final ElementHandlerStack m_elementHandlerStack = new ElementHandlerStack();
     private final ElementHandlerSet m_elementHandlerSet;
     private final String m_documentUrl;
-    
+
     private Locator m_locator;
     private Element m_lastModelElement;
+    private Debugger m_debugger;
+    private boolean m_debugBreak;
 
-    public Handler(String documentUrl, ElementHandlerSet elementHandlerSet) {
+    public Handler(String documentUrl, ElementHandlerSet elementHandlerSet, Debugger debugger) {
         m_documentUrl = documentUrl;
         m_elementHandlerSet = elementHandlerSet;
+        m_debugger = debugger;
     }
-    
+
     @Override
     public void startElement(String nsUri, String localName, String qName,
             Attributes attr) throws SAXException {
 
         Class<? extends ElementHandler> clazz = getElementHandlerClass(nsUri,
                 localName);
-        
+
         ElementHandler elementHandler;
-        
+
         try {
             elementHandler = clazz.newInstance();
         } catch (Exception e) {
             throw new SAXException("Failed to instantiate handler for element '" + localName + "'", e);
         }
-        
+
         org.mmx.xdtl.parser.Attributes wrappedAttrs = new AttributesImpl(attr);
-        
-        m_elementHandlerStack.push(elementHandler,
-                new SourceLocator(m_documentUrl, m_locator.getLineNumber(), localName),
-                wrappedAttrs.getStringValue("id", ""));
-        
+
+        SourceLocator locator = new SourceLocator(m_documentUrl, m_locator.getLineNumber(), localName);
+        if (m_debugBreak) {
+            m_debugger.addBreakpoint(locator);
+            m_debugBreak = false;
+        }
+
+        m_elementHandlerStack.push(elementHandler, locator,
+                wrappedAttrs.getStringValue("id", ""),
+                wrappedAttrs.getStringValue("nolog", "0"));
+
         elementHandler.startElement(nsUri, localName, wrappedAttrs);
     }
 
     /**
      * Lookup element handler class corresponding to element name.
-     * 
+     *
      * @param localName
      * @return
      * @throws SAXException
      */
     private Class<? extends ElementHandler> getElementHandlerClass(String nsUri,
             String elementName) throws SAXException {
-        
+
         Class<? extends ElementHandler> clazz;
         if (XDTL_URI.equalsIgnoreCase(nsUri)) {
             clazz = m_elementHandlerSet.get(elementName);
         } else {
             clazz = m_elementHandlerSet.getDefault();
         }
-        
+
         if (clazz == null) {
             throw new SAXException("Cannot find handler for element '"
                     + elementName + "'");
         }
-        
+
         return clazz;
     }
 
@@ -99,6 +109,7 @@ class Handler extends DefaultHandler {
         m_lastModelElement = stackItem.getElementHandler().endElement();
         m_lastModelElement.setSourceLocator(stackItem.getSourceLocator());
         m_lastModelElement.setId(stackItem.getId());
+        m_lastModelElement.setNoLog(stackItem.getNoLog());
         notifyTopElementHandler();
     }
 
@@ -127,5 +138,13 @@ class Handler extends DefaultHandler {
     @Override
     public void fatalError(SAXParseException e) throws SAXException {
         throw e;
-    }        
+    }
+
+    @Override
+    public void processingInstruction(String target, String data)
+            throws SAXException {
+        if (m_debugger != null && "debug".equals(target)) {
+            m_debugBreak = true;
+        }
+    }
 }

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.mmx.xdtl.runtime.command;
 
@@ -13,6 +13,7 @@ import org.mmx.xdtl.runtime.CommandBuilder;
 import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.ExpressionEvaluator;
 import org.mmx.xdtl.runtime.RuntimeCommand;
+import org.mmx.xdtl.runtime.RuntimeCommandClassMap;
 import org.mmx.xdtl.runtime.TypeConverter;
 
 import com.google.inject.Inject;
@@ -36,16 +37,17 @@ public class LogCmdBuilder implements CommandBuilder {
      * @see org.mmx.xdtl.runtime.CommandBuilder#build(org.mmx.xdtl.runtime.Context, java.lang.Class, org.mmx.xdtl.model.Command)
      */
     @Override
-    public <T extends RuntimeCommand> RuntimeCommand build(Context ctx,
-            Class<T> runtimeClass, Command cmd) throws Exception {
+    public RuntimeCommand build(Context ctx,
+            RuntimeCommandClassMap rtCmdClassMap, Command cmd) throws Exception {
 
         Log log = (Log) cmd;
         String strLevel = m_typeConv.toString(m_exprEval.evaluate(ctx, log.getLevel()));
         Level level = toLogLevel(strLevel);
-        
+
         String msg = m_typeConv.toString(m_exprEval.evaluate(ctx, log.getMsg()));
-        
-        Constructor<T> ctor = runtimeClass.getConstructor(Level.class, String.class);
+
+        Class<? extends RuntimeCommand> rtCmdClass = rtCmdClassMap.getCommandClass(null);
+        Constructor<? extends RuntimeCommand> ctor = rtCmdClass.getConstructor(Level.class, String.class);
         return ctor.newInstance(level, msg);
     }
 

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xdtl:package name="native_clear"
+	xmlns:xdtl="http://xdtl.org/xdtl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd">
+	
+	<xdtl:tasks>
+		<xdtl:task name="main">
+			<xdtl:steps>
+				<xdtl:exec cmd="mkdir c:\\tmptest" />
+				<xdtl:exec cmd="mkdir c:\\tmptest\\1" />
+				<xdtl:exec cmd="mkdir c:\\tmptest\\a2" />
+				<xdtl:clear target="c:\\tmptest\1*" />
+			</xdtl:steps>
+		</xdtl:task>		
+	</xdtl:tasks>
+</xdtl:package>

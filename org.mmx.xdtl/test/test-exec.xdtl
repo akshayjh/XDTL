@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Test exec command.
+ -->
+<package name="test-exec" xmlns="http://xdtl.org/xdtl">
+  <variable name="msg">Hello</variable>
+  <connection name="conn" type="FILE">xdtl:connection</connection>
+  <tasks>
+    <task name="first">
+      <steps>
+        <exec shell="1" cmd="">
+          echo $msg
+        </exec>
+      </steps>
+    </task>
+  </tasks>
+</package>

@@ -26,31 +26,36 @@
 		<xs:attribute name="delimiter" type="xs:string" default=";"/>
 		<xs:attribute name="quote" type="xs:string" default="&quot;"/>
 		<xs:attribute name="null" type="xs:string"/>
+		<xs:attribute name="escape" type="xs:string" default="\" use="optional"/>
 		<xs:attribute name="encoding" type="xs:string" default="UTF-8"/>
 	</xs:attributeGroup>
 	<xs:element name="package">
 		<xs:annotation>
-			<xs:documentation>Package is the container for data transformation steps. Every package 
-				has a unique identifier in the form of a URI. A package contains an arbitrary number 
-				of Variables, Parameters and  Connections and an ordered collection of Tasks. 
+			<xs:documentation>Package is the container for data transformation steps. Every package
+				has a unique identifier in the form of a URI. A package contains an arbitrary number
+				of Variables, Parameters and  Connections and an ordered collection of Tasks.
 				A single XDTL document can contain several packages.</xs:documentation>
 		</xs:annotation>
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element ref="xdtl:annotation" minOccurs="0"/>
-				<xs:element ref="xdtl:parameter" minOccurs="0"  maxOccurs="unbounded"/>
-				<xs:element ref="xdtl:define" minOccurs="0"  maxOccurs="unbounded"/>
-				<xs:element ref="xdtl:variable" minOccurs="0"  maxOccurs="unbounded"/>
-				<xs:element ref="xdtl:connection" minOccurs="0"  maxOccurs="unbounded"/>
+				<xs:choice minOccurs="0" maxOccurs="unbounded">
+					<xs:element ref="xdtl:parameter"/>
+					<xs:element ref="xdtl:define"/>
+					<xs:element ref="xdtl:variable"/>
+					<xs:element ref="xdtl:config"/>
+					<xs:element ref="xdtl:connection"/>
+					<xs:element ref="xdtl:script"/>
+				</xs:choice>
 				<xs:element ref="xdtl:tasks"/>
 			</xs:sequence>
 			<xs:attribute name="name" type="xs:string" use="required"/>
 			<xs:attribute name="description" type="xs:string"/>
 			<xs:attribute name="version" type="xs:string"/>
-			<xs:attribute name="resume" type="xdtl:check" default="0"/>
+			<xs:attribute name="resume" type="xs:string" default="0"/>
 			<xs:attribute name="onerror" type="xs:anyURI">
 				<xs:annotation>
-					<xs:documentation>Task the execution is transferred to in case an error occurs; 
+					<xs:documentation>Task the execution is transferred to in case an error occurs;
 						could be a task in another package.</xs:documentation>
 				</xs:annotation>
 			</xs:attribute>
@@ -58,7 +63,7 @@
 	</xs:element>
 	<xs:element name="parameter">
 		<xs:annotation>
-			<xs:documentation>Parameters are variables used to pass values from one task to another. 
+			<xs:documentation>Parameters are variables used to pass values from one task to another.
 				Parameters are initialized either by a calling task, or with default values.</xs:documentation>
 		</xs:annotation>
 		<xs:complexType>
@@ -79,18 +84,20 @@
 								<xs:enumeration value="FLOAT"/>
 							</xs:restriction>
 						</xs:simpleType>
-					</xs:attribute>	
+					</xs:attribute>
 					<xs:attribute name="format" type="xs:string"/>
 					<xs:attribute name="default" type="xs:string"/>
 					<xs:attribute name="required" type="xdtl:check" default="0"/>
 					<xs:attribute name="hidden" type="xdtl:check" default="0"/>
+					<xs:attribute name="nolog" type="xs:string" default="0"/>
+					<xs:anyAttribute processContents="skip" namespace="##other"/>
 				</xs:extension>
 			</xs:simpleContent>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="variable">
 		<xs:annotation>
-			<xs:documentation>Variables are name-value pairs used for instantiation of generic 
+			<xs:documentation>Variables are name-value pairs used for instantiation of generic
 				transformations by substituting variable references for their real values.</xs:documentation>
 		</xs:annotation>
 		<xs:complexType>
@@ -104,9 +111,9 @@
 	</xs:element>
 	<xs:element name="define">
 		<xs:annotation>
-			<xs:documentation>Defines a name-value pair denoting either an immutable value (constant) 
-				or a functional piece of code (macro). The value can contain other dereferenciable 
-				particle defined earlier of in an upper context. Defined particle is substituted 
+			<xs:documentation>Defines a name-value pair denoting either an immutable value (constant)
+				or a functional piece of code (macro). The value can contain other dereferenciable
+				particle defined earlier of in an upper context. Defined particle is substituted
 				with its value during execution.</xs:documentation>
 		</xs:annotation>
 		<xs:complexType>
@@ -120,7 +127,7 @@
 	</xs:element>
 	<xs:element name="connection">
 		<xs:annotation>
-			<xs:documentation>Connections are references to data sources and targets used in 
+			<xs:documentation>Connections are references to data sources and targets used in
 				transformations. Connections can refer to database resources (tables, views, result
 				sets), text files in tabular format or Internet resources expressed by a URI.</xs:documentation>
 		</xs:annotation>
@@ -140,13 +147,37 @@
 					</xs:attribute>
 					<xs:attribute name="exists" type="xdtl:check" default="0"/>
 					<xs:attribute name="onopen" type="xs:anyURI"/>
+					<xs:attribute name="user" type="xs:string"/>
+					<xs:attribute name="password" type="xs:string"/>
+				</xs:extension>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="config">
+		<xs:annotation>
+			<xs:documentation></xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:attribute name="href" type="xs:string" use="required"/>
+			<xs:attribute name="encoding" type="xs:string" default="UTF-8"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="script">
+		<xs:annotation>
+			<xs:documentation>Executes an external or embedded script.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute name="href" type="xs:string"/>
+					<xs:attribute name="encoding" type="xs:string" default="UTF-8"/>
 				</xs:extension>
 			</xs:simpleContent>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="tasks">
 		<xs:annotation>
-			<xs:documentation>Tasks are an ordered collection of data transformations that move, 
+			<xs:documentation>Tasks are an ordered collection of data transformations that move,
 				create or change data. There is at least one task in tasks collection.</xs:documentation>
 		</xs:annotation>
 		<xs:complexType>
@@ -158,22 +189,28 @@
 	<xs:element name="task">
 		<xs:annotation>
 			<xs:documentation>Task is the primary unit of execution that has a unique name (identifier).
-				A task can be parameterized in case some of it's transformations have parameters. Parameters 
+				A task can be parameterized in case some of it's transformations have parameters. Parameters
 				should have default values defined. There is at least one step in a task.</xs:documentation>
 		</xs:annotation>
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element ref="xdtl:annotation" minOccurs="0"/>
-				<xs:element ref="xdtl:parameter" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:choice minOccurs="0" maxOccurs="unbounded">
+					<xs:element ref="xdtl:parameter"/>
+					<xs:element ref="xdtl:define"/>
+					<xs:element ref="xdtl:variable"/>
+					<xs:element ref="xdtl:config"/>
+					<xs:element ref="xdtl:connection"/>
+				</xs:choice>
 				<xs:element ref="xdtl:steps" minOccurs="0" maxOccurs="unbounded"/>
 			</xs:sequence>
 			<xs:attribute name="name" type="xs:string" use="required"/>
 			<xs:attribute name="annotation" type="xs:string"/>
 			<xs:attribute name="connection" type="xs:string"/>
-			<xs:attribute name="resume" type="xdtl:check" default="0"/>
+			<xs:attribute name="resume" type="xs:string" default="0"/>
 			<xs:attribute name="onerror" type="xs:anyURI">
 				<xs:annotation>
-					<xs:documentation>The task execution is transferred to in case an error occurs; 
+					<xs:documentation>The task execution is transferred to in case an error occurs;
 						could be a task in another package.</xs:documentation>
 				</xs:annotation>
 			</xs:attribute>
@@ -181,7 +218,7 @@
 	</xs:element>
 	<xs:element name="steps" type="xdtl:step">
 		<xs:annotation>
-			<xs:documentation>Steps are the smallest units of execution. Each step contains one data 
+			<xs:documentation>Steps are the smallest units of execution. Each step contains one data
 				transformation of any predefined type.</xs:documentation>
 		</xs:annotation>
 	</xs:element>
@@ -202,6 +239,7 @@
 			<xs:element ref="xdtl:query"/>
 			<xs:element ref="xdtl:fetch"/>
 			<xs:element ref="xdtl:decode"/>
+			<xs:element ref="xdtl:parse"/>
 			<xs:element ref="xdtl:if"/>
 			<xs:element ref="xdtl:for"/>
 			<xs:element ref="xdtl:call"/>
@@ -213,6 +251,8 @@
 			<!--xs:element ref="xdtl:mappings"/-->
 			<xs:element ref="xdtl:error"/>
 			<xs:element ref="xdtl:exit"/>
+			<xs:element ref="xdtl:find"/>
+			<xs:element ref="xdtl:sleep"/>
 			<xs:any namespace="##other" processContents="lax"/>
 		</xs:choice>
 	</xs:complexType>
@@ -225,6 +265,8 @@
 			<xs:attribute name="source" type="xs:string" use="required"/>
 			<xs:attribute name="target" type="xs:anyURI" use="required"/>
 			<xs:attribute name="overwrite" type="xdtl:check" use="required"/>
+			<xs:attribute name="options" type="xs:string" />
+			<xs:attribute name="nolog" type="xs:string" default="0"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="put">
@@ -236,6 +278,8 @@
 			<xs:attribute name="source" type="xs:anyURI" use="required"/>
 			<xs:attribute name="target" type="xs:string" use="required"/>
 			<xs:attribute name="overwrite" type="xdtl:check" use="required"/>
+			<xs:attribute name="options" type="xs:string" />
+			<xs:attribute name="nolog" type="xs:string" default="0"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="unpack">
@@ -247,6 +291,8 @@
 			<xs:attribute name="source" type="xs:anyURI" use="required"/>
 			<xs:attribute name="target" type="xs:anyURI" use="required"/>
 			<xs:attribute name="overwrite" type="xdtl:check" use="required"/>
+			<xs:attribute name="options" type="xs:string" />
+			<xs:attribute name="nolog" type="xs:string" default="0"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="pack">
@@ -258,6 +304,8 @@
 			<xs:attribute name="source" type="xs:anyURI" use="required"/>
 			<xs:attribute name="target" type="xs:anyURI" use="required"/>
 			<xs:attribute name="overwrite" type="xdtl:check" use="required"/>
+			<xs:attribute name="options" type="xs:string" />
+			<xs:attribute name="nolog" type="xs:string" default="0"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="strip">
@@ -270,6 +318,7 @@
 			<xs:attribute name="target" type="xs:anyURI" use="required"/>
 			<xs:attribute name="overwrite" type="xdtl:check" use="required"/>
 			<xs:attribute name="expr" type="xs:string"/>
+			<xs:attribute name="nolog" type="xs:string" default="0"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="clear">
@@ -278,6 +327,7 @@
 		</xs:annotation>
 		<xs:complexType>
 			<xs:attribute name="target" type="xs:anyURI" use="required"/>
+			<xs:attribute name="nolog" type="xs:string" default="0"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="move">
@@ -288,6 +338,7 @@
 			<xs:attribute name="source" type="xs:anyURI" use="required"/>
 			<xs:attribute name="target" type="xs:anyURI" use="required"/>
 			<xs:attribute name="overwrite" type="xdtl:check" use="required"/>
+			<xs:attribute name="nolog" type="xs:string" default="0"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="read">
@@ -308,6 +359,7 @@
 					<xs:documentation>Number of rows to be committed as a batch. Default is no batch commit.</xs:documentation>
 				</xs:annotation>
 			</xs:attribute>
+			<xs:attribute name="nolog" type="xs:string" default="0"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="write">
@@ -320,6 +372,7 @@
 			<xs:attributeGroup ref="xdtl:textFile"/>
 			<xs:attribute name="overwrite" type="xdtl:check" default="0"/>
 			<xs:attribute name="connection" type="xs:string"/>
+			<xs:attribute name="nolog" type="xs:string" default="0"/>
 		</xs:complexType>
 	</xs:element>
 <!--
@@ -337,6 +390,7 @@
 			<xs:attribute name="target" type="xs:string" use="required"/>
 			<xs:attributeGroup ref="xdtl:textFile"/>
 			<xs:attribute name="overwrite" type="xdtl:check"/>
+			<xs:attribute name="nolog" type="xs:string" default="0"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="dump">
@@ -353,10 +407,11 @@
 			<xs:attribute name="target" type="xs:anyURI" use="required"/>
 			<xs:attributeGroup ref="xdtl:textFile"/>
 			<xs:attribute name="overwrite" type="xdtl:check"/>
+			<xs:attribute name="nolog" type="xs:string" default="0"/>
 		</xs:complexType>
 	</xs:element>
 -->
-<xs:element name="transaction">
+	<xs:element name="transaction">
 		<xs:annotation>
 			<xs:documentation>Ordered sequence of SQL statements executed under transaction control.</xs:documentation>
 		</xs:annotation>
@@ -365,20 +420,22 @@
 				<xs:element ref="xdtl:query" minOccurs="1" maxOccurs="unbounded"/>
 			</xs:sequence>
 			<xs:attribute name="connection" type="xs:string"/>
+			<xs:attribute name="nolog" type="xs:string" default="0"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="query">
 		<xs:annotation>
 			<xs:documentation>Execute a database query (an SQL statement, a SPARQL query, a map-reduce API call etc).</xs:documentation>
 		</xs:annotation>
-		<xs:complexType>
+		<xs:complexType mixed="true">
 			<xs:sequence>
 				<xs:element ref="xdtl:parameter" minOccurs="0" maxOccurs="unbounded"/>
 			</xs:sequence>
-			<xs:attribute name="source" type="xs:string" use="required"/>
+			<xs:attribute name="source" type="xs:string"/>
 			<xs:attribute name="target" type="xs:string"/>
 			<xs:attribute name="connection" type="xs:string"/>
 			<xs:attribute name="querytype" type="xs:string" default="sql"/>
+			<xs:attribute name="nolog" type="xs:string" default="0"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="fetch">
@@ -386,13 +443,19 @@
 			<xs:documentation>Export the result of a database query into a text file or variable.</xs:documentation>
 		</xs:annotation>
 		<xs:complexType>
-			<xs:attribute name="source" type="xs:string" use="required"/>
-			<xs:attribute name="target" type="xs:string"/>
-			<xs:attributeGroup ref="xdtl:textFile"/>
-			<xs:attribute name="overwrite" type="xdtl:check" default="0"/>
-			<xs:attribute name="rowset" type="xs:string"/>
-			<xs:attribute name="connection" type="xs:string" use="required"/>
-			<xs:attribute name="destination" type="xs:string"/>
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute name="source" type="xs:string"/>
+					<xs:attribute name="target" type="xs:string"/>
+					<xs:attributeGroup ref="xdtl:textFile"/>
+					<xs:attribute name="header" type="xs:string" default="0"/>
+					<xs:attribute name="overwrite" type="xdtl:check" default="0"/>
+					<xs:attribute name="rowset" type="xs:string"/>
+					<xs:attribute name="connection" type="xs:string" use="required"/>
+					<xs:attribute name="destination" type="xs:string"/>
+					<xs:attribute name="nolog" type="xs:string" default="0"/>
+				</xs:extension>
+			</xs:simpleContent>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="decode">
@@ -404,6 +467,22 @@
 			<xs:attribute name="target" type="xs:string" use="required"/>
 			<xs:attribute name="overwrite" type="xdtl:check" default="0"/>
 			<xs:attribute name="type" type="xs:string" default="XML" use="optional"/>
+			<xs:attribute name="nolog" type="xs:string" default="0"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="parse">
+		<xs:annotation>
+			<xs:documentation>Parse unstructured text using predefined and compiled Grammar.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:attribute name="source" type="xs:string" use="required"/>
+			<xs:attribute name="rowset" type="xs:string" use="required"/>
+			<xs:attribute name="target" type="xs:string" use="optional"/>
+			<xs:attribute name="grammar" type="xs:string" use="required"/>
+			<xs:attribute name="overwrite" type="xdtl:check" default="0"/>
+			<xs:attribute name="type" type="xs:string" default="rowset" use="optional"/>
+			<xs:attribute name="template" type="xs:string" use="optional"/>
+			<xs:attribute name="nolog" type="xs:string" default="0"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="if">
@@ -414,9 +493,10 @@
 			<xs:complexContent>
 				<xs:extension base="xdtl:step">
 					<xs:attribute name="expr" type="xs:string" use="required"/>
+					<xs:attribute name="nolog" type="xs:string" default="0"/>
 				</xs:extension>
 			</xs:complexContent>
-		</xs:complexType>		
+		</xs:complexType>
 	</xs:element>
 	<xs:element name="for">
 		<xs:annotation>
@@ -431,19 +511,20 @@
 						<xs:annotation>
 							<xs:documentation>Optional name of the loop index variable.</xs:documentation>
 						</xs:annotation>
-					</xs:attribute>	
-					<xs:attribute name="count" type="xs:string">	
+					</xs:attribute>
+					<xs:attribute name="count" type="xs:string">
 						<xs:annotation>
 							<xs:documentation>Optional name of the loop element count variable.</xs:documentation>
 						</xs:annotation>
-					</xs:attribute>	
+					</xs:attribute>
+					<xs:attribute name="nolog" type="xs:string" default="0"/>
 				</xs:extension>
 			</xs:complexContent>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="call">
 		<xs:annotation>
-			<xs:documentation>Invoke an external package or a task in another package passing 
+			<xs:documentation>Invoke an external package or a task in another package passing
 				required parameters.</xs:documentation>
 		</xs:annotation>
 		<xs:complexType>
@@ -451,6 +532,7 @@
 				<xs:element ref="xdtl:parameter" minOccurs="0" maxOccurs="unbounded"/>
 			</xs:sequence>
 			<xs:attribute name="href" type="xs:anyURI" use="required"/>
+			<xs:attribute name="nolog" type="xs:string" default="0"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="exec">
@@ -458,18 +540,23 @@
 			<xs:documentation>Execute an arbitrary operating system command level (shell) command.</xs:documentation>
 		</xs:annotation>
 		<xs:complexType>
-			<xs:attribute name="shell" type="xs:string"/>
-			<xs:attribute name="cmd" type="xs:string" use="required"/>
-			<xs:attribute name="target" type="xs:string">
-				<xs:annotation>
-					<xs:documentation>Text variable to return command output.</xs:documentation>
-				</xs:annotation>
-			</xs:attribute>
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute name="shell" type="xs:string"/>
+					<xs:attribute name="cmd" type="xs:string"/>
+					<xs:attribute name="target" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>Text variable to return command output.</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+					<xs:attribute name="nolog" type="xs:string" default="0"/>
+				</xs:extension>
+			</xs:simpleContent>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="render">
 		<xs:annotation>
-			<xs:documentation>Merge an SQL template with corresponding mappings to produce 
+			<xs:documentation>Merge an SQL template with corresponding mappings to produce
 				executable SQL statement(s).</xs:documentation>
 		</xs:annotation>
 		<xs:complexType>
@@ -480,11 +567,14 @@
 			<xs:attribute name="source" type="xs:string"/>
 			<xs:attribute name="rowset" type="xs:string"/>
 			<xs:attribute name="target" type="xs:string"/>
+			<xs:attribute name="lang" type="xs:string" default="VTL"/>
+			<xs:attribute name="nolog" type="xs:string" default="0"/>
+			<xs:attribute name="init" type="xs:string"/> <!-- initial template -->
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="log">
 		<xs:annotation>
-			<xs:documentation>Add an arbitrary line to standard log. Based on level the line 
+			<xs:documentation>Add an arbitrary line to standard log. Based on level the line
 				is either output of filtered out.</xs:documentation>
 		</xs:annotation>
 		<xs:complexType>
@@ -500,6 +590,7 @@
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:attribute>
+			<xs:attribute name="nolog" type="xs:string" default="0"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="send">
@@ -507,10 +598,18 @@
 			<xs:documentation>Send contents of a source to the target.</xs:documentation>
 		</xs:annotation>
 		<xs:complexType>
-			<xs:attribute name="source" type="xs:string" use="required"/>
-			<xs:attribute name="target" type="xs:anyURI" use="required"/>
-			<xs:attribute name="overwrite" type="xdtl:check" use="required"/>
-      <xs:attribute name="encoding" type="xs:string" default="UTF-8" />
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute name="source" type="xs:string"/>
+					<xs:attribute name="target" type="xs:anyURI"/>
+					<xs:attribute name="overwrite" type="xs:string" default="1"/>
+					<xs:attribute name="rowset" type="xs:string"/>
+					<xs:attributeGroup ref="xdtl:textFile"/>
+					<xs:attribute name="header" type="xs:string" default="0"/>
+					<xs:attribute name="skip" type="xs:string" default="0"/>
+					<xs:attribute name="nolog" type="xs:string" default="0"/>
+				</xs:extension>
+			</xs:simpleContent>
 		</xs:complexType>
 	</xs:element>
 	<!--
@@ -522,6 +621,7 @@
 			<xs:attribute name="name" type="xs:string" use="required"/>
 			<xs:attribute name="source" type="xs:string" use="required"/>
 			<xs:attribute name="target" type="xs:string" use="required"/>
+			<xs:attribute name="nolog" type="xs:string" default="0"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="mappings">
@@ -572,7 +672,7 @@
 									<xs:enumeration value="aggr"/>
 								</xs:restriction>
 							</xs:simpleType>
-						</xs:attribute>	
+						</xs:attribute>
 						<xs:attribute name="jointype">
 							<xs:simpleType>
 								<xs:restriction base="xs:string">
@@ -598,6 +698,7 @@
 		<xs:complexType>
 			<xs:attribute name="code" type="xs:string" default="0" />
 			<xs:attribute name="global" type="xs:boolean" default="0"/>
+			<xs:attribute name="nolog" type="xs:string" default="0"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="error">
@@ -607,7 +708,28 @@
 		<xs:complexType>
 			<xs:attribute name="code" type="xs:string" use="required"/>
 			<xs:attribute name="msg" type="xs:string"/>
+			<xs:attribute name="nolog" type="xs:string" default="0"/>
 		</xs:complexType>
 	</xs:element>
-
+	<xs:element name="find">
+		<xs:annotation>
+			<xs:documentation>Find files.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:attribute name="source" type="xs:string" use="required"/>
+			<xs:attribute name="match" type="xs:string"/>
+			<xs:attribute name="recursive" type="xs:string" default="1"/>
+			<xs:attribute name="rowset" type="xs:string" use="required"/>
+			<xs:attribute name="nolog" type="xs:string" default="0"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="sleep">
+		<xs:annotation>
+			<xs:documentation>Sleep for specified number of seconds.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:attribute name="seconds" type="xs:string" use="required"/>
+			<xs:attribute name="nolog" type="xs:string" default="0"/>
+		</xs:complexType>
+	</xs:element>
 </xs:schema>

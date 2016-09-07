@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Test 'query' element source attribute.
+ -->
+<package name="test-query-soutce" xmlns="http://xdtl.org/xdtl">
+  <connection name="conn" type="DB">$testdb</connection>
+  <tasks>
+    <task name="first" connection="$conn">
+      <steps>
+        <!-- Source attribute -->
+        <query source="select nvl(to_char(?, 'dd.mm.yyyy'), 'null') || ',' || to_char(?, '9.9') from dual" target="tmp">
+          <parameter name="p1" type="DATE">2011-02-01</parameter>
+          <parameter name="p2" type="DOUBLE">1.2</parameter>
+        </query>
+        <if expr="${tmp != '01.02.2011, 1.2'">
+          <log msg="Failed: Source attribute: tmp='$tmp'"/>
+        </if>
+
+        <!-- Source in content -->
+        <query target="tmp">
+          select nvl(to_char(?, 'dd.mm.yyyy'), 'null') || ',' || to_char(?, '9.9') from dual
+
+          <parameter name="p1" type="DATE">2011-02-01</parameter>
+          <parameter name="p2" type="DOUBLE">1.2</parameter>
+        </query>
+        <if expr="${tmp != '01.02.2011, 1.2'">
+          <log msg="Failed: Source in content: tmp='$tmp'"/>
+        </if>
+
+        <!-- Source priority -->
+        <query source="select 'attr' from dual" target="tmp">
+          select 'content' from dual
+        </query>
+        <if expr="${tmp != 'attr'">
+          <log msg="Failed: Source priority: tmp='$tmp'"/>
+        </if>
+      </steps>
+    </task>
+  </tasks>
+</package>

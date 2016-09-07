@@ -2,15 +2,15 @@ package org.mmx.xdtl.runtime.command;
 
 import java.sql.Statement;
 
+import org.apache.log4j.Logger;
 import org.mmx.xdtl.db.JdbcConnection;
+import org.mmx.xdtl.log.XdtlLogger;
 import org.mmx.xdtl.model.Connection;
 import org.mmx.xdtl.runtime.Context;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PostgresqlReadCmd extends PostgresqlReadWriteCmd {
-    private final Logger m_logger = LoggerFactory.getLogger(PostgresqlReadCmd.class);
-    
+    private static final Logger logger = XdtlLogger.getLogger("xdtl.read");
+
     private final String m_errors;
 
     public PostgresqlReadCmd(Object source, String target, String type,
@@ -18,22 +18,25 @@ public class PostgresqlReadCmd extends PostgresqlReadWriteCmd {
             Connection cnn, String errors, boolean header, int rowOffset, int batch) {
 
         super((String) source, target, type, overwrite, delimiter, quote, encoding, cnn, header, true);
-        m_errors = errors;        
+        m_errors = errors;
     }
 
     @Override
     public void run(Context context) throws Throwable {
         JdbcConnection cnn = context.getConnectionManager().getJdbcConnection(getConnection());
-        if (isOverwrite()) {           
+        if (isOverwrite()) {
             Statement stmt = cnn.createStatement();
             try {
-                m_logger.info("Truncating table '{}'", getTarget());
-                stmt.execute("truncate " + getTarget());
+                String sql = "truncate " + getTarget();
+                if (logger.isDebugEnabled()) {
+                    logger.debug(sql);
+                }
+                stmt.execute(sql);
             } finally {
                 close(stmt);
             }
         }
-    
+
         super.run(context);
     }
 
@@ -41,9 +44,22 @@ public class PostgresqlReadCmd extends PostgresqlReadWriteCmd {
     protected String createSql() {
         String sql = super.createSql();
         if (m_errors != null && m_errors.length() > 0) {
-            sql = sql + " log errors into " + m_errors; 
+            sql = sql + " log errors into " + m_errors;
         }
-        
+
         return sql;
+    }
+
+    @Override
+    protected void logCmdStart() {
+        if (logger.isDebugEnabled()) {
+            logger.debug(String.format("source=%s, type=%s, target=%s," +
+                    " delimiter=%s, quote=%s, errors=%s, overwrite=%s," +
+                    " encoding=%s, header=%s" +
+                    getSource(), getType(), getTarget(), getDelimiter(), getQuote(),
+                    m_errors, isOverwrite(), getEncoding(), getHeader()));
+        } else {
+            logger.info("target=" + getTarget());
+        }
     }
 }

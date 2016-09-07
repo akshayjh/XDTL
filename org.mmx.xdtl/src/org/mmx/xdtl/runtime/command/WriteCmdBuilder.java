@@ -21,11 +21,11 @@ public class WriteCmdBuilder extends ReadWriteCmdBuilder {
     protected RuntimeCommand createInstance() throws Exception {
         Constructor<? extends RuntimeCommand> ctor =
                 getRuntimeClass().getConstructor(String.class, String.class,
-                        String.class, boolean.class, String.class, String.class,
+                        String.class, boolean.class, String.class, String.class, String.class,
                         String.class, Connection.class);
 
-        RuntimeCommand rtCmd = ctor.newInstance((String) getSource(), getTarget(), getType(),
-                isOverwrite(), getDelimiter(), getQuote(), getEncoding(),
+        RuntimeCommand rtCmd = ctor.newInstance(getSource(), getTarget(), getType(),
+                isOverwrite(), getDelimiter(), getQuote(), getEncoding(), getEscape(),
                 getConnection());
         
         return rtCmd;

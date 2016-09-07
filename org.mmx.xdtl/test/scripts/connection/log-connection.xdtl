@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Log element test.
+ -->
+<package name="test-log" xmlns="http://xdtl.org/xdtl">
+  <parameter name="x"></parameter>
+  <connection name="conn" type="FILE">$x</connection>
+  <tasks>
+    <task name="first">
+      <steps>
+        <log msg="$conn.value"/>
+      </steps>
+    </task>
+  </tasks>
+</package>

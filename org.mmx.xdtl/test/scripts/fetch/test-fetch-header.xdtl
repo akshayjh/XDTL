@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Test 'fetch' element header attribute.
+ -->
+<package name="test-fetch" xmlns="http://xdtl.org/xdtl">
+  <variable name="table">PERSON</variable>
+  <variable name="csv">../scripts/fetch/output.csv</variable>
+  <connection name="conn" type="DB">$testdb</connection>
+  <tasks>
+    <task name="first" connection="$conn">
+      <steps>
+        <fetch source="select * from $table" overwrite="1" connection="$conn" target="$csv" header="1"/>
+      </steps>
+    </task>
+  </tasks>
+</package>

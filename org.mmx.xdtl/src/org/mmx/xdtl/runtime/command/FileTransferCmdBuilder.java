@@ -14,6 +14,8 @@ import org.mmx.xdtl.runtime.TypeConverter;
 import com.google.inject.Inject;
 
 public class FileTransferCmdBuilder extends AbstractCmdBuilder {
+    private static final String CMD_VAR_PREFIX = "xdtlCmd";
+
     private final ExpressionEvaluator m_exprEval;
     private final TypeConverter m_typeConverter;
 
@@ -22,47 +24,49 @@ public class FileTransferCmdBuilder extends AbstractCmdBuilder {
     private String m_source;
     private String m_target;
     private boolean m_overwrite;
-    
+    private String m_options;
+
     @Inject
-    public FileTransferCmdBuilder(ExpressionEvaluator exprEvaluator,
-            TypeConverter typeConverter) {
+    public FileTransferCmdBuilder(ExpressionEvaluator exprEvaluator, TypeConverter typeConverter) {
         m_exprEval = exprEvaluator;
         m_typeConverter = typeConverter;
     }
 
     @Override
     protected RuntimeCommand createInstance() throws Exception {
-        Constructor<? extends RuntimeCommand> ctor =
-            getRuntimeClass().getConstructor(String.class, String.class,
-                    String.class, boolean.class, String.class);
-        
-        return ctor.newInstance(m_cmd, m_source, m_target, m_overwrite,
-                m_cmdName);
+        Constructor<? extends RuntimeCommand> ctor = getRuntimeClass().getConstructor(String.class, String.class,
+        		String.class, boolean.class, String.class, String.class);
+
+        return ctor.newInstance(m_cmd, m_source, m_target, m_overwrite, m_options, m_cmdName);
     }
 
     @Override
     protected void evaluate(Command obj) throws Exception {
         FileTransfer cmd = (FileTransfer) obj;
         Context ctx = getContext();
-        
+
         // Determine command name from command class name
-        m_cmdName = obj.getClass().getSimpleName().toLowerCase();
+        m_cmdName = obj.getClass().getSimpleName();
 
         m_cmd = cmd.getCmd();
         if (m_cmd == null || m_cmd.length() == 0) {
-            m_cmd = m_typeConverter.toString(ctx.getVariableValue(m_cmdName));
+            m_cmd = m_typeConverter.toString(ctx.getVariableValue(CMD_VAR_PREFIX + m_cmdName));
         } else {
             m_cmd = m_typeConverter.toString(m_exprEval.evaluate(ctx, m_cmd));
         }
-        
+
+        m_cmdName = m_cmdName.toLowerCase();
+
         Object source = m_exprEval.evaluate(ctx, cmd.getSource());
         m_source = asString(source, cmd);
-        
+
         Object target = m_exprEval.evaluate(ctx, cmd.getTarget());
         m_target = asString(target, cmd);
-        
-        m_overwrite = m_typeConverter.toBoolean(m_exprEval.evaluate(ctx,
-                cmd.getOverwrite()));        
+
+        m_overwrite = m_typeConverter.toBoolean(m_exprEval.evaluate(ctx, cmd.getOverwrite()));
+
+        Object options = m_exprEval.evaluate(ctx, cmd.getOptions());
+        m_options = asString(options, cmd);
     }
 
     private String asString(Object src, Command cmd) {
@@ -72,7 +76,7 @@ public class FileTransferCmdBuilder extends AbstractCmdBuilder {
                 throw new XdtlException("only file or uri connections are allowed",
                         cmd.getSourceLocator());
             }
-            
+
             return cnn.getValue();
         } else if (src instanceof String) {
             return (String) src;

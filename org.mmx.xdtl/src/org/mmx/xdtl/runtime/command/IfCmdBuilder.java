@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.mmx.xdtl.runtime.command;
 
@@ -12,6 +12,7 @@ import org.mmx.xdtl.runtime.CommandBuilder;
 import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.ExpressionEvaluator;
 import org.mmx.xdtl.runtime.RuntimeCommand;
+import org.mmx.xdtl.runtime.RuntimeCommandClassMap;
 import org.mmx.xdtl.runtime.TypeConverter;
 
 import com.google.inject.Inject;
@@ -35,16 +36,17 @@ public class IfCmdBuilder implements CommandBuilder {
      * @see org.mmx.xdtl.runtime.CommandBuilder#build(org.mmx.xdtl.runtime.Context, java.lang.Class, org.mmx.xdtl.model.Command)
      */
     @Override
-    public <T extends RuntimeCommand> RuntimeCommand build(Context context,
-            Class<T> runtimeClass, Command cmd) throws Exception {
-        
+    public RuntimeCommand build(Context context,
+            RuntimeCommandClassMap rtCmdClassMap, Command cmd) throws Exception {
+
         If elem = (If) cmd;
         Boolean condition = m_typeConv.toBoolean(m_exprEval.evaluate(context, elem.getExpr()));
         if (condition == null) {
             condition = Boolean.FALSE;
         }
-        
-        Constructor<T> ctor = runtimeClass.getConstructor(boolean.class, CommandList.class);
+
+        Class<? extends RuntimeCommand> rtCmdClass = rtCmdClassMap.getCommandClass(null);
+        Constructor<? extends RuntimeCommand> ctor = rtCmdClass.getConstructor(boolean.class, CommandList.class);
         return ctor.newInstance(condition, elem.getCommandList());
     }
 }

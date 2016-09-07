@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Send rowset test.
+ -->
+<package name="test-send-rowset" xmlns="http://xdtl.org/xdtl">
+  <variable name="csv1">file:../scripts/send/output1.csv</variable>
+  <variable name="csv2">file:../scripts/send/output2.csv</variable>
+  <connection name="cnn" type="DB">$testdb</connection>
+  <tasks>
+    <task name="first">
+      <steps>
+        <fetch connection="$cnn" source="SELECT * FROM MMX_REPO_DEV.MD_OBJECT where object_type_cd = 120" rowset="rowset"/>
+        <send rowset="$rowset" target="$csv1" overwrite="1" header="1"/>
+        <send source="$csv1" rowset="rowset" overwrite="1" header="1"/>
+        <send rowset="$rowset" target="$csv2" overwrite="1" header="1"/>
+      </steps>
+    </task>
+  </tasks>
+</package>

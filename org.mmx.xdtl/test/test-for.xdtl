@@ -14,5 +14,12 @@
         <!-- <render template="rowstest.vm" rowset="$rows" target="tmp"/>-->
       </steps>
     </task>
+    <task name="test-null">
+      <steps>
+        <for item="row" rowset="${null}">
+          <log msg="$row"/>
+        </for>
+      </steps>
+    </task>
   </tasks>
 </package>

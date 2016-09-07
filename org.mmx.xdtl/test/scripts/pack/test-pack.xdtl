@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Test package header elements.
+-->
+<package name="test-pack" xmlns="http://xdtl.org/xdtl">
+  <tasks>
+    <task name="main">
+      <steps>
+        <pack overwrite="0" source="../scripts/pack/test.txt" target="../scripts/pack/test.tar.gz"/>
+      </steps>
+    </task>
+  </tasks>
+</package>

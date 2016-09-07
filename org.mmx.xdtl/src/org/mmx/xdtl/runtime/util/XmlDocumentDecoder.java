@@ -51,9 +51,7 @@ public class XmlDocumentDecoder {
 		for (String key : tagmap.keySet()) {
 			List<Object> value = tagmap.get(key);
 			
-			if (value.size() == 1 && !m.containsKey(key)) {
-				m.put(key, value.get(0));
-			} else if (m.containsKey(key)) {
+			if (m.containsKey(key)) {
 				for (int j = 0; j < value.size(); j++) {
 					items.add(value.get(j));
 				}

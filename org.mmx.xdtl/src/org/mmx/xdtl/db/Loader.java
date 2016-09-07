@@ -10,16 +10,17 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.mmx.xdtl.db.converter.DateConverter;
 import org.mmx.xdtl.db.converter.DoubleConverter;
 import org.mmx.xdtl.db.converter.IConverter;
 import org.mmx.xdtl.db.converter.StringConverter;
+import org.mmx.xdtl.log.XdtlLogger;
 import org.mmx.xdtl.model.XdtlException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Loader {
-    private static final Logger logger = LoggerFactory.getLogger(Loader.class);
+    private static final Logger logger = XdtlLogger.getLogger("xdtl.rt.db.loader");
+    private static final Logger rowLogger = XdtlLogger.getLogger("xdtl.rt.db.loader.rows");
     private static final int DEFAULT_BATCH_SIZE = 1000;
 
     private final JdbcConnection m_cnn;
@@ -35,6 +36,7 @@ public class Loader {
     private boolean m_initialAutoCommit;
     private Object[] m_tempRowBuffer;
     private IdentifierConverter m_identifierConverter;
+    private boolean m_inFailedState;
 
     public Loader(JdbcConnection cnn, String table, int batchSize,
             int commitRowCount) throws SQLException {
@@ -49,15 +51,15 @@ public class Loader {
         init(metaData);
 
         m_initialAutoCommit = m_cnn.getAutoCommit();
-        if (logger.isDebugEnabled()) {
-            String msg = "batch size=%d, initial autocommit=%s, commitRowCount=%d";
+        if (logger.isTraceEnabled()) {
+            String msg = "ctor: batch size=%d, initial autocommit=%s, commitRowCount=%d";
             msg = String.format(msg, m_batchSize, m_initialAutoCommit ? "on"
                     : "off", m_commitRowCount);
-            logger.debug("ctor: {}", msg);
+            logger.trace(msg);
         }
 
         if (m_initialAutoCommit) {
-            logger.debug("ctor: turning autocommit off");
+            logger.trace("ctor: turning autocommit off");
             m_cnn.setAutoCommit(false);
         }
     }
@@ -75,8 +77,8 @@ public class Loader {
         try {
             while (rs.next()) {
                 String columnName = rs.getString("COLUMN_NAME");
-                m_columns.add(new Column(rs.getInt("DATA_TYPE"),
-                        rs.getString("TYPE_NAME"), columnName));
+                m_columns.add(new Column(columnName, rs.getInt("DATA_TYPE"),
+                        rs.getString("TYPE_NAME")));
                 m_columnMap.put(columnName, m_columns.size() - 1);
                 sql.append("?,");
             }
@@ -87,7 +89,7 @@ public class Loader {
         if (m_columns.size() == 0) {
             throw new XdtlException("init: no columns found in table '" + m_table + "'");
         }
-        
+
         sql.setLength(sql.length() - 1);
         sql.append(")");
 
@@ -99,13 +101,23 @@ public class Loader {
     }
 
     public void close() throws SQLException {
-        if (m_rowNum % m_batchSize != 0) {
-            logger.debug("close: final batch");
-            executeBatch(m_statement);
+        SQLException sqlException = null;
+
+        if (!m_inFailedState && (m_rowNum % m_batchSize != 0)) {
+            logger.trace("close: final batch");
+            try {
+                executeBatch(m_statement);
+            } catch (SQLException e) {
+                logger.trace("executeBatch failed: " +  e.getMessage());
+                sqlException = e;
+            }
         }
 
-        if (m_rowNum - m_lastCommit != 0) {
-            logger.debug("close: final commit");
+        if (m_inFailedState) {
+            logger.trace("close: rollback");
+            m_cnn.rollback();
+        } else if (m_rowNum - m_lastCommit != 0) {
+            logger.trace("close: final commit");
             m_cnn.commit();
         }
 
@@ -117,27 +129,36 @@ public class Loader {
 
         try {
             if (m_initialAutoCommit) {
-                logger.debug("close: turning autocommit back on");
+                logger.trace("close: turning autocommit back on");
                 m_cnn.setAutoCommit(m_initialAutoCommit);
             }
         } catch (SQLException e) {
-            logger.warn("Failed to restore autocommit flag to '{}'",
-                    m_initialAutoCommit);
+            logger.warn("Failed to restore autocommit flag to '" + m_initialAutoCommit + "'");
+        }
+
+        if (sqlException != null) {
+            throw sqlException;
         }
     }
 
     public void loadRow(Object[] values, List<String> columnNames) throws Exception {
+        if (m_inFailedState) {
+            return;
+        }
+
         int count = m_columns.size();
 
-        if (logger.isTraceEnabled()) {
-            StringBuilder buf = new StringBuilder();
+        if (rowLogger.isTraceEnabled()) {
+            StringBuilder msg = new StringBuilder();
+            msg.append("row ").append(m_rowNum).append(": ");
+
             for (int i = 0; i < m_columns.size(); i++) {
-                buf.append("\n");
-                buf.append(m_columns.get(i).getName()).append(": ");
+                msg.append("\n");
+                msg.append(m_columns.get(i).getName()).append(": ");
                 Object value = i < values.length ? values[i] : "";
-                buf.append(value);
+                msg.append(value);
             }
-            logger.trace("row {}: {}", m_rowNum, buf.toString());
+            rowLogger.trace(msg);
         }
 
         if (columnNames != null) {
@@ -157,12 +178,15 @@ public class Loader {
         m_statement.addBatch();
         m_rowNum++;
         if (m_rowNum % m_batchSize == 0) {
-            logger.debug("loadRow: executeBatch, rowNum={}", m_rowNum);
+            if (logger.isTraceEnabled()) {
+                logger.trace("loadRow: executeBatch, rowNum=" + m_rowNum);
+            }
+
             executeBatch(m_statement);
 
             if (m_commitRowCount != 0
                     && (m_rowNum - m_lastCommit >= m_commitRowCount)) {
-                logger.debug("loadRow: commit");
+                logger.trace("loadRow: commit");
                 m_cnn.commit();
                 m_lastCommit = m_rowNum;
             }
@@ -171,7 +195,7 @@ public class Loader {
 
     private Object[] remapValues(Object[] values, List<String> columnNames) {
         Object[] result = getTempRowBuffer();
-        
+
         int i = 0;
         for (String columnName: columnNames) {
             String dbColumnName = m_identifierConverter.toDbIdentifier(columnName);
@@ -179,7 +203,7 @@ public class Loader {
             if (columnIndex == null) {
                 throw new XdtlException("Column not found: " + dbColumnName);
             }
-            
+
             result[columnIndex.intValue()] = values[i++];
         }
 
@@ -200,24 +224,25 @@ public class Loader {
         } else {
             Arrays.fill(m_tempRowBuffer, null);
         }
-        
+
         return m_tempRowBuffer;
     }
-    
+
     private void executeBatch(PreparedStatement stmt) throws SQLException {
         try {
             stmt.executeBatch();
         } catch (BatchUpdateException e) {
-            logger.error("executeBatch: failed", e);
+            m_inFailedState = true;
             throw e.getNextException();
+        } catch (SQLException e) {
+            m_inFailedState = true;
+            throw e;
         }
     }
 
     private Object convert(Object object, Column col) throws Exception {
         assert object != null;
         IConverter<Object> converter = getConverter(object);
-        // m_logger.debug("About to convert column " + col.getName() +
-        // " with value " + (object == null ? "null" : object.toString()));
         return (converter != null) ? converter.convert(object, col) : object;
     }
 

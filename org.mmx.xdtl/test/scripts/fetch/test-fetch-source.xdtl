@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Test 'fetch' element source attribute.
+ -->
+<package name="test-fetch" xmlns="http://xdtl.org/xdtl">
+  <variable name="table">DUAL</variable>
+  <connection name="conn" type="DB">$testdb</connection>
+  <tasks>
+    <task name="first" connection="$conn">
+      <steps>
+        <!-- Source attribute -->
+        <fetch source="select 'TEST' from $table" overwrite="1" connection="$conn" rowset="rowset"/>
+        <if expr="${rowset[0][0]} != 'TEST'">
+          <log msg="Failed: Source attribute: rowset[0][0] = ${rowset[0][0]}"/>
+        </if>
+
+        <!-- Source in content -->
+        <fetch overwrite="1" connection="$conn" rowset="rowset">
+            select 'TEST' from $table
+        </fetch>
+        <if expr="${rowset[0][0]} != 'TEST'">
+          <log msg="Failed: Source in content: rowset[0][0] = ${rowset[0][0]}"/>
+        </if>
+
+        <!-- Source priority -->
+        <fetch source="select 'attr' from $table" overwrite="1" connection="$conn" rowset="rowset">
+            select 'content' from $table
+        </fetch>
+        <if expr="${rowset[0][0]} != 'attr'">
+          <log msg="Failed: Source in content: rowset[0][0] = ${rowset[0][0]}"/>
+        </if>
+      </steps>
+    </task>
+  </tasks>
+</package>

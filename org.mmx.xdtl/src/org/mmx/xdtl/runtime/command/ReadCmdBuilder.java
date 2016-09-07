@@ -37,13 +37,13 @@ public class ReadCmdBuilder extends ReadWriteCmdBuilder {
     protected RuntimeCommand createInstance() throws Exception {
         Constructor<? extends RuntimeCommand> ctor =
             getRuntimeClass().getConstructor(Object.class, String.class,
-                    String.class, boolean.class, String.class, String.class,
+                    String.class, boolean.class, String.class, String.class, String.class,
                     String.class, Connection.class, String.class, boolean.class,
                     int.class, int.class);
 
         RuntimeCommand rtCmd = ctor.newInstance(getSource(), getTarget(),
                 getType(), isOverwrite(), getDelimiter(), getQuote(),
-                getEncoding(), getConnection(), m_errors, m_header, m_rowOffset,
+                getEncoding(), getEscape(), getConnection(), m_errors, m_header, m_rowOffset,
                 m_batch);
     
         return rtCmd;

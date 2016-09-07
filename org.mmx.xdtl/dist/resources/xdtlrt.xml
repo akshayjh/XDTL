@@ -5,7 +5,8 @@
     <entry key="osprocessrunner.stream.encoding">cp1257</entry>
     <entry key="useinternalschema">true</entry>
     <entry key="loader.batchsize">1000</entry>
-    <entry key="read.impl">org.mmx.xdtl.runtime.command.JdbcReadCmd</entry>
+	<entry key="parser.maxcyclecount">5000</entry>
+	<entry key="logger.sqlshortener">5000</entry>
 	<!-- if true, commands doing external calls  (exec, read, write, etc) will not throw error on non-zero exit code -->
 	<entry key="errors.silentexitcode">true</entry>
 <!--
@@ -31,22 +32,26 @@
     <entry key="library.path">library</entry>
 -->
 <!--
+    XML transformer factory. Clear this entry to use JDK's internal XML
+    transformer. Default is Saxon HE.
+    <entry key="transformerFactory.class">net.sf.saxon.TransformerFactoryImpl</entry>
+ -->
+<!--
 	<entry key="write.impl">org.mmx.xdtl.runtime.command.PostgresqlWriteCmd</entry>
 -->
 <!--
     Exec based versions of read/write commands
 
     <entry key="read.impl">org.mmx.xdtl.runtime.command.ReadCmd</entry>
-    <entry key="write.impl">org.mmx.xdtl.runtime.command.WriteCmd</entry> 
+    <entry key="write.impl">org.mmx.xdtl.runtime.command.WriteCmd</entry>
 -->
 <!--
     Generic JDBC based read command
- 
-    <entry key="read.impl">org.mmx.xdtl.runtime.command.JdbcReadCmd</entry>
  -->
+    <entry key="read.impl">org.mmx.xdtl.runtime.command.JdbcReadCmd</entry>
 <!--
     Read command for Oracle
- 
+
     <entry key="read.impl">org.mmx.xdtl.runtime.command.OracleReadCmd</entry>
  -->
 </properties>

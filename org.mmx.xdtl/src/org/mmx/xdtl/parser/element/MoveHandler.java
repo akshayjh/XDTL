@@ -27,8 +27,7 @@ public class MoveHandler extends AbstractElementHandler {
      */
     @Override
     public void startElement(Attributes attr) {
-        m_move = new Move(attr.getStringValue("cmd"),
-                attr.getStringValue("source"),
+        m_move = new Move(attr.getStringValue("source"),
                 attr.getStringValue("target"),
                 attr.getStringValue("overwrite"));
     }

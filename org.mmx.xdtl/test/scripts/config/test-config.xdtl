@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Properties element test. -->
+<package name="config.test.xdtl" xmlns="http://xdtl.org/xdtl">
+  <variable name="anotherKey">21</variable>
+  <config href="test.properties" />
+
+  <tasks>
+    <task name="main">
+      <steps>
+        <log msg="Muutuja keyName väärtus failis on $keyName" />
+        <send target="keyName" source="Uus väärtus" overwrite="1" />
+        <log msg="Muutuja keyName paketis omistatud väärtus on $keyName" />
+        <log msg="${(parseInt(anotherKey) + 1).toString()}" />
+      </steps>
+    </task>
+    <task name="unmain">
+      <config href="test2.properties" />
+      <steps>
+        <log msg="Muutuja keyName väärtus failis on $keyName" />
+      </steps>
+    </task>
+  </tasks>
+</package>

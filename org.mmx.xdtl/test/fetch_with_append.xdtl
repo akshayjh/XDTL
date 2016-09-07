@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xdtl:package name="native_clear"
+	xmlns:xdtl="http://xdtl.org/xdtl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd">
+	
+	<xdtl:connection name="conn" type="DB">jdbc:postgresql://127.0.0.1:5432/postgres?user=postgres&amp;allowEncodingChanges=true</xdtl:connection>
+	
+	<xdtl:tasks>
+		<xdtl:task name="main">
+			<xdtl:steps>
+				<xdtl:fetch source="select 'AAA';" target="d:/tmp/test2.txt" overwrite="1" connection="$conn"/>
+				<xdtl:fetch source="select 'BBB';" target="d:/tmp/test2.txt" overwrite="1" connection="$conn"/>
+				<xdtl:fetch source="select 'CCC';" target="d:/tmp/test2.txt" overwrite="0" connection="$conn"/>				
+			</xdtl:steps>
+		</xdtl:task>		
+	</xdtl:tasks>
+</xdtl:package>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Test contexts.
+-->
+<package name="test-context" xmlns="http://xdtl.org/xdtl">
+  <script>
+    function add(x, y) {
+        return x + y;
+    }
+  </script>
+
+  <tasks>
+    <task name="first">
+      <steps>
+        <send target="x">${
+            '123'
+        }</send>
+        <log msg="x + 1 = ${add(x, 1)}"/>
+        <call href="subpackage.xdtl">
+          <parameter name="param">Hello</parameter>
+        </call>
+      </steps>
+    </task>
+
+    <task name="second">
+      <steps>
+        <send target="y">${
+            '123'
+        }</send>
+        <log msg="y + 1 = ${add(y, 1)}"/>
+      </steps>
+    </task>
+  </tasks>
+</package>

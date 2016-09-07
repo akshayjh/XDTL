@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Test task-local connections.
+ -->
+<package name="test-onopen" xmlns="http://xdtl.org/xdtl">
+  <connection name="test" type="FILE">Hello</connection>
+  <tasks>
+    <task name="first">
+      <steps>
+        <for rowset="${[testdb, testdb]}" item="x">
+          <call href="#second">
+            <parameter name="x">$x</parameter>
+          </call>
+        </for>
+      </steps>
+    </task>
+    <task name="second">
+      <parameter name="x"></parameter>
+      <connection name="testcnn" type="DB">$x</connection>
+      <steps>
+        <query source="select count(*) from mmx_repo_dev.md_object" connection="$testcnn" target="cnt"/>
+        <log msg="rowcount=$cnt"/>
+      </steps>
+    </task>
+  </tasks>
+</package>

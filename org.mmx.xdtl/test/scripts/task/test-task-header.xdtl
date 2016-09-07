@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Test task header elements.
+-->
+<package name="test-task-header" xmlns="http://xdtl.org/xdtl">
+  <tasks>
+    <task name="main">
+      <variable name="my_var">Variable</variable>
+      <define name="my_const">$my_var</define>
+      <connection name="my_cnn" type="FILE">$my_var</connection>
+      <parameter name="my_param1" default="Param 1"></parameter>
+      <config href="test.properties"/>
+      <parameter name="my_param2" default="$keyName"></parameter>
+
+      <steps>
+        <!--  Variable -->
+        <if expr="${my_var != 'Variable'}">
+          <log msg="Failed: variable"/>
+        </if>
+
+        <!--  Define -->
+        <if expr="${my_const != 'Variable'}">
+          <log msg="Failed: define"/>
+        </if>
+
+        <!--  Connection -->
+        <if expr="${my_cnn.value != 'Variable'}">
+          <log msg="Failed: connection"/>
+        </if>
+
+        <!--  Parameter 1 -->
+        <if expr="${my_param1 != 'Param 1'}">
+          <log msg="Failed: parameter 1"/>
+        </if>
+
+        <!--  Config -->
+        <if expr="${keyName != 'väärtus'}">
+          <log msg="Failed: config"/>
+        </if>
+
+        <!--  Parameter 2 -->
+        <if expr="${my_param2 != 'väärtus'}">
+          <log msg="Failed: parameter 2"/>
+        </if>
+      </steps>
+    </task>
+  </tasks>
+</package>

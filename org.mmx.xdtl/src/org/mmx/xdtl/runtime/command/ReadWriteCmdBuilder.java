@@ -21,6 +21,7 @@ public abstract class ReadWriteCmdBuilder extends AbstractCmdBuilder {
     private String m_delimiter;
     private String m_quote;
     private String m_encoding;
+    private String m_escape;
     private Connection m_connection;
 
     @Inject
@@ -59,6 +60,7 @@ public abstract class ReadWriteCmdBuilder extends AbstractCmdBuilder {
         m_delimiter = m_typeConv.toString(m_exprEval.evaluate(ctx, cmd.getDelimiter()));
         m_quote = m_typeConv.toString(m_exprEval.evaluate(ctx, cmd.getQuote()));
         m_encoding = m_typeConv.toString(m_exprEval.evaluate(ctx, cmd.getEncoding()));
+        m_escape = m_typeConv.toString(m_exprEval.evaluate(ctx, cmd.getEscape()));
     }
 
     protected Object getSource() {
@@ -99,5 +101,9 @@ public abstract class ReadWriteCmdBuilder extends AbstractCmdBuilder {
 
     protected String getEncoding() {
         return m_encoding;
+    }
+
+    protected String getEscape() {
+        return m_escape;
     }
 }

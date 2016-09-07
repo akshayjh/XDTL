@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xdtl>
+<!--
+	Nolog attribute test.
+ -->
+<package name="test-log" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xdtl.org/xdtl">
+  <connection name="conn" type="FILE">xdtl:connection</connection>
+  <tasks>
+    <task name="first">
+      <steps>
+        <log msg="$xdtlTest" nolog="1"/>
+        <call href="echo.xdtl">
+          <parameter name="msg" nolog="1">Hello</parameter>
+        </call>
+      </steps>
+    </task>
+  </tasks>
+</package>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Hashmap test.
+ -->
+<package name="test-hashmap" xmlns="http://xdtl.org/xdtl">
+  <connection name="conn" type="FILE">xdtl:connection</connection>
+  <tasks>
+    <task name="first">
+      <steps>
+        <send source="${a = new java.util.HashMap(), a.put('test', 'HELLO'), a}" target="xdtlTest" overwrite="1"/>
+        <log msg="${xdtlTest.test}"/>
+      </steps>
+    </task>
+  </tasks>
+</package>

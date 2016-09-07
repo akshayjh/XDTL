@@ -9,22 +9,22 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+import org.mmx.xdtl.log.XdtlLogger;
 import org.mmx.xdtl.model.XdtlException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PathList {
-    private static final Logger logger = LoggerFactory.getLogger(PathList.class); 
+    private static final Logger logger = XdtlLogger.getLogger("xdtl.rt.pathList");
     private static final String PATH_SEPARATOR = ",";
-    
+
     private ArrayList<URL> m_roots = new ArrayList<URL>();
     private URL m_baseUrl;
-    
+
     public PathList(PathList src) {
         m_baseUrl = src.m_baseUrl;
         m_roots.addAll(src.m_roots);
     }
-    
+
     public PathList(String baseUrl, String paths) {
         if (paths == null || paths.length() == 0) return;
 
@@ -46,19 +46,22 @@ public class PathList {
     public Object forEachFile(FilenameFilter filter, ForEachCallback callback) {
         for (URL root: m_roots) {
             if (!root.getProtocol().equalsIgnoreCase("file")) continue;
-    
-            logger.debug("forEachFile: directory={}", root.getPath());
+
+            if (logger.isTraceEnabled()) {
+                logger.trace("forEachFile: directory=" + root.getPath());
+            }
+
             File directory = new File(root.getPath());
             if (!directory.exists() || !directory.isDirectory()) continue;
             File[] files = directory.listFiles(filter);
             Arrays.sort(files);
-            
+
             for (int i = 0; i < files.length; i++) {
                 Object result = callback.execute(files[i]);
                 if (result != null) return result;
             }
         }
-        
+
         return null;
     }
 
@@ -69,11 +72,11 @@ public class PathList {
     public void prepend(URL url) {
         m_roots.add(0, getDirectoryUrl(url));
     }
-    
+
     private URL getDirectoryUrl(URL url) {
         String path = url.getPath();
         if (path.endsWith("/")) return url;
-        
+
         try {
             return new URL(url, "./");
         } catch (MalformedURLException e) {
@@ -84,18 +87,21 @@ public class PathList {
     public interface ForEachCallback {
         Object execute(File file);
     }
-    
+
     public String toCsv() {
         StringBuilder buf = new StringBuilder();
         for (URL url: m_roots) {
             buf.append(escapeCsv(url)).append(PATH_SEPARATOR);
         }
-        
+
         if (m_roots.size() > 0) {
             buf.setLength(buf.length() - 1);
         }
-        
-        logger.debug("toCsv: result={}", buf);
+
+        if (logger.isTraceEnabled()) {
+            logger.trace("toCsv: result=" + buf);
+        }
+
         return buf.toString();
     }
 

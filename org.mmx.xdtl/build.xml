@@ -1,138 +1,140 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project name="xdtl" default="dist">
 
-	<available file="../.git" type="dir" property="git.present"/>
-	
-	<property file="src/org/mmx/xdtl/Version.properties"/>
-	
-	<property name="build.dir"                   value="build"/>
-	<property name="bin.dir"                     value="${build.dir}/bin"/>
-	<property name="javadoc.dir"                 value="${build.dir}/javadoc"/>
-	<property name="lib.dir"                     value="lib"/>
-	<property name="src.dir"                     value="src"/>
-	<property name="test.bin.dir"                value="${build.dir}/test-bin"/>
-	<property name="test.lib.dir"                value="lib/test"/>
-	<property name="test.src.dir"                value="test/src"/>
-	<property name="test.results.dir"            value="${build.dir}/test-results"/>
-	<property name="dist.src.scripts.dir"        value="dist/scripts"/>
-	<property name="dist.src.resources.dir"      value="dist/resources"/>
-	<property name="dist.lib.dir.prefix"         value="xdtl"/>
-	<property name="dist.resources.dir.prefix"   value="${dist.lib.dir.prefix}/resources"/>
+    <available file="../.git" type="dir" property="git.present"/>
 
-	<path id="libs">
-		<fileset dir="${lib.dir}" includes="*.jar"/>
-	</path>
+    <property file="src/org/mmx/xdtl/Version.properties"/>
 
-	<path id="classpath">
-		<path refid="libs"/>
-	</path>
-		
-	<path id="test-libs">
-		<fileset dir="${test.lib.dir}" includes="*.jar"/>
-	</path>
+    <property name="build.dir"                   value="build"/>
+    <property name="bin.dir"                     value="${build.dir}/bin"/>
+    <property name="javadoc.dir"                 value="${build.dir}/javadoc"/>
+    <property name="lib.dir"                     value="lib"/>
+    <property name="src.dir"                     value="src"/>
+    <property name="test.bin.dir"                value="${build.dir}/test-bin"/>
+    <property name="test.lib.dir"                value="lib/test"/>
+    <property name="test.src.dir"                value="test/src"/>
+    <property name="test.results.dir"            value="${build.dir}/test-results"/>
+    <property name="dist.src.scripts.dir"        value="dist/scripts"/>
+    <property name="dist.src.resources.dir"      value="dist/resources"/>
+    <property name="dist.lib.dir.prefix"         value="lib"/>
+    <property name="dist.resources.dir.prefix"   value="resources"/>
 
-	<path id="test-classpath">
-		<path refid="classpath"/>
-		<path refid="test-libs"/>
-		<path location="${build.dir}/bin"/>
-	</path>
-	
-	
-	<target name="revision">
-		<exec executable="git" outputproperty="xdtl.implementation.version" failifexecutionfails="false" errorproperty="">
-			<arg value="describe"/>
-			<arg value="--match"/>
-			<arg value="build"/>
-		</exec>
-		
-		<property name="jarfile"                     value="xdtl-${xdtl.implementation.version}.jar"/>
-		<property name="zipfile"                     value="xdtlrt-${xdtl.implementation.version}.zip"/>
-	</target>
+    <path id="libs">
+        <fileset dir="${lib.dir}" includes="*.jar"/>
+    </path>
 
-	<!-- - - - - - - - - - - - - - - - - - 
-          target: compile                      
-	- - - - - - - - - - - - - - - - - -->
-	<target name="compile">
-		<mkdir dir="${bin.dir}"/>
+    <path id="classpath">
+        <path refid="libs"/>
+    </path>
 
-		<javac srcdir="${src.dir}"
-         destdir="${bin.dir}"
-         classpathref="classpath"
-         debug="on"
-		 includeantruntime="false"
-		/>
-	</target>
+    <path id="test-libs">
+        <fileset dir="${test.lib.dir}" includes="*.jar"/>
+    </path>
 
-	<!-- - - - - - - - - - - - - - - - - - 
-          target: compile-tests                      
-	- - - - - - - - - - - - - - - - - -->
-	<target name="compile-tests" depends="compile">
-		<mkdir dir="${test.bin.dir}"/>
+    <path id="test-classpath">
+        <path refid="classpath"/>
+        <path refid="test-libs"/>
+        <path location="${build.dir}/bin"/>
+    </path>
 
-		<javac srcdir="${test.src.dir}"
+    <target name="revision">
+        <exec executable="git" outputproperty="xdtl.implementation.version" failifexecutionfails="false" errorproperty="">
+            <arg value="describe"/>
+            <arg value="--match"/>
+            <arg value="build"/>
+        </exec>
+
+        <property name="jarfile" value="xdtl-${xdtl.implementation.version}.jar"/>
+        <property name="zipfile" value="xdtlrt-${xdtl.implementation.version}.zip"/>
+    </target>
+
+    <!-- - - - - - - - - - - - - - - - - -
+          target: compile
+    - - - - - - - - - - - - - - - - - -->
+    <target name="compile">
+        <mkdir dir="${bin.dir}"/>
+
+        <javac srcdir="${src.dir}"
+            destdir="${bin.dir}"
+            classpathref="classpath"
+            debug="on"
+            includeantruntime="false"
+            target="1.8"
+            source="1.8"
+        />
+    </target>
+
+    <!-- - - - - - - - - - - - - - - - - -
+          target: compile-tests
+    - - - - - - - - - - - - - - - - - -->
+    <target name="compile-tests" depends="compile">
+        <mkdir dir="${test.bin.dir}"/>
+
+        <javac srcdir="${test.src.dir}"
          destdir="${test.bin.dir}"
-		 classpathref="test-classpath"
+         classpathref="test-classpath"
          debug="on"
-		/>
-	</target>
+        />
+    </target>
 
-	<!-- ================================= 
-          target: build-jar              
+    <!-- =================================
+          target: build-jar
          ================================= -->
-	<target name="build-jar" depends="compile,revision" description="Build project">
-		<jar destfile="${build.dir}/${jarfile}" basedir="${bin.dir}">
-			<fileset dir="${src.dir}">
-			    <include name="**/*.xsd"/>
+    <target name="build-jar" depends="compile,revision" description="Build project">
+        <jar destfile="${build.dir}/${jarfile}" basedir="${bin.dir}">
+            <fileset dir="${src.dir}">
+                <include name="**/*.xsd"/>
                 <include name="org/mmx/xdtl/conf/default.properties"/>
-			</fileset>
-			<manifest>
-				<attribute name="Main-Class" value="org.mmx.xdtl.cli.Main"/>
-				<section name="org/mmx/xdtl/">
-					<attribute name="Specification-Title" value="${xdtl.specification.title}"/>
-					<attribute name="Specification-Version" value="${xdtl.specification.version}"/>
-					<attribute name="Specification-Vendor" value="${xdtl.specification.vendor}"/>
-					<attribute name="Implementation-Title" value="${xdtl.implementation.title}"/>
-					<attribute name="Implementation-Version" value="${xdtl.implementation.version}"/>
-					<attribute name="Implementation-Vendor" value="${xdtl.implementation.vendor}"/>
-				</section>
-			</manifest>
-		</jar>
-	</target>
+            </fileset>
+            <manifest>
+                <attribute name="Main-Class" value="org.mmx.xdtl.cli.Main"/>
+                <section name="org/mmx/xdtl/">
+                    <attribute name="Specification-Title" value="${xdtl.specification.title}"/>
+                    <attribute name="Specification-Version" value="${xdtl.specification.version}"/>
+                    <attribute name="Specification-Vendor" value="${xdtl.specification.vendor}"/>
+                    <attribute name="Implementation-Title" value="${xdtl.implementation.title}"/>
+                    <attribute name="Implementation-Version" value="${xdtl.implementation.version}"/>
+                    <attribute name="Implementation-Vendor" value="${xdtl.implementation.vendor}"/>
+                </section>
+            </manifest>
+        </jar>
+    </target>
 
-	<target name="dist" depends="build-jar">
-		<zip destfile="${build.dir}/${zipfile}">
-			<zipfileset dir="${dist.src.scripts.dir}"/>
-			<zipfileset dir="${dist.src.resources.dir}" prefix="${dist.resources.dir.prefix}"/>
-			<zipfileset dir="${lib.dir}" prefix="${dist.lib.dir.prefix}" includes="*.jar"/>
-			<zipfileset dir="${build.dir}" includes="${jarfile}" prefix="${dist.lib.dir.prefix}"/>
-		</zip>
-	</target>
+    <target name="dist" depends="build-jar">
+        <zip destfile="${build.dir}/${zipfile}">
+            <zipfileset dir="${dist.src.scripts.dir}" includes="*.sh" filemode="755"/>
+            <zipfileset dir="${dist.src.scripts.dir}" excludes="*.sh"/>
+            <zipfileset dir="${dist.src.resources.dir}" prefix="${dist.resources.dir.prefix}"/>
+            <zipfileset dir="${lib.dir}" prefix="${dist.lib.dir.prefix}" includes="*.jar"/>
+            <zipfileset dir="${build.dir}" includes="${jarfile}" prefix="${dist.lib.dir.prefix}"/>
+        </zip>
+    </target>
 
-	<target name="build-javadoc" description="Build javadoc">
-		<javadoc sourcepath="${src.dir}" destdir="${javadoc.dir}" classpathref="classpath"/>
-	</target>
-		
-	<!-- ================================= 
-          target: run-tests              
+    <target name="build-javadoc" description="Build javadoc">
+        <javadoc sourcepath="${src.dir}" destdir="${javadoc.dir}" classpathref="classpath"/>
+    </target>
+
+    <!-- =================================
+          target: run-tests
          ================================= -->
-	<target name="run-tests" depends="compile-tests" description="Run all tests">
-		<mkdir dir="${test.results.dir}"/>
-		
-		<junit>
-			<classpath>
-				<path refid="test-classpath" />
-				<path location="${test.bin.dir}" />
-			</classpath>
-			
-			<formatter type="plain"/>
-			
-			<batchtest todir="${test.results.dir}">
-				<fileset dir="${test.src.dir}" includes="**/*Test.java" />
-			</batchtest>
-		</junit>
-	</target>
-	
-	<target name="clean" description="Clean project">
-		<delete dir="${build.dir}"/>
-	</target>
+    <target name="run-tests" depends="compile-tests" description="Run all tests">
+        <mkdir dir="${test.results.dir}"/>
+
+        <junit>
+            <classpath>
+                <path refid="test-classpath" />
+                <path location="${test.bin.dir}" />
+            </classpath>
+
+            <formatter type="plain"/>
+
+            <batchtest todir="${test.results.dir}">
+                <fileset dir="${test.src.dir}" includes="**/*Test.java" />
+            </batchtest>
+        </junit>
+    </target>
+
+    <target name="clean" description="Clean project">
+        <delete dir="${build.dir}"/>
+    </target>
 </project>

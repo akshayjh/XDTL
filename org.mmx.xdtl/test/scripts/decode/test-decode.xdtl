@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Test 'decode' element
+ -->
+<package name="test-decode" xmlns="http://xdtl.org/xdtl">
+  <tasks>
+    <task name="first">
+      <steps>
+        <decode source="file:../scripts/decode/person.xml" target="person_xml"/>
+        <for rowset="$person_xml:person" item="person">
+          <log msg="First name: $person:firstname, last name: $person:lastname"/>
+        </for>
+      </steps>
+    </task>
+  </tasks>
+</package>

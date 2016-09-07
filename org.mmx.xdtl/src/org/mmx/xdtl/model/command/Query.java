@@ -1,6 +1,5 @@
 package org.mmx.xdtl.model.command;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -15,14 +14,20 @@ public class Query extends AbstractElement implements Command {
     private final String m_connection;
     private final String m_queryType;
     private final String m_target;
-    private final ArrayList<Parameter> m_parameterList = new ArrayList<Parameter>();
+    private final List<Parameter> m_parameterList;
 
-    public Query(String source, String connection, String queryType, String target) {
+    public Query(String source, String connection, String queryType, String target, List<Parameter> parameterList) {
         super();
         m_source = source;
         m_connection = connection;
         m_queryType = queryType;
         m_target = target;
+
+        if (parameterList == null) {
+            m_parameterList = Collections.emptyList();
+        } else {
+            m_parameterList = Collections.unmodifiableList(parameterList);
+        }
     }
 
     public String getSource() {
@@ -40,12 +45,8 @@ public class Query extends AbstractElement implements Command {
     public String getTarget() {
         return m_target;
     }
-    
-    public void addParameter(Parameter param) {
-        m_parameterList.add(param);
-    }
-    
+
     public List<Parameter> getParameterList() {
-        return Collections.unmodifiableList(m_parameterList);
+        return m_parameterList;
     }
 }

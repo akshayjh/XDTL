@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Test 'define' element.
+-->
+<package name="test-define" xmlns="http://xdtl.org/xdtl">
+  <define name="my_const">Constant</define>
+  <variable name="my_var">Variable</variable>
+
+  <tasks>
+    <task name="main">
+      <steps>
+        <!--  Read -->
+        <if expr="${my_const != 'Constant'}">
+          <log msg="Failed: define"/>
+        </if>
+
+        <!--  Overwrite -->
+        <send source="test" target="my_const"/>
+      </steps>
+    </task>
+  </tasks>
+</package>

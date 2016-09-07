@@ -2,25 +2,26 @@ package org.mmx.xdtl.db;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.mmx.xdtl.log.XdtlLogger;
 
 public class ExcelSource implements Source {
-    private static final Logger logger = LoggerFactory.getLogger(ExcelSource.class);
-    
+    private static final Logger logger = XdtlLogger.getLogger("xdtl.rt.db.excelSource");
+
     private Workbook m_workbook;
     private Sheet m_sheet;
     private InputStream m_stream;
     private int m_rowNum;
     private int m_cellNum;
-    
+
     public ExcelSource(InputStream stream, String sheetName, boolean header,
             int skip) throws Exception {
         m_stream = stream;
@@ -36,12 +37,12 @@ public class ExcelSource implements Source {
             if (m_sheet == null) {
                 throw new Exception("Sheet '" + sheetName + "' not found in workbook");
             }
-        }        
-        
+        }
+
         if (header) ++skip;
         skipRows(skip);
     }
-    
+
     private void skipRows(int rowCount) {
         m_rowNum = rowCount;
     }
@@ -57,7 +58,7 @@ public class ExcelSource implements Source {
     private Object[] readNext() throws IOException {
         Row row = m_sheet.getRow(m_rowNum);
         if (row == null) return null;
-        
+
         int cellCount = row.getLastCellNum();
         Object[] result = new Object[cellCount];
         boolean rowHasValues = false;
@@ -68,10 +69,10 @@ public class ExcelSource implements Source {
             result[m_cellNum] = value;
             rowHasValues |= value != null;
         }
-        
+
         // stop at first empty row
         if (!rowHasValues) return null;
-        
+
         m_rowNum++;
         return result;
     }
@@ -83,7 +84,7 @@ public class ExcelSource implements Source {
         if (cellType == Cell.CELL_TYPE_FORMULA) {
             cellType = cell.getCachedFormulaResultType();
         }
-        
+
         return getCellValue(cell, cellType);
     }
 
@@ -111,5 +112,10 @@ public class ExcelSource implements Source {
     @Override
     public void close() throws Exception {
         m_stream.close();
+    }
+
+    @Override
+    public List<Column> getColumns() throws Exception {
+        throw new Exception("getColumns() is not implemented");
     }
 }

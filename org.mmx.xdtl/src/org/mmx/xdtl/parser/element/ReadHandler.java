@@ -24,6 +24,7 @@ public class ReadHandler extends AbstractElementHandler {
                 attr.getStringValue("delimiter"),
                 attr.getStringValue("quote"),
                 attr.getStringValue("encoding"),
+                attr.getStringValue("escape"),
                 attr.getStringValue("errors"),
                 attr.getStringValue("header"),
                 attr.getStringValue("skip"),

@@ -1,0 +1,4 @@
+<!ELEMENT article (title,sect)>
+<!ELEMENT title (#PCDATA)>
+<!ELEMENT sect (para,sect)>
+<!ELEMENT para (#PCDATA)>

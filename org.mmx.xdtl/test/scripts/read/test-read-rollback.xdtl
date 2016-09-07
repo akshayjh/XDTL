@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Test read command.
+ -->
+<package name="test-read-rollback" xmlns="http://xdtl.org/xdtl">
+  <connection name="conn" type="DB">$testdb</connection>
+  <tasks>
+    <task name="first" connection="$conn" resume="1" onerror="#error-handler">
+      <steps>
+        <call href="#second"/>
+        <query source="SELECT COUNT(*) FROM ARHIVAAL" target="x"/>
+      </steps>
+    </task>
+    <task name="second" connection="$conn">
+      <steps>
+        <read source="../scripts/read/arhivaal.csv" target="arhivaal" type="CSV" header="1"/>
+      </steps>
+    </task>
+    <task name="error-handler" connection="$conn">
+      <steps>
+        <log msg="Error"/>
+      </steps>
+    </task>
+  </tasks>
+</package>

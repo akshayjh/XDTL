@@ -2,19 +2,14 @@ package org.mmx.xdtl.runtime.command;
 
 import java.util.List;
 
+import org.apache.log4j.Logger;
+import org.mmx.xdtl.log.XdtlLogger;
 import org.mmx.xdtl.model.Connection;
 import org.mmx.xdtl.runtime.Context;
-import org.mmx.xdtl.runtime.OsProcessException;
-import org.mmx.xdtl.runtime.RuntimeCommand;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+public class WriteCmd extends ExecBasedCmd {
+    private static final Logger logger = XdtlLogger.getLogger("xdtl.cmd.write");
 
-public class WriteCmd implements RuntimeCommand {
-    private final Logger m_logger = LoggerFactory.getLogger(WriteCmd.class);
-    
     private final String m_source;
     private final String m_target;
     private final String m_type;
@@ -22,10 +17,6 @@ public class WriteCmd implements RuntimeCommand {
     private final String m_quote;
     private final String m_encoding;
     private Connection m_connection;
-
-    private OsProcessRunner m_osProcessRunner;
-    private OsArgListBuilder m_argListBuilder;
-    private boolean m_silentNonZeroExitCode;
 
     public WriteCmd(String source, String target, String type,
             boolean overwrite, String delimiter, String quote, String encoding,
@@ -41,52 +32,21 @@ public class WriteCmd implements RuntimeCommand {
     }
 
     @Override
-    public void run(Context context) throws Throwable {
-        m_logger.info(String.format(
-                "write: source='%s', target='%s', " +
-                "type='%s', delimiter='%s', quote='%s', connection='%s'",
-                m_source, m_target,
-                m_type, m_delimiter, m_quote, m_connection));
-        
-        m_argListBuilder.addVariableEscaped("source", m_source);
-        m_argListBuilder.addVariableEscaped("target", m_target);
-        m_argListBuilder.addVariableEscaped("type", m_type);
-        m_argListBuilder.addVariableEscaped("delimiter", m_delimiter);
-        m_argListBuilder.addVariableEscaped("quote", m_quote);
-        m_argListBuilder.addVariableEscaped("encoding", m_encoding);
-        m_argListBuilder.addVariableEscaped("connection", m_connection.getValue());
+    protected List<String> getArgs(Context context, OsArgListBuilder argListBuilder) {
+        argListBuilder.addVariableEscaped("source", m_source);
+        argListBuilder.addVariableEscaped("target", m_target);
+        argListBuilder.addVariableEscaped("type", m_type);
+        argListBuilder.addVariableEscaped("delimiter", m_delimiter);
+        argListBuilder.addVariableEscaped("quote", m_quote);
+        argListBuilder.addVariableEscaped("encoding", m_encoding);
+        argListBuilder.addVariableEscaped("connection", m_connection.getValue());
 
         String cmd = (String) context.getVariableValue("write");
-        List<String> args = m_argListBuilder.build(cmd, true);
-
-        int exitValue = m_osProcessRunner.run(args).getExitCode();
-        context.assignVariable(Context.VARNAME_XDTL_EXITCODE, exitValue);
-        
-        if (exitValue != 0 && !m_silentNonZeroExitCode) {
-            throw new OsProcessException("'write' failed with exit value " + exitValue, exitValue);
-        }
+        return argListBuilder.build(cmd, true);
     }
 
-    public OsProcessRunner getOsProcessRunner() {
-        return m_osProcessRunner;
-    }
-
-    @Inject
-    public void setOsProcessRunner(OsProcessRunner osProcessRunner) {
-        m_osProcessRunner = osProcessRunner;
-    }
-
-    public OsArgListBuilder getArgListBuilder() {
-        return m_argListBuilder;
-    }
-
-    @Inject
-    public void setArgListBuilder(OsArgListBuilder argListBuilder) {
-        m_argListBuilder = argListBuilder;
-    }
-    
-    @Inject
-    protected void setSilentNonZeroExitCode(@Named("errors.silentexitcode") boolean value) {
-    	m_silentNonZeroExitCode = value;
+    @Override
+    protected Logger getLogger() {
+        return logger;
     }
 }

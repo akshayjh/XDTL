@@ -10,7 +10,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.mmx.xdtl.db.JdbcConnection;
+import org.mmx.xdtl.log.XdtlLogger;
 import org.mmx.xdtl.model.Command;
 import org.mmx.xdtl.model.Connection;
 import org.mmx.xdtl.model.Parameter;
@@ -21,28 +23,26 @@ import org.mmx.xdtl.runtime.ExpressionEvaluator;
 import org.mmx.xdtl.runtime.RuntimeCommand;
 import org.mmx.xdtl.runtime.TypeConverter;
 import org.mmx.xdtl.services.UriSchemeParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
 public class QueryCmdBuilder extends AbstractCmdBuilder {
     private static final int STREAM_BUF_SIZE = 4096;
     private static final String DEFAULT_DATE_PATTERN = "yyyy-MM-dd";
-    
-    private final Logger m_logger = LoggerFactory.getLogger(QueryCmdBuilder.class);
-    
+
+    private static final Logger logger = XdtlLogger.getLogger("xdtl.cmd.query");
+
     private final ExpressionEvaluator m_exprEval;
     private final TypeConverter m_typeConv;
     private final UriSchemeParser m_uriSchemeParser;
     private final List<Object> m_params = new ArrayList<Object>();
-    
+
     private String m_sqlStatement;
     private String m_queryType;
     private String m_target;
     private Connection m_connection;
     private JdbcConnection m_jdbcConnection;
-    
+
     @Inject
     public QueryCmdBuilder(ExpressionEvaluator exprEval,
             TypeConverter typeConverter, UriSchemeParser uriSchemeParser) {
@@ -50,13 +50,13 @@ public class QueryCmdBuilder extends AbstractCmdBuilder {
         m_typeConv = typeConverter;
         m_uriSchemeParser = uriSchemeParser;
     }
-    
+
     @Override
     protected RuntimeCommand createInstance() throws Exception {
         Constructor<? extends RuntimeCommand> ctor =
                 getRuntimeClass().getConstructor(
                         JdbcConnection.class, String.class, String.class, List.class);
-        
+
         return ctor.newInstance(m_jdbcConnection, m_sqlStatement, m_target, m_params);
     }
 
@@ -72,30 +72,30 @@ public class QueryCmdBuilder extends AbstractCmdBuilder {
         }
 
         m_connection = (Connection) obj;
-        
+
         String source = m_typeConv.toString(m_exprEval.evaluate(ctx, qry.getSource()));
         if (source == null || source.length() == 0) {
             throw new XdtlException("'source' is mandatory", cmd.getSourceLocator());
         }
-        
-        String sourceScheme = m_uriSchemeParser.getScheme(source);        
+
+        String sourceScheme = m_uriSchemeParser.getScheme(source);
         m_sqlStatement = sourceScheme.isEmpty() ? source : loadQuery(source);
-        
+
         m_queryType = m_typeConv.toString(m_exprEval.evaluate(ctx,
                 qry.getQueryType()));
 
         m_target = m_typeConv.toString(m_exprEval.evaluate(ctx,
                 qry.getTarget()));
-        
+
         if (!Query.QUERYTYPE_SQL.equalsIgnoreCase(m_queryType)) {
             throw new XdtlException("Query type '" + m_queryType +
                     "' is not supported", cmd.getSourceLocator());
         }
-        
+
         evaluateParams(qry, ctx);
-        
+
         m_jdbcConnection = ctx.getConnectionManager().getJdbcConnection(
-                m_connection); 
+                m_connection);
     }
 
     private void evaluateParams(Query qry, Context ctx) {
@@ -108,7 +108,7 @@ public class QueryCmdBuilder extends AbstractCmdBuilder {
                 try {
                     type = ParameterType.valueOf(strType.toUpperCase());
                 } catch (IllegalArgumentException e) {
-                    throw new XdtlException("Unsupported parameter type: " + strType + ", parameter name=" + param.getName());                
+                    throw new XdtlException("Unsupported parameter type: " + strType + ", parameter name=" + param.getName());
                 }
             }
 
@@ -161,22 +161,22 @@ public class QueryCmdBuilder extends AbstractCmdBuilder {
     }
 
     private String loadQuery(String source) {
-        m_logger.debug("Loading query from '" + source + "'");
-        
+        logger.trace("Loading query from '" + source + "'");
+
         try {
             URL url = new URL(source);
             InputStream is = url.openStream();
             try {
                 InputStreamReader reader = new InputStreamReader(is);
-                
+
                 StringBuilder builder = new StringBuilder();
                 char[] buf = new char[STREAM_BUF_SIZE];
                 int numRead;
-                
+
                 while ((numRead = reader.read(buf)) != -1) {
                     builder.append(buf, 0, numRead);
                 }
-                
+
                 return builder.toString();
             } finally {
                 close(is);
@@ -190,10 +190,10 @@ public class QueryCmdBuilder extends AbstractCmdBuilder {
         try {
             is.close();
         } catch (IOException e) {
-            m_logger.warn("Failed to close input stream");
+            logger.warn("Failed to close input stream");
         }
     }
-    
+
     private enum ParameterType {
         BOOLEAN,
         BYTE,

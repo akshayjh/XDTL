@@ -23,6 +23,7 @@ public class WriteHandler extends AbstractElementHandler {
                 attr.getStringValue("overwrite"),
                 attr.getStringValue("delimiter"),
                 attr.getStringValue("quote"),
-                attr.getStringValue("encoding"));
+                attr.getStringValue("encoding"),
+                attr.getStringValue("escape"));
     }
 }

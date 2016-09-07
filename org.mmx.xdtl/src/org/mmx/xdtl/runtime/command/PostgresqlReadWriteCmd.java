@@ -2,17 +2,17 @@ package org.mmx.xdtl.runtime.command;
 
 import java.sql.Statement;
 
+import org.apache.log4j.Logger;
 import org.mmx.xdtl.db.JdbcConnection;
+import org.mmx.xdtl.log.XdtlLogger;
 import org.mmx.xdtl.model.Connection;
 import org.mmx.xdtl.model.XdtlException;
 import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.RuntimeCommand;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class PostgresqlReadWriteCmd implements RuntimeCommand {
-    private final Logger m_logger = LoggerFactory.getLogger(PostgresqlReadWriteCmd.class);
-    
+public abstract class PostgresqlReadWriteCmd implements RuntimeCommand {
+    private static final Logger logger = XdtlLogger.getLogger(PostgresqlReadWriteCmd.class);
+
     private final String m_source;
     private final String m_target;
     private final String m_type;
@@ -23,7 +23,7 @@ public class PostgresqlReadWriteCmd implements RuntimeCommand {
     private final boolean m_header;
     private final Connection m_connection;
     private final String m_encoding;
-    
+
     public PostgresqlReadWriteCmd(String source, String target, String type,
             boolean overwrite, String delimiter, String quote, String encoding,
             Connection cnn, boolean header, boolean read) {
@@ -38,7 +38,7 @@ public class PostgresqlReadWriteCmd implements RuntimeCommand {
         m_connection = cnn;
         m_header = header;
         m_read = read;
-        
+
         if (!(m_type.equals("CSV") || m_type.equals("FIXED"))) {
             throw new XdtlException("Invalid type: '" + m_type + "', only CSV " +
                     "and FIXED are supported");
@@ -47,34 +47,40 @@ public class PostgresqlReadWriteCmd implements RuntimeCommand {
 
     @Override
     public void run(Context context) throws Throwable {
+        logCmdStart();
         JdbcConnection cnn = context.getConnectionManager().getJdbcConnection(m_connection);
         String sql = createSql();
+        if (logger.isDebugEnabled()) {
+            logger.debug(sql);
+        }
+
         Statement stmt = cnn.createStatement();
         try {
-            m_logger.info("COPY: sql={}", sql);
             stmt.execute(sql);
         } finally {
             close(stmt);
         }
     }
 
+    protected abstract void logCmdStart();
+
     protected String createSql() {
         String str;
-        
+
         if (m_read) {
             str = "COPY " + m_target + " FROM '" + m_source + "'";
         } else {
             str = "COPY " + m_source + " TO '" + m_target + "'";
         }
-        
+
         StringBuilder options = new StringBuilder();
         if (m_delimiter.length() != 0) {
             options.append(" DELIMITER '").append(m_delimiter).append('\'');
         }
-        
+
         if (m_type.equals("CSV")) {
             options.append(" CSV");
-            
+
             if (m_header) {
                 options.append(" HEADER");
             }
@@ -87,15 +93,15 @@ public class PostgresqlReadWriteCmd implements RuntimeCommand {
         if (options.length() > 0) {
             str = str + " WITH" + options.toString();
         }
-        
+
         return str;
     }
-    
+
     protected void close(Statement stmt) {
         try {
             stmt.close();
         } catch (Throwable t) {
-            m_logger.warn("Failed to close statement", t);
+            logger.warn("Failed to close statement", t);
         }
     }
 
@@ -129,5 +135,9 @@ public class PostgresqlReadWriteCmd implements RuntimeCommand {
 
     protected String getEncoding() {
         return m_encoding;
+    }
+
+    protected boolean getHeader() {
+        return m_header;
     }
 }

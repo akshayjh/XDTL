@@ -8,15 +8,17 @@ public abstract class FileTransfer extends AbstractElement implements Command {
     protected final String m_source;
     protected final String m_target;
     protected final String m_overwrite;
+    protected final String m_options;
 
-    public FileTransfer(String cmd, String source, String target, String overwrite) {
+    public FileTransfer(String cmd, String source, String target, String overwrite, String options) {
         m_cmd = cmd;
         m_source = source;
         m_target = target;
         m_overwrite = overwrite;
+        m_options = options;
     }
-
-    public String getCmd() {
+    
+	public String getCmd() {
         return m_cmd;
     }
 
@@ -31,5 +33,8 @@ public abstract class FileTransfer extends AbstractElement implements Command {
     public String getOverwrite() {
         return m_overwrite;
     }
-
+    
+    public String getOptions() {
+    	return m_options;
+    }
 }

@@ -6,16 +6,15 @@ import org.mmx.xdtl.parser.AbstractElementHandler;
 import org.mmx.xdtl.parser.Attributes;
 
 public class VariableHandler extends AbstractElementHandler {
-    private Variable m_var;
-    
+    private String m_name;
+
     @Override
     public Element endElement() {
-        m_var.setValue(getText());
-        return m_var;
+        return new Variable(m_name, getText());
     }
 
     @Override
     public void startElement(Attributes attr) {
-        m_var = new Variable(attr.getStringValue("name"), null);
+        m_name = attr.getStringValue("name");
     }
 }

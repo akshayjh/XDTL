@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
-    <entry key="get">wget %target:-O :% %overwrite::-nc% %source%</entry>
-    <entry key="put">copy %source% %target%</entry>
-    <entry key="pack">tar zvf %target% %source%</entry>
-    <entry key="unpack">tar xzvf %source% %target:-C :%</entry>
-    <entry key="read">read %source% %target% %delimiter% %quote%</entry>
-    <entry key="write">write %source% %target% %delimiter% %quote%</entry>
-    <entry key="strip">sh %overwrite::-C% -c sed\ %expr%\ %source%\ &gt;\ %target%</entry>
-    <entry key="move">sh -c mv\ %overwrite:-f:-n%\ %source%\ %target%</entry>
-    <entry key="clear">sh -c rm\ -f\ %target%</entry>
+    <entry key="xdtlCmdGet">wget %options% %target:-O :% %overwrite::-nc% %source%</entry>
+    <entry key="xdtlCmdPut">copy %options% %source% %target%</entry>
+    <entry key="xdtlCmdPack">sh -c tar\ -czvf\ %options%\ %target%\ %source%</entry>
+    <entry key="xdtlCmdUnpack">sh -c tar\ -xzvf\ %options%\ %source%\ %target:-C\ :%</entry>
+    <entry key="xdtlCmdRead">read %source% %target% %delimiter% %quote%</entry>
+    <entry key="xdtlCmdWrite">write %source% %target% %delimiter% %quote%</entry>
+    <entry key="xdtlCmdStrip">sh %overwrite::-C% -c sed\ %expr%\ %source%\ &gt;\ %target%</entry>
+    <entry key="xdtlCmdMove">sh -c mv\ %overwrite:-f:-n%\ %source%\ %target%</entry>
+    <entry key="xdtlCmdClear">sh -c rm\ -f\ %target%</entry>
+    <!-- <entry key="xdtlShell">sh -c %cmd%</entry> -->
 </properties>

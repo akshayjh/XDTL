@@ -15,7 +15,7 @@ import org.xml.sax.helpers.DefaultHandler;
 public class XmlSource implements Source {
     private SAXParser m_parser;
     private String m_sourceUri;
-    
+
     public XmlSource(String sourceUri) {
         m_sourceUri = sourceUri;
 
@@ -25,7 +25,7 @@ public class XmlSource implements Source {
             throw new XdtlException(e);
         }
     }
-    
+
     private SAXParser createParser() throws Exception {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         factory.setNamespaceAware(true);
@@ -68,18 +68,18 @@ public class XmlSource implements Source {
 
         public ElemNode(String name, Attributes attributes) {
             m_name = name;
-            
+
             for (int i = 0; i < attributes.getLength(); i++) {
                 String attrName  = attributes.getLocalName(i);
                 String attrValue = attributes.getValue(i);
                 addAttribute(new Attr(attrName, attrValue));
             }
         }
-        
+
         public String getName() {
             return m_name;
         }
-        
+
         public boolean hasValue() {
             return m_value != null && m_value.length() > 0;
         }
@@ -87,7 +87,7 @@ public class XmlSource implements Source {
         public String getValue() {
             return m_value;
         }
-        
+
         public void appendToValue(String str) {
             if (m_value == null) {
                 m_value = str;
@@ -95,11 +95,11 @@ public class XmlSource implements Source {
                 m_value += str;
             }
         }
-        
+
         public List<Attr> getAttributes() {
             return m_attributes;
         }
-    
+
         public void addAttribute(Attr attr) {
             if (m_attributes == null) {
                 m_attributes = new ArrayList<Attr>();
@@ -107,15 +107,15 @@ public class XmlSource implements Source {
 
             m_attributes.add(attr);
         }
-        
+
         public List<ElemNode> getChildren() {
             return m_children;
         }
-        
+
         public boolean hasChildren() {
             return m_children != null;
         }
-        
+
         public void addChild(ElemNode child) {
             if (m_children == null) {
                 m_children = new ArrayList<ElemNode>();
@@ -124,23 +124,23 @@ public class XmlSource implements Source {
             m_children.add(child);
         }
     }
-    
+
     private static class RowGenerator {
         private RowHandler m_rowHandler;
         private ArrayList<String> m_columns = new ArrayList<String>();
         private ArrayList<String> m_values = new ArrayList<String>();
-        
+
         public RowGenerator(RowHandler rowHandler) {
             m_rowHandler = rowHandler;
         }
-        
+
         public void generateRows(ElemNode rootNode) throws Exception {
             processNode("", rootNode);
             sendRowToRowHandler();
             m_columns.clear();
             m_values.clear();
         }
-        
+
         private void processNode(String columnPrefix, ElemNode node) throws Exception {
             columnPrefix = getColumnName(columnPrefix, node.getName());
 
@@ -190,11 +190,11 @@ public class XmlSource implements Source {
             return columnPrefix + "_" + name;
         }
     }
-    
+
     private static class SaxEventHandler extends DefaultHandler {
         private ArrayDeque<ElemNode> elementStack = new ArrayDeque<ElemNode>();
         private RowGenerator m_rowGenerator;
-        
+
         public SaxEventHandler(RowHandler rowHandler) {
             m_rowGenerator = new RowGenerator(rowHandler);
         }
@@ -207,7 +207,7 @@ public class XmlSource implements Source {
                 ElemNode parentNode = elementStack.peek();
                 parentNode.addChild(node);
             }
-            
+
             elementStack.push(node);
         }
 
@@ -234,5 +234,10 @@ public class XmlSource implements Source {
             ElemNode node = elementStack.peek();
             node.appendToValue(String.valueOf(ch, start, length).trim());
         }
+    }
+
+    @Override
+    public List<Column> getColumns() throws Exception {
+        throw new Exception("getColumns() is not implemented");
     }
 }

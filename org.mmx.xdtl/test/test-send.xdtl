@@ -2,11 +2,11 @@
 <!--
 	'send' element test.
  -->
-<package name="test-send" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd" xmlns="http://xdtl.org/xdtl">
+<package name="test-send" xmlns="http://xdtl.org/xdtl">
   <tasks>
     <task name="first">
       <steps>
-        <send source="test1" target="file:///tmp/test.txt" overwrite="1"/>
+        <send source="test1" target="file:///tmp/test.txt"/>
         <!-- <render template="paramstest.vm" target="tmp">
         	<parameter name="param1">p1value</parameter>
         	<parameter name="param2">p2value</parameter>

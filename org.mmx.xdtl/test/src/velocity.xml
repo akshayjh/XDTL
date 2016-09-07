@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
-<properties>
-	<entry key="runtime.log.logsystem.class">org.mmx.xdtl.runtime.util.VelocityLogger</entry>
-	<entry key="resource.loader">url</entry>
-	<entry key="url.resource.loader.class">org.apache.velocity.runtime.resource.loader.URLResourceLoader</entry>
-	<entry key="velocimacro.library" />
-    <entry key="input.encoding">UTF-8</entry>
-</properties>

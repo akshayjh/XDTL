@@ -15,18 +15,18 @@ public class CommandOverrides {
     private final CommandMappingSet m_mappings;
     private final HashMap<String, CommandMapping> m_map = new HashMap<String, CommandMapping>();
     private final String m_propertyNameSuffix;
-    
+
     public CommandOverrides(Properties properties, CommandMappingSet mappings) {
-        
+
         m_properties = properties;
         m_mappings = mappings;
         m_propertyNameSuffix = DEFAULT_PROPERTY_NAME_SUFFIX;
         init();
     }
-    
+
     public CommandOverrides(Properties properties, CommandMappingSet mappings,
             String propertyNameSuffix) {
-        
+
         m_properties = properties;
         m_mappings = mappings;
         m_propertyNameSuffix = propertyNameSuffix;
@@ -39,27 +39,30 @@ public class CommandOverrides {
                     mapping);
         }
     }
-    
+
     public void apply() throws ClassNotFoundException {
         int suffixLen = m_propertyNameSuffix.length();
-        
+
         for (Map.Entry<Object, Object> entry: m_properties.entrySet()) {
             String name = (String) entry.getKey();
-            
+
             if (name.endsWith(m_propertyNameSuffix)) {
                 String mappingName = name.substring(0, name.length() - suffixLen);
+                String tag = null;
+
+                // extract command tag if present
+                int lastIndexOfDot = mappingName.lastIndexOf('.');
+                if (lastIndexOfDot != -1) {
+                    tag = mappingName.substring(lastIndexOfDot + 1, mappingName.length());
+                    mappingName = mappingName.substring(0, lastIndexOfDot);
+                }
+
                 CommandMapping mapping = m_map.get(mappingName);
-                
+
                 if (mapping != null) {
                     String cmdClassName = entry.getValue().toString();
                     Class<?> cmdClass = Class.forName(cmdClassName);
-                    
-                    CommandMapping newMapping = new CommandMapping(
-                            mapping.getModelClass(),
-                            mapping.getBuilderClass(),
-                            cmdClass.asSubclass(RuntimeCommand.class));
-                    
-                    m_mappings.putMapping(newMapping);
+                    mapping.putCommandClass(tag, cmdClass.asSubclass(RuntimeCommand.class));
                 }
             }
         }

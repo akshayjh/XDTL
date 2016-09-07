@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Rowset test.
+ -->
+<package name="test-send-rowset" xmlns="http://xdtl.org/xdtl">
+  <variable name="csv">file:../scripts/rowset/output.csv</variable>
+  <tasks>
+    <task name="first">
+      <steps>
+        <send source="${new org.mmx.xdtl.db.RowSet(2).append('ESIMENE,TEINE'.split(/,/))}" target="rs"></send>
+        <send source="${rs[0].COL0 = 'Test'}" target="tmp"></send>
+        <send rowset="$rs" target="$csv" header="1"/>
+        <send source="${xdtlRowsetToCSV(rs)}" target="txt"/>
+        <send source="${rs.toCsv(false, ',', '&quot;')}" target="txt"/>
+        <log msg="$txt"/>
+      </steps>
+    </task>
+  </tasks>
+</package>

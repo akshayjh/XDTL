@@ -2,13 +2,18 @@
 <!--
 	Fetch element test.
  -->
-<package name="test-fetch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd" xmlns="http://xdtl.org/xdtl">
-  <variable name="table">test</variable>
+<package name="test-fetch" xmlns="http://xdtl.org/xdtl">
+  <variable name="table">person</variable>
   <connection name="conn" type="DB">$testdb</connection>
   <tasks>
     <task name="first" connection="$conn">
       <steps>
-        <fetch source="select * from $table" target="test2" encoding="UTF-8" overwrite="1" connection="$conn" destination="$conn"/>
+        <fetch source="select * from $table" rowset="rowset" encoding="UTF-8" overwrite="1" connection="$conn"/>
+        <log msg="$rowset[0].firstname"/>
+        <!-- <for item="person" rowset="$rowset">
+          <log msg="$person.firstname"/>
+        </for>-->
+        <!-- <read source="$rowset" target="person2" type="ROWSET" overwrite="1"/> -->
         <!-- <read source="/temp/test.csv" type="CSV" target="$table" overwrite="1"/> -->
       </steps>
     </task>

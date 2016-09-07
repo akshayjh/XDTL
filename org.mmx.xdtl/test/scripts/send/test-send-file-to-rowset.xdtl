@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Send to rowset test.
+ -->
+<package name="test-send-file-to-rowset" xmlns="http://xdtl.org/xdtl">
+  <connection name="cnn" type="DB">$testdb</connection>
+  <tasks>
+    <task name="first">
+      <steps>
+        <send source="file:../scripts/send/person.csv" type="CSV" encoding="UTF-8" overwrite="1" rowset="rowset" header="1"/>
+        <for item="row" rowset="$rowset">
+          <log msg="$row[0] '$row[1]' '$row[2]' '$row[3]'"></log>
+        </for>
+      </steps>
+    </task>
+  </tasks>
+</package>

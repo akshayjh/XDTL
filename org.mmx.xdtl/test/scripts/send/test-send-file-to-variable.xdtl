@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Send file to variable test.
+ -->
+<package name="test-send-file-to-variable" xmlns="http://xdtl.org/xdtl">
+  <connection name="cnn" type="DB">$testdb</connection>
+  <variable name="runScript">person.csv</variable>
+  <tasks>
+    <task name="first">
+      <steps>
+        <send source="file:$runScript" target="runScriptSrc"/>
+        <for item="row" rowset="${runScriptSrc.split(/;/)}">
+          <?debug?>
+          <log msg="$row"></log>
+        </for>
+      </steps>
+    </task>
+  </tasks>
+</package>

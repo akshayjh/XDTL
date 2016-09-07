@@ -30,6 +30,10 @@ public class SourceLocator {
             return "[unknown]"; 
         }
         
-        return '[' + m_tagName + '@' + m_documentUrl + ':' + m_lineNumber + ']';
+        return m_tagName + '@' + m_documentUrl + ':' + m_lineNumber;
+    }
+    
+    public boolean isNull() {
+        return this == NULL;
     }
 }

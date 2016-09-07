@@ -3,6 +3,7 @@ package org.mmx.xdtl.runtime.command;
 import java.lang.reflect.Constructor;
 
 import org.mmx.xdtl.model.Command;
+import org.mmx.xdtl.model.Variable;
 import org.mmx.xdtl.model.command.Exec;
 import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.ExpressionEvaluator;
@@ -18,7 +19,7 @@ public class ExecCmdBuilder extends AbstractCmdBuilder {
     private String m_shell;
     private String m_cmd;
     private String m_targetVariable;
-    
+
     @Inject
     public ExecCmdBuilder(ExpressionEvaluator exprEvaluator,
             TypeConverter typeConverter) {
@@ -33,10 +34,10 @@ public class ExecCmdBuilder extends AbstractCmdBuilder {
     			getRuntimeClass().getConstructor(String.class, String.class);
     		return ctor.newInstance(m_shell, m_cmd);
     	}
-		
+
     	Constructor<? extends RuntimeCommand> ctor =
 			getRuntimeClass().getConstructor(String.class, String.class, String.class);
-        
+
         return ctor.newInstance(m_shell, m_cmd, m_targetVariable);
     }
 
@@ -44,8 +45,27 @@ public class ExecCmdBuilder extends AbstractCmdBuilder {
     protected void evaluate(Command cmd) throws Exception {
         Exec exec = (Exec) cmd;
         Context ctx = getContext();
-        m_shell = m_typeConverter.toString(m_exprEvaluator.evaluate(ctx, exec.getShell()));
+
+        boolean shell = m_typeConverter.toBoolean(m_exprEvaluator.evaluate(ctx, exec.getShell()));
+        if (shell) {
+            Variable shellVar = ctx.getVariable("xdtlShell");
+            if (shellVar == null) {
+                m_shell = getDefaultShellCommand();
+            } else {
+                m_shell = m_typeConverter.toString(shellVar.getValue());
+            }
+        }
+
         m_cmd = m_typeConverter.toString(m_exprEvaluator.evaluate(ctx, exec.getCmd()));
         m_targetVariable = exec.getTargetVariable();
+    }
+
+    private String getDefaultShellCommand() {
+        boolean isWindows = System.getProperty("os.name").startsWith("Windows");
+        if (isWindows) {
+            return "cmd /c %cmd%";
+        } else {
+            return System.getenv("SHELL") + " -c %cmd%";
+        }
     }
 }

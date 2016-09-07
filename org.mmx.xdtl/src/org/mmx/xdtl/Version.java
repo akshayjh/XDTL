@@ -4,21 +4,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+import org.mmx.xdtl.log.XdtlLogger;
 
 public class Version {
     private static final String PROPERTIES_RESOURCE = "Version.properties";
-        
-    private final Logger m_logger = LoggerFactory.getLogger(Version.class);
-    
+    private static final Logger logger = XdtlLogger.getLogger("xdtl.version");
+
     private String m_specificationVersion;
     private String m_specificationTitle;
     private String m_specificationVendor;
     private String m_implementationVersion;
     private String m_implementationTitle;
     private String m_implementationVendor;
-    
+
     public Version() {
         init();
     }
@@ -47,15 +46,15 @@ public class Version {
                 try {
                     is.close();
                 } catch (IOException e) {
-                    m_logger.warn("Failed to close input stream", e);
+                    logger.warn("Failed to close input stream", e);
                 }
             }
-            
+
             m_specificationTitle    = props.getProperty("xdtl.specification.title");
             m_specificationVersion  = props.getProperty("xdtl.specification.version");
             m_specificationVendor   = props.getProperty("xdtl.specification.vendor");
             m_implementationTitle   = props.getProperty("xdtl.implementation.title");
-            m_implementationVersion = props.getProperty("xdtl.implementation.version.prefix") + ".00";
+            m_implementationVersion = "dev";
             m_implementationVendor  = props.getProperty("xdtl.implementation.vendor");
         }
     }

@@ -13,9 +13,10 @@ public abstract class ReadWrite extends AbstractElement implements Command {
     private final String m_delimiter;
     private final String m_quote;
     private final String m_encoding;
+    private final String m_escape;
 
     public ReadWrite(String source, String target, String connection, String type,
-            String overwrite, String delimiter, String quote, String encoding) {
+            String overwrite, String delimiter, String quote, String encoding, String escape) {
         super();
         m_source = source;
         m_target = target;
@@ -25,6 +26,7 @@ public abstract class ReadWrite extends AbstractElement implements Command {
         m_delimiter = delimiter;
         m_quote = quote;
         m_encoding = encoding;
+        m_escape = escape;
         
         if (m_connection == null) {
             throw new XdtlException("connection cannot be null");
@@ -62,4 +64,9 @@ public abstract class ReadWrite extends AbstractElement implements Command {
     public String getEncoding() {
         return m_encoding;
     }
+
+    public String getEscape() {
+        return m_escape;
+    }
 }
+

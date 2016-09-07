@@ -8,7 +8,7 @@ import org.mmx.xdtl.parser.Attributes;
 
 public class RenderHandler extends AbstractElementHandler {
     private Render m_elem;
-    
+
     @Override
     public Element endElement() {
         return m_elem;
@@ -20,7 +20,9 @@ public class RenderHandler extends AbstractElementHandler {
                 attr.getStringValue("template"),
                 attr.getStringValue("source"),
                 attr.getStringValue("target"),
-                attr.getStringValue("rowset"));
+                attr.getStringValue("rowset"),
+                attr.getStringValue("lang"),
+                attr.getStringValue("init"));
     }
 
     @Override

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Test 'sleep' element.
+ -->
+<package name="test-sleep" xmlns="http://xdtl.org/xdtl">
+  <tasks>
+    <task name="first">
+      <steps>
+        <sleep seconds="10"/>
+      </steps>
+    </task>
+  </tasks>
+</package>

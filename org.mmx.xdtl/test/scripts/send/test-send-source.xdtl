@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Test 'send' element source attribute.
+ -->
+<package name="test-send-source" xmlns="http://xdtl.org/xdtl">
+  <tasks>
+    <task name="first">
+      <steps>
+        <!-- Priority -->
+        <send source="test1" target="x" overwrite="1">
+            test2
+        </send>
+        <if expr="${x != 'test1'}">
+          <log msg="Failed: Source attribute priority: x = '$x'"/>
+        </if>
+
+        <!-- Trim -->
+        <send target="x" overwrite="1">
+            test2
+        </send>
+        <if expr="${x != 'test2'}">
+          <log msg="Failed: Invalid value (not trimmed?): x = '$x'"/>
+        </if>
+
+        <!-- Empty source attr -->
+        <send source="" target="x" overwrite="1">
+            test2
+        </send>
+        <if expr="${x != ''}">
+          <log msg="Failed: Empty source attribute: x = '$x'"/>
+        </if>
+
+        <!-- Simple expression -->
+        <send target="x" overwrite="1">
+            ${'test' + '2'}
+        </send>
+        <if expr="${x != 'test2'}">
+          <log msg="Failed: Simple expression: x = '$x'"/>
+        </if>
+
+        <!-- Scripting -->
+        <send target="x" overwrite="1">${
+            function add(x, y) {
+                return x + y;
+            }
+        }</send>
+
+        <if expr="${add(3, 2) != 5}">
+          <log msg="Failed: Scripting: x = '$x'"/>
+        </if>
+      </steps>
+    </task>
+  </tasks>
+</package>

@@ -5,7 +5,7 @@ import java.lang.annotation.Annotation;
 import java.util.Properties;
 
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
+import javax.xml.transform.TransformerFactory;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.mmx.xdtl.Version;
@@ -18,6 +18,7 @@ import org.mmx.xdtl.model.command.Exec;
 import org.mmx.xdtl.model.command.Exit;
 import org.mmx.xdtl.model.command.Extension;
 import org.mmx.xdtl.model.command.Fetch;
+import org.mmx.xdtl.model.command.Find;
 import org.mmx.xdtl.model.command.For;
 import org.mmx.xdtl.model.command.Get;
 import org.mmx.xdtl.model.command.If;
@@ -25,12 +26,13 @@ import org.mmx.xdtl.model.command.Log;
 import org.mmx.xdtl.model.command.Mappings;
 import org.mmx.xdtl.model.command.Move;
 import org.mmx.xdtl.model.command.Pack;
+import org.mmx.xdtl.model.command.Parse;
 import org.mmx.xdtl.model.command.Put;
 import org.mmx.xdtl.model.command.Query;
 import org.mmx.xdtl.model.command.Read;
 import org.mmx.xdtl.model.command.Render;
-import org.mmx.xdtl.model.command.Script;
 import org.mmx.xdtl.model.command.Send;
+import org.mmx.xdtl.model.command.Sleep;
 import org.mmx.xdtl.model.command.Strip;
 import org.mmx.xdtl.model.command.Transaction;
 import org.mmx.xdtl.model.command.Unpack;
@@ -66,37 +68,46 @@ import org.mmx.xdtl.runtime.command.LogCmd;
 import org.mmx.xdtl.runtime.command.LogCmdBuilder;
 import org.mmx.xdtl.runtime.command.MappingsCmd;
 import org.mmx.xdtl.runtime.command.MappingsCmdBuilder;
+import org.mmx.xdtl.runtime.command.MoveCmd;
+import org.mmx.xdtl.runtime.command.MoveCmdBuilder;
 import org.mmx.xdtl.runtime.command.OsArgListBuilder;
 import org.mmx.xdtl.runtime.command.OsArgListBuilderImpl;
 import org.mmx.xdtl.runtime.command.OsProcessRunner;
 import org.mmx.xdtl.runtime.command.OsProcessRunnerImpl;
+import org.mmx.xdtl.runtime.command.ParseCmd;
+import org.mmx.xdtl.runtime.command.ParseCmdBuilder;
 import org.mmx.xdtl.runtime.command.PostgresqlReadCmd;
 import org.mmx.xdtl.runtime.command.PostgresqlWriteCmd;
 import org.mmx.xdtl.runtime.command.QueryCmd;
 import org.mmx.xdtl.runtime.command.QueryCmdBuilder;
 import org.mmx.xdtl.runtime.command.ReadCmdBuilder;
-import org.mmx.xdtl.runtime.command.RenderCmd;
-import org.mmx.xdtl.runtime.command.RenderCmdBuilder;
-import org.mmx.xdtl.runtime.command.ScriptCmd;
-import org.mmx.xdtl.runtime.command.ScriptCmdBuilder;
-import org.mmx.xdtl.runtime.command.SendCmd;
-import org.mmx.xdtl.runtime.command.SendCmdBuilder;
 import org.mmx.xdtl.runtime.command.StripCmd;
 import org.mmx.xdtl.runtime.command.StripCmdBuilder;
 import org.mmx.xdtl.runtime.command.TransactionCmd;
 import org.mmx.xdtl.runtime.command.TransactionCmdBuilder;
 import org.mmx.xdtl.runtime.command.WriteCmdBuilder;
+import org.mmx.xdtl.runtime.command.find.FindCmd;
+import org.mmx.xdtl.runtime.command.find.FindCmdBuilder;
+import org.mmx.xdtl.runtime.command.render.RenderCmdBuilder;
+import org.mmx.xdtl.runtime.command.render.VelocityRenderCmd;
+import org.mmx.xdtl.runtime.command.render.XslRenderCmd;
+import org.mmx.xdtl.runtime.command.send.SendCmd;
+import org.mmx.xdtl.runtime.command.send.SendCmdBuilder;
+import org.mmx.xdtl.runtime.command.sleep.SleepCmd;
+import org.mmx.xdtl.runtime.command.sleep.SleepCmdBuilder;
 import org.mmx.xdtl.runtime.impl.CommandInvoker;
 import org.mmx.xdtl.runtime.impl.CommandInvokerImpl;
 import org.mmx.xdtl.runtime.impl.CommandMapping;
 import org.mmx.xdtl.runtime.impl.CommandMappingSet;
 import org.mmx.xdtl.runtime.impl.ConnectionManagerImpl;
+import org.mmx.xdtl.runtime.impl.DebugCommandInvoker;
 import org.mmx.xdtl.runtime.impl.EngineImpl;
 import org.mmx.xdtl.runtime.impl.ExtensionLoader;
 import org.mmx.xdtl.runtime.impl.PackageLoader;
 import org.mmx.xdtl.runtime.impl.ScriptExpressionEvaluator;
 import org.mmx.xdtl.runtime.impl.TypeConverterImpl;
-import org.mmx.xdtl.runtime.util.StringShortener;
+import org.mmx.xdtl.runtime.util.PropertiesLoader;
+import org.mmx.xdtl.runtime.util.UrlStreamFactory;
 import org.mmx.xdtl.runtime.util.VariableNameValidator;
 import org.mmx.xdtl.services.GuiceInjector;
 import org.mmx.xdtl.services.Injector;
@@ -109,70 +120,79 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 
+import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
+
 public class RuntimeModule extends AbstractModule {
     private static final CommandMapping[] DEFAULT_COMMAND_MAPPINGS = {
-        new CommandMapping(Call.class, CallCmdBuilder.class, CallCmd.class),        
+        new CommandMapping(Call.class, CallCmdBuilder.class, CallCmd.class),
         new CommandMapping(Get.class, FileTransferCmdBuilder.class, FileTransferCmd.class),
         new CommandMapping(Put.class, FileTransferCmdBuilder.class, FileTransferCmd.class),
-        new CommandMapping(Pack.class, FileTransferCmdBuilder.class, FileTransferCmd.class),        
+        new CommandMapping(Pack.class, FileTransferCmdBuilder.class, FileTransferCmd.class),
         new CommandMapping(Unpack.class, FileTransferCmdBuilder.class, FileTransferCmd.class),
         new CommandMapping(Mappings.class, MappingsCmdBuilder.class, MappingsCmd.class),
-        new CommandMapping(Render.class, RenderCmdBuilder.class, RenderCmd.class),
+        new CommandMapping(Render.class, RenderCmdBuilder.class, VelocityRenderCmd.class).putCommandClass("XSL", XslRenderCmd.class),
         new CommandMapping(Transaction.class, TransactionCmdBuilder.class, TransactionCmd.class),
         new CommandMapping(Query.class, QueryCmdBuilder.class, QueryCmd.class),
         new CommandMapping(Exec.class, ExecCmdBuilder.class, ExecCmd.class),
         new CommandMapping(Read.class, ReadCmdBuilder.class, PostgresqlReadCmd.class),
         new CommandMapping(Write.class, WriteCmdBuilder.class, PostgresqlWriteCmd.class),
         new CommandMapping(Strip.class, StripCmdBuilder.class, StripCmd.class),
-        new CommandMapping(Move.class, FileTransferCmdBuilder.class, FileTransferCmd.class),
+        new CommandMapping(Move.class, MoveCmdBuilder.class, MoveCmd.class),
         new CommandMapping(Clear.class, ClearCmdBuilder.class, ClearCmd.class),
-        new CommandMapping(Script.class, ScriptCmdBuilder.class, ScriptCmd.class),
         new CommandMapping(If.class, IfCmdBuilder.class, IfCmd.class),
         new CommandMapping(Log.class, LogCmdBuilder.class, LogCmd.class),
         new CommandMapping(Fetch.class, FetchCmdBuilder.class, FetchCmd.class),
-		new CommandMapping(Decode.class, DecodeCmdBuilder.class, DecodeCmd.class),
+        new CommandMapping(Decode.class, DecodeCmdBuilder.class, DecodeCmd.class),
         new CommandMapping(For.class, ForCmdBuilder.class, ForCmd.class),
         new CommandMapping(Send.class, SendCmdBuilder.class, SendCmd.class),
         new CommandMapping(Exit.class, ExitCmdBuilder.class, ExitCmd.class),
         new CommandMapping(Error.class, ErrorCmdBuilder.class, ErrorCmd.class),
-        new CommandMapping(Extension.class, ExtensionCmdBuilder.class, ExtensionCmd.class)
+        new CommandMapping(Extension.class, ExtensionCmdBuilder.class, ExtensionCmd.class),
+        new CommandMapping(Parse.class, ParseCmdBuilder.class, ParseCmd.class),
+        new CommandMapping(Find.class, FindCmdBuilder.class, FindCmd.class),
+        new CommandMapping(Sleep.class, SleepCmdBuilder.class, SleepCmd.class)
     };
 
     private final CommandMappingSet m_commandMappings = createDefaultCommandMappings();
-    private final ScriptEngineManager m_scriptEngineManager = new ScriptEngineManager();
     private final Properties m_properties;
-    
-    public RuntimeModule(Properties properties) {
+    private final boolean m_debug;
+
+    public RuntimeModule(Properties properties, boolean debug) {
         m_properties = properties;
+        m_debug = debug;
         CommandOverrides overrides = new CommandOverrides(properties, m_commandMappings);
-        
+
         try {
             overrides.apply();
         } catch (ClassNotFoundException e) {
             throw new XdtlException(e);
         }
     }
-    
+
     public void addCommandMapping(CommandMapping mapping) {
         m_commandMappings.putMapping(mapping);
     }
-    
+
     @Override
     protected void configure() {
         bind(ExpressionEvaluator.class).to(ScriptExpressionEvaluator.class).in(Singleton.class);
         bind(TypeConverter.class).to(TypeConverterImpl.class).in(Singleton.class);
         bind(Engine.class).to(EngineImpl.class);
-        bind(CommandInvoker.class).to(CommandInvokerImpl.class);
+        bind(CommandInvoker.class).to(m_debug ? DebugCommandInvoker.class : CommandInvokerImpl.class);
         bind(ConnectionManager.class).to(ConnectionManagerImpl.class);
         bind(VelocityEngine.class).toProvider(VelocityEngineProvider.class);
+        bind(TransformerFactory.class).toProvider(TransformerFactoryProvider.class).in(Singleton.class);
         bind(Properties.class).annotatedWith(Names.named("velocity.properties")).toProvider(VelocityPropertiesProvider.class);
         bind(OsProcessRunner.class).to(OsProcessRunnerImpl.class);
         bind(OsArgListBuilder.class).to(OsArgListBuilderImpl.class);
         bind(CommandMappingSet.class).toInstance(m_commandMappings);
         bind(VariableNameValidator.class);
-        bind(StringShortener.class);
+        //bind(StringShortener.class).in(Singleton.class);
+        //bind(StringShortener.class).annotatedWith(Names.named("SqlShortener")).toInstance(new StringShortener(60));
         bind(UriSchemeParser.class).in(Singleton.class);
-        
+        bind(UrlStreamFactory.class).in(Singleton.class);
+        bind(PropertiesLoader.class).in(Singleton.class);
+
         String homeDirUrl = new File(m_properties.getProperty("home")).toURI().toString();
         if (!homeDirUrl.endsWith("/")) {
             homeDirUrl += "/";
@@ -180,7 +200,7 @@ public class RuntimeModule extends AbstractModule {
 
         PathList pathList = new PathList(homeDirUrl, m_properties.getProperty("startup.path"));
         bind(PathList.class).annotatedWith(Names.named("startup.path")).toInstance(pathList);
-        
+
         pathList = new PathList(homeDirUrl, m_properties.getProperty("velocity.path"));
         bind(PathList.class).annotatedWith(Names.named("velocity.path")).toInstance(pathList);
 
@@ -197,12 +217,13 @@ public class RuntimeModule extends AbstractModule {
         bind(ExtensionLoader.class);
         bind(PackageLoader.class);
     }
-    
+
     @Provides @Singleton
     protected ScriptEngine getScriptEngine() {
-        return m_scriptEngineManager.getEngineByName("JavaScript");
+        NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
+        return factory.getScriptEngine("-strict");
     }
-    
+
     private void bindCommandBuilders() {
         for (CommandMapping mapping: m_commandMappings.getMappings()) {
             bind(key(CommandBuilder.class, mapping.getModelClass())).to(mapping.getBuilderClass());
@@ -212,7 +233,7 @@ public class RuntimeModule extends AbstractModule {
     private Annotation name(Class<?> type) {
         return Names.named(type.getName());
     }
-    
+
     private <T> Key<T> key(Class<T> type1, Class<?> type2) {
         return Key.get(type1, name(type2));
     }

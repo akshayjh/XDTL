@@ -1,0 +1,365 @@
+XDTL 2.0 Cookbook
+
+------------------------
+Chapter 1. Hello, world!
+------------------------
+<?xml version="1.0" encoding="UTF-8"?>
+<package name="hello_world" version="1.0" description="XDTL hello world sample"
+	xmlns="http://xdtl.org/xdtl" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<tasks>
+		<task name="main">
+			<steps>
+				<log msg="Hello, world!" />
+			</steps>
+		</task>
+	</tasks>
+</package>
+
+/home/xdtl$ ./xdtlrt.sh hello_world.xdtl
+
+09:41:01 [INFO ] Running package 'hello_world'
+09:41:01 [INFO ] Running task 'main'
+09:41:01 [INFO ] Hello, world!
+09:41:01 [INFO ] done
+
+
+-------------------------
+Chapter 2. Package header
+-------------------------
+
+<package name="chaper_2">
+	<annotation>
+		This is a sample package that illustrates header commands
+		Header defines connection default parameters, which are then read from configuration file.
+		If no configuration file name is passed to package, a default one is used. 
+		Configuration file is .properties formatted file, see http://docs.oracle.com/cd/E23095_01/Platform.93/ATGProgGuide/html/s0204propertiesfileformat01.html
+		All configuration parameters maybe overwritten by caller.
+		Value for parameter specialConditions must be provided, otherwise RT will throw an exception.
+		This package uses specific Javascript library sample.js and defines one additional function.
+	</annotation>
+	
+	<variable name="defaultDbhost">127.0.0.1:5432</variable>
+	<variable name="defaultDbname">postgres</variable>
+	<variable name="defaultDbuser">postgres</variable>
+	<variable name="defaultdbPass" />
+
+	<parameter name="configFile" default="/home/xdtl/sample.properties" />
+	<config href="$configFile" />
+
+	<parameter name="dbhost" default="$defaultDbhost" />
+	<parameter name="dbname" default="$defaultDbname" />
+	<parameter name="dbuser" default="$defaultDbuser" />
+	<parameter name="dbpass" default="$defaultDbpass" />
+
+	<parameter name="specialConditions" required="1" />
+
+	<script href="special.js" encoding="ASCII" />
+	<script>
+		function addOne(a) { 
+			return a+1; 
+		}
+	</script>
+
+	<connection name="pgConn" type="DB">jdbc:postgresql://$dbhost/$dbname?user=$dbuser&amp;password=$dbpass&amp;allowEncodingChanges=true</connection>
+
+	<tasks>
+		...
+	</tasks>
+</package>
+
+Various database connections strings
+
+	<connection name="pgConn" type="DB">jdbc:postgresql://127.0.0.1:5432/postgres?user=postgres&amp;allowEncodingChanges=true</connection>
+	<connection name="oracleConn" type="DB">jdbc:oracle:thin:scott/tiger@//127.0.0.1:1521/XE</connection>
+	<connection name="mssqlConn" type="DB">jdbc:sqlserver://127.0.0.1:1433;databaseName=Northwind;user=sa;password=Password123;</connection>
+	<connection name="db2Conn" type="DB" user="db2admin" password="db2passw0rd">jdbc:db2://$dbhost/$dbname</connection>
+
+
+---------------------------------------
+Chapter 3. CVS files, DML and datapumps
+---------------------------------------
+
+<package name="chapter_3">
+	<parameter name="schemaNm" default="DSA" />
+	<script>
+		function formatPhoneNumber(p) {
+			return p.replace(/ /g, '');
+		}
+	</script>
+	<tasks>
+		<task name="read_csv">
+			<connection name="conn" type="DB">jdbc...</connection>
+			<annotation>
+				This task reads data from CSV file and loads data into table LOADED_DATA 
+				in the schema defined by $schemaNm package-level variable of the same structure.
+				COMMIT is done every 500 rows.
+			</annotation>
+			<steps>
+				<read 
+					 source="somedata.csv" 
+					 type="CSV" overwrite="1" encoding="UTF-8" delimeter="," 
+					 batch="500"
+					 target="$schemaNm.LOADED_DATA" connection="$conn"  />
+			</steps>
+		</task>
+
+		<task name="insert_from_csv_one_by_one">
+			<connection name="conn" type="DB">jdbc....</connection>
+			<annotation>
+				This task reads csv file into a rowset object, iterates over the rows,
+				for each row performs an insert query.
+				Every row is commited separately.
+				The two query syntaxes are equivalent, thus in this sample data will be inserted twice.
+			</annotation>
+			<steps>
+				<send source="file:/home/xdtl/somedata.csv" 
+					 header="1" rowset="fileData" encoding="UTF-8" delimeter="," />
+				<for rowset="$fileData" item="thisRow">
+					<send target="x">${
+						function allCaps(a) {
+							return a.toUpperCase();
+						}
+
+						thisRow.firstname = allCaps(thisRow.firstname);
+						thisRow.lastname = allCaps(thisRow.lastname);
+						thisRow.phone = formatPhoneNumber(thisRow.phone);
+					}
+					</send>
+
+					<query connection="$conn">
+						INSERT INTO $schemaNm.LOADED_DATA(firsname, lastname, phone)
+						VALUES ('$thisRow:firstname', '$thisRow:lastname', '$thisRow:phone')
+					</query>
+
+					<!-- alternatively, query parameters can be used -->
+					<query connection="$conn" 
+						 source="INSERT INTO $schemaNm.LOADED_DATA(firsname, lastname, phone) VALUES (?, ?, ?)">
+						<parameter name="p1">$thisRow:firstname</parameter>
+						<parameter name="p2">${thisRow.lastname}</parameter>
+						<parameter name="p3">$thisRow[2]</parameter>
+					</query>
+				</for>
+			</steps>
+		</task>
+
+
+		<task name="insert_from_csv_all_at_once">
+			<connection name="conn" type="DB">jdbc....</connection>
+			<annotation>
+				This task reads csv file into a rowset object, iterates over the rows,
+				perfoming some JS transformations.
+				All data is upload to DB with read command
+			</annotation>
+			<steps>
+				<send source="file:/home/xdtl/somedata.csv" 
+					 header="1" rowset="fileData" encoding="UTF-8" delimeter="," />
+				<for rowset="$fileData" item="thisRow">
+					<send target="x">${
+						function allCaps(a) {
+							return a.toUpperCase();
+						}
+
+						thisRow.firstname = allCaps(thisRow.firstname);
+						thisRow.lastname = allCaps(thisRow.lastname);
+						thisRow.phone = formatPhoneNumber(thisRow.phone);
+					}
+					</send>
+				</for>
+				<send target="file:temporary_file.txt" source="$fileData" />
+				<read source="file:temporary_file.txt" target="$schemaNm.LOADED_DATA" connecion="$conn" />
+				<clear target="temporary_file.txt" />
+			</steps>
+		</task>
+
+		<task name="datapump_one_by_one_with_transformation">
+			<annotation>
+				This task loads rowset from one database, performs simple transformation 
+				and loads data into another database.
+			</annotation>
+			<connection name="conn1" type="DB">jdbc....</connection>
+			<connection name="conn2" type="DB">jdbc....</connection>
+			<steps>
+				<fetch connection="$conn1" rowser="srcRs">
+					SELECT firstname, lastname, phone FROM $schemaNm.LOADED_DATA
+				</fetch>
+				<for rowset="srcRs" item="thisRow">
+					<query connection="$conn2">
+						INSERT INTO $trgSchema.PERSON_CONTACTS (person_id, contact_type, contact_address)
+						SELECT p1.person_id, 'PHONE', '$thisRow:phone'
+						FROM $trgSchema.PERSONS p1
+						WHERE p1.firstname = '$thisRow:firstname' AND p1.lastname = '$thisRow:lastname'
+					</query>
+				</for>
+			</steps>
+		</task>
+
+		<task name="datapump_direct">
+			<annotation>
+				Direct data pump between two databases.
+				Note, that the fetched recordset must match the target table structure
+			</annotation/>
+			<connection name="conn1" type="DB">jdbc....</connection>
+			<connection name="conn2" type="DB">jdbc....</connection>
+			<steps>
+				<fetch connection="$conn1" destination="$conn2" target="$trgSchema.PERSON_CONTACTS">
+					SELECT lookup1.person_id, 'PHONE', p1.phone
+					FROM $schemaNm.LOADED_DATA p1
+					JOIN $schemaNm.PERSON_LOOKUP lookup1
+					WHERE lookup1.firstname = p1.firstname AND lookup1.lastname = p1.lastname
+				</fetch>
+			</steps>
+		</task>
+	</tasks>
+</package>
+
+----------------------------------------------------------
+Chapter 4. Flow control, external calls and error handling
+----------------------------------------------------------
+<package name="chapter_4">
+	<annotation>
+		This package demonstrates call and exec commands.
+		Note the exit command in the task "main" - it prevents 
+		the rest of the package being executed twice.
+	</annotation>
+	<tasks>
+		<task name="main">
+			<variable name="paramValue">some value</variable>
+			<steps>
+				<call href="#another_task">
+					<parameter name="param1">$paramValue</parameter>
+				</call>
+				<call href="#exec_shell_cmd" />
+				<call href="#fail_with_error" />
+				<exit />
+			</steps>
+		</task>
+
+		<task name="execute_another_task">
+			<annotation>
+				This task shows usage of task parameters and if command.
+				Note that value of param2 will not be logged.
+			</annotation>
+			<parameter name="param1" required="1" />
+			<parameter name="param2" required="0" default="0" nolog="1" />
+			<steps>
+				<if expr="${param2 == '0'}">
+					<call href="chapter_3.xdtl#read_csv" />
+				</if>
+				<if expr="${param2 != '0'}">
+					<log msg="$param1" />
+				</if>
+			</steps>
+		</task>
+
+		<task name="exec_shell_cmd">
+			<annotation>
+				This task demonstrates simple external calls.
+			</annotation>
+			<steps>
+				<send source="Well hello there" target="file:/home/xdtl/message.txt" />
+				<exec shell="1"><![CDATA[
+					 mail -s 'Hello world' email@expample.com < /home/xdtl/message.txt
+					 ]]>
+				</exec>
+				<exec shell="1" cmd="cat /home/xdtl/message.txt" target="messageSent" />
+				<log msg="$messageSent" />
+			</steps>
+		</task>
+
+		<task name="fail_with_error" onerror="#error_handler" resume="1">
+			<annotation>
+				This task demonstrates error handling.
+				Query task will fail, becouse connection variable is not defined.
+				Error handler task will be executed, then control will be returned to next line of code.
+			</annotation>
+			<steps>
+				<query connection="$thereIsNoConnection">SELECT 1</query>
+				<log msg="Package resumed after error" />
+			</steps>
+		</task>
+		
+		<task name="error_handler">	
+			<annotation>
+				This is a sample error handler.
+				Variables xdtlError, xdtlErrorCode, xdtlErrorDesc, xdtlErrorType, xdtlErrorLocation
+				are defined only within this task scope.
+			</annotation>
+			<steps>
+			      <log msg="xdtlError = $xdtlError" />
+			      <log msg="xdtlErrorCode = $xdtlErrorCode" />
+			      <log msg="xdtlErrorDesc = $xdtlErrorDesc" />
+			      <log msg="xdtlErrorType = $xdtlErrorType" />
+			      <log msg="xdtlErrorLocation = $xdtlErrorLocation" />
+			</steps>
+		</task>
+	</tasks>
+</package>
+
+--------------------------
+Chapter 5. File operations
+--------------------------
+<package name="chapter_5">
+	<annotation>
+		Various file operations in XDTL
+	</annotation>
+	<tasks>
+		<task name="merge_txt_files">
+		<annotation>
+			There is a bunch of CSV and TXT files of same structure in two folders
+			CSVs are coma-delimeted UTF-8 files, TXTs files have | as delimeter and are ASCII.
+			Merge all of them into single file.
+			Delete all TXT files, move csv files to separate folder.
+		</annotation>
+			<steps>
+				<find source="/home/xdtl/folder1,/home/xdtl/folder2" 
+					 match=".*\.(csv|txt)" recursive="0" rowset="txtFiles" />
+				<send target="firstFile" source="1" />
+				<for rowset="txtFiles" item="thisFile">
+					<send target="x" />${
+						delim = (thisFile.type == 'cvs') ? ',' : '|';
+						encod = (thisFile.type == 'cvs') ? 'UTF-8' : 'ASCII';
+					}
+					</send>
+					<!-- read source file -->
+					<send rowset="fileContents" source="file:${thisFile.name}"
+						 delimeter="$delim" encoding="$encod" />
+					<!-- overwrite or append merged filed -->
+					<send rowset="$fileContents" target="file:/home/xdtl/merged_file.csv"  
+						 delimiter=";"  encoding="UTF-8" 
+						 overwrite="$firstFile" header="$firstFile"/>
+					<send target="firstFile" source="0" />
+					<if expr="${thisFile.type == 'txt'}">
+						<clear target="$thisFile:name" />
+					</if>
+					<if expr="${thisFile.type == 'csv'}">
+						<move source="$thisFile:name" target="/xdtl/home/archive" />
+					</if>
+				</for>
+			</steps>
+		</task>
+	</tasks>
+</package>
+
+-------------------
+Chapter 6. XLM data
+-------------------
+<package name="chapter_6">
+	<annotation>
+		Package illustrates XML processing functionality:
+		- process xml with xslt processor
+		- load and flatten xml into a rowset
+	</annotation>
+	<tasks>
+		<task name="main">
+			<steps>
+				<render source="original.xml" template="original_to_standart.xsl" target="standart.xml" language="XLS" />
+	 			<decode source="standart.xml" target="person_xml"/>
+	        	<for rowset="$person_xml:person" item="person">
+	          		<log msg="First name: $person:firstname, last name: $person:lastname" />
+	        	</for>
+	        </steps>
+        </task>
+    </tasks>
+</package>
+

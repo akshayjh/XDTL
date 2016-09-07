@@ -1,10 +1,11 @@
 package org.mmx.xdtl.model;
 
 public interface Element {
+    String getId();
+    String getNoLog();
+    SourceLocator getSourceLocator();
 
-    public abstract String getId();
-    public abstract SourceLocator getSourceLocator();
-
-    public abstract void setId(String id);
-    public abstract void setSourceLocator(SourceLocator sourceLocator);
+    void setId(String id);
+    void setNoLog(String noLog);
+    void setSourceLocator(SourceLocator sourceLocator);
 }

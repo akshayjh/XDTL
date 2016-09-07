@@ -1,5 +1,7 @@
 package org.mmx.xdtl.parser;
 
+import org.mmx.xdtl.model.TextFileProperties;
+
 public abstract class AbstractElementHandler implements ElementHandler {
     private StringBuilder m_textBuffer;
 
@@ -17,14 +19,23 @@ public abstract class AbstractElementHandler implements ElementHandler {
         if (m_textBuffer == null) {
             m_textBuffer = new StringBuilder();
         }
-        
+
         m_textBuffer.append(ch, start, length);
     }
-    
-    protected void startElement(Attributes attr) {        
+
+    protected void startElement(Attributes attr) {
     }
-    
+
     protected String getText() {
         return m_textBuffer != null ? m_textBuffer.toString() : null;
+    }
+
+    protected TextFileProperties getTextFileProperties(Attributes attr) {
+        return new TextFileProperties(attr.getStringValue("type"),
+                attr.getStringValue("delimiter"),
+                attr.getStringValue("quote"),
+                attr.getStringValue("null"),
+                attr.getStringValue("escape"),
+                attr.getStringValue("encoding"));
     }
 }

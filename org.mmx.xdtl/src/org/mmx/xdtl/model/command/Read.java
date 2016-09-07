@@ -7,9 +7,9 @@ public class Read extends ReadWrite {
     private final String m_batch;
     
     public Read(String source, String target, String connection, String type,
-            String overwrite, String delimiter, String quote, String encoding,
+            String overwrite, String delimiter, String quote, String encoding, String escape,
             String errors, String header, String skip, String batch) {
-        super(source, target, connection, type, overwrite, delimiter, quote, encoding);
+        super(source, target, connection, type, overwrite, delimiter, quote, encoding, escape);
         
         m_errors = errors;
         m_header = header;

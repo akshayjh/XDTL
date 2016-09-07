@@ -2,12 +2,12 @@
 <!--
 	Log element test.
  -->
-<package name="test-log" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xdtl.org/xdtl xdtl.xsd" xmlns="http://xdtl.org/xdtl">
-  <connection name="conn" type="FILE">xdtl:connection</connection>
+<package name="test-log" xmlns="http://xdtl.org/xdtl">
+  <parameter name="param" required="1"></parameter>
   <tasks>
     <task name="first">
       <steps>
-        <log msg="$xdtlTest"/>
+        <log msg="$param, $global"/>
       </steps>
     </task>
   </tasks>

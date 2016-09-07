@@ -5,33 +5,38 @@ import java.io.InputStream;
 import javax.xml.parsers.SAXParser;
 
 import org.mmx.xdtl.parser.Parser;
+import org.mmx.xdtl.parser.element.AnnotationElementHandler;
 import org.mmx.xdtl.parser.element.CallHandler;
 import org.mmx.xdtl.parser.element.ClearHandler;
 import org.mmx.xdtl.parser.element.ColumnHandler;
 import org.mmx.xdtl.parser.element.ConditionHandler;
+import org.mmx.xdtl.parser.element.ConfigHandler;
 import org.mmx.xdtl.parser.element.ConnectionHandler;
 import org.mmx.xdtl.parser.element.DecodeHandler;
 import org.mmx.xdtl.parser.element.DefaultElementHandler;
+import org.mmx.xdtl.parser.element.DefineHandler;
 import org.mmx.xdtl.parser.element.ErrorHandler;
 import org.mmx.xdtl.parser.element.ExecHandler;
 import org.mmx.xdtl.parser.element.ExitHandler;
 import org.mmx.xdtl.parser.element.FetchHandler;
+import org.mmx.xdtl.parser.element.FindHandler;
 import org.mmx.xdtl.parser.element.ForHandler;
 import org.mmx.xdtl.parser.element.GetHandler;
 import org.mmx.xdtl.parser.element.IfHandler;
 import org.mmx.xdtl.parser.element.LogHandler;
 import org.mmx.xdtl.parser.element.MappingsHandler;
 import org.mmx.xdtl.parser.element.MoveHandler;
-import org.mmx.xdtl.parser.element.AnnotationElementHandler;
 import org.mmx.xdtl.parser.element.PackHandler;
 import org.mmx.xdtl.parser.element.PackageHandler;
 import org.mmx.xdtl.parser.element.ParameterHandler;
+import org.mmx.xdtl.parser.element.ParseHandler;
 import org.mmx.xdtl.parser.element.PutHandler;
 import org.mmx.xdtl.parser.element.QueryHandler;
 import org.mmx.xdtl.parser.element.ReadHandler;
 import org.mmx.xdtl.parser.element.RenderHandler;
 import org.mmx.xdtl.parser.element.ScriptHandler;
 import org.mmx.xdtl.parser.element.SendHandler;
+import org.mmx.xdtl.parser.element.SleepHandler;
 import org.mmx.xdtl.parser.element.SourceHandler;
 import org.mmx.xdtl.parser.element.StepsHandler;
 import org.mmx.xdtl.parser.element.StripHandler;
@@ -53,7 +58,7 @@ import com.google.inject.Provides;
 import com.google.inject.name.Named;
 
 public class ParserModule extends AbstractModule {
-    
+
     @Override
     protected void configure() {
         bind(Parser.class).to(CachingParser.class);
@@ -68,6 +73,7 @@ public class ParserModule extends AbstractModule {
         set.add("package", PackageHandler.class);
         set.add("parameter", ParameterHandler.class);
         set.add("variable", VariableHandler.class);
+        set.add("config", ConfigHandler.class);
         set.add("connection", ConnectionHandler.class);
         set.add("tasks", TasksHandler.class);
         set.add("task", TaskHandler.class);
@@ -101,10 +107,14 @@ public class ParserModule extends AbstractModule {
         set.add("error", ErrorHandler.class);
         set.add("annotation", AnnotationElementHandler.class);
         set.add("decode", DecodeHandler.class);
+        set.add("parse", ParseHandler.class);
+        set.add("find", FindHandler.class);
+        set.add("define", DefineHandler.class);
+        set.add("sleep", SleepHandler.class);
         set.setDefault(DefaultElementHandler.class);
         return set;
     }
-    
+
     @Provides @Named("schema")
     InputStream getSchemaInputStream(@Named("useinternalschema") boolean useInternalSchema ) {
         if (useInternalSchema) {

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Render element test (XSL).
+ -->
+<package name="test-render-xsl" xmlns="http://xdtl.org/xdtl">
+  <connection name="conn" type="FILE">xdtl:connection</connection>
+  <tasks>
+    <task name="first">
+      <steps>
+        <render source="file:$testdatadir/article 1.xml" target="file:$testdatadir/target.xml" template="file:$testdatadir/article1a.xsl" lang="XSL"/>
+        <render source="file:$testdatadir/article 1.xml" target="temp" template="file:$testdatadir/article1a.xsl" lang="XSL"/>
+        <log msg="$temp"/>
+        <render target="temp" template="file:$testdatadir/standalone.xsl" lang="XSL" init="test"/>
+        <if expr="$temp != 'Initial template name works.'">
+            <log level="ERROR" msg="Initial template failed"/>
+        </if>
+      </steps>
+    </task>
+  </tasks>
+</package>

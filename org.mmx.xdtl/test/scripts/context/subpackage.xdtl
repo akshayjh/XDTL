@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Callable package for testing
+-->
+<package name="subpackage" xmlns="http://xdtl.org/xdtl">
+  <parameter name="param"></parameter>
+  <tasks>
+    <task name="first">
+      <steps>
+        <log msg="$param"/>
+      </steps>
+    </task>
+  </tasks>
+</package>

@@ -9,7 +9,8 @@ package org.mmx.xdtl.model;
 public class XdtlException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
-    private final SourceLocator m_sourceLocator;
+    private SourceLocator m_sourceLocator;
+    private boolean m_logged;
 
     /**
      * 
@@ -31,7 +32,7 @@ public class XdtlException extends RuntimeException {
      */
     public XdtlException(Throwable arg0) {
         super(arg0);
-        m_sourceLocator = SourceLocator.NULL;
+        setSourceLocator(arg0);
     }
 
     /**
@@ -40,7 +41,7 @@ public class XdtlException extends RuntimeException {
      */
     public XdtlException(String arg0, Throwable arg1) {
         super(arg0, arg1);
-        m_sourceLocator = SourceLocator.NULL;
+        setSourceLocator(arg1);
     }
 
     /**
@@ -48,14 +49,15 @@ public class XdtlException extends RuntimeException {
      * @param arg1
      */
     public XdtlException(String arg0, SourceLocator sourceLocator) {
-        super(arg0);
-        m_sourceLocator = sourceLocator;
+        super(arg0);        
+        setSourceLocator(sourceLocator);
     }
     
-    /**
-     * @param arg0
-     * @param arg1
-     */
+    public XdtlException(SourceLocator sourceLocator, Throwable t) {
+        super(t);        
+        setSourceLocator(sourceLocator);
+    }
+
     public XdtlException(String arg0, SourceLocator sourceLocator, Throwable arg1) {
         super(arg0, arg1);
         m_sourceLocator = sourceLocator;
@@ -63,6 +65,29 @@ public class XdtlException extends RuntimeException {
     
     public SourceLocator getSourceLocator() {
         return m_sourceLocator;
+    }
+
+    private void setSourceLocator(Throwable t) {
+        if (t instanceof XdtlException) {
+            m_sourceLocator = ((XdtlException) t).getSourceLocator();
+        } else {
+            m_sourceLocator = SourceLocator.NULL;
+        }
+    }
+
+    public void setSourceLocator(SourceLocator sourceLocator) {
+        if (sourceLocator == null) {
+            throw new NullPointerException("Sourcelocator cannot be null");
+        }
+        m_sourceLocator = sourceLocator;
+    }
+
+    public boolean isLogged() {
+        return m_logged;
+    }
+
+    public void setLogged(boolean logged) {
+        m_logged = logged;
     }
 
     @Override

@@ -12,17 +12,17 @@ public class TypeConverterImpl implements TypeConverter {
         if (obj == null) {
             return null;
         }
-        
+
         if (obj instanceof Boolean) {
             return (Boolean) obj;
         }
-        
+
         if (obj instanceof String) {
             String s = (String) obj;
             if (Boolean.parseBoolean(s)) {
                 return true;
             }
-            
+
             // try to convert to int
             try {
                 obj = Integer.parseInt(s);
@@ -30,9 +30,9 @@ public class TypeConverterImpl implements TypeConverter {
                 return false;
             }
         }
-        
+
         if (obj instanceof Integer) {
-            return ((Integer) obj) != 0; 
+            return ((Integer) obj) != 0;
         }
 
         throw new XdtlException("Type '" + obj.getClass().getName() +
@@ -44,15 +44,15 @@ public class TypeConverterImpl implements TypeConverter {
         if (obj == null) {
             return null;
         }
-        
+
         if (obj instanceof Integer) {
             return (Integer) obj;
         }
-        
+
         if (obj instanceof Boolean) {
             return ((Boolean) obj).booleanValue() ? 1 : 0;
         }
-        
+
         if (obj instanceof String) {
             String s = (String) obj;
             try {
@@ -61,7 +61,7 @@ public class TypeConverterImpl implements TypeConverter {
                 throw new XdtlException("'" + s + "' cannot be converted to integer");
             }
         }
-        
+
         throw new XdtlException("Type '" + obj.getClass().getName() +
             "' cannot be converted to integer");
     }
@@ -71,7 +71,7 @@ public class TypeConverterImpl implements TypeConverter {
         if (obj == null) {
             return null;
         }
-        
+
         return obj.toString();
     }
 
@@ -94,12 +94,18 @@ public class TypeConverterImpl implements TypeConverter {
 
     @Override
     public Character toChar(Object obj) {
+        if (obj instanceof Character) {
+            return (Character) obj;
+        }
+
         String str = toString(obj);
         if (str == null || str.length() == 0) {
             return null;
         }
 
         char c0 = str.charAt(0);
+        if (str.length() == 1) return c0;
+
         if (c0 == '\\') {
             if (str.length() == 2) {
                 switch(str.charAt(1)) {
@@ -109,10 +115,8 @@ public class TypeConverterImpl implements TypeConverter {
                     case 'n': return '\n';
                 }
             }
-        } else {
-            if (str.length() == 1) return c0;
         }
-        
+
         throw new XdtlException("'" + str + "' cannot be converted to char");
     }
 }

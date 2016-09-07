@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Test onopen attribute on a connection.
+ -->
+<package name="test-onopen" xmlns="http://xdtl.org/xdtl">
+  <connection name="test" type="FILE">Hello</connection>
+  <tasks>
+    <task name="first">
+      <steps>
+        <for rowset="${[1,2,3,4]}" item="x">
+          <call href="log-connection.xdtl">
+            <parameter name="x">$x</parameter>
+          </call>
+        </for>
+      </steps>
+    </task>
+  </tasks>
+</package>

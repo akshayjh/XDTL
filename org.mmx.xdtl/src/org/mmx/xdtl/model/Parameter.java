@@ -5,8 +5,8 @@ public class Parameter extends AbstractElement {
     private String m_default;
     private boolean m_required;
     private String m_value;
-    private String type;
-    private String format;
+    private String m_type;
+    private String m_format;
 
     public Parameter() {
     }
@@ -58,18 +58,18 @@ public class Parameter extends AbstractElement {
     }
 
     public String getType() {
-        return type;
+        return m_type;
     }
 
     public void setType(String type) {
-        this.type = type;
+        m_type = type;
     }
 
     public String getFormat() {
-        return format;
+        return m_format;
     }
 
     public void setFormat(String format) {
-        this.format = format;
+        m_format = format;
     }
 }

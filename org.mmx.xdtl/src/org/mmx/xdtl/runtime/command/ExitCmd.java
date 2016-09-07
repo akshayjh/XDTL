@@ -1,28 +1,28 @@
 package org.mmx.xdtl.runtime.command;
 
+import org.apache.log4j.Logger;
+import org.mmx.xdtl.log.XdtlLogger;
 import org.mmx.xdtl.runtime.Context;
 import org.mmx.xdtl.runtime.RuntimeCommand;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ExitCmd implements RuntimeCommand {
-    private final Logger m_logger = LoggerFactory.getLogger(ExitCmd.class);
-    
+    private static final Logger logger = XdtlLogger.getLogger("xdtl.cmd.exit");
+
     private final int m_code;
     private final boolean m_global;
-    
+
     public ExitCmd(int code, boolean global) {
         m_code = code;
         m_global = global;
     }
-    
+
     @Override
     public void run(Context context) throws Throwable {
     	if (m_global) {
-    		m_logger.info("exit runtime");
+    		logger.info("exit runtime, code=" + m_code);
     		context.getEngineControl().exit(m_code);
     	} else {
-    		m_logger.info("exit current package");
+    		logger.info("exit current package");
     		context.getEngineControl().exit();
     	}
     }

@@ -12,7 +12,7 @@ public class Variable extends AbstractElement {
 
         validateName();
     }
-    
+
     public Variable(String name, Object value) {
         super();
         m_name = name;
@@ -36,7 +36,7 @@ public class Variable extends AbstractElement {
             throw new XdtlException("Variable must have a name");
         }
     }
-    
+
     public String getName() {
         return m_name;
     }
@@ -99,10 +99,10 @@ public class Variable extends AbstractElement {
 
         return true;
     }
-    
+
     @Override
     public String toString() {
-        return "Variable [m_name=" + m_name + ", m_readOnly=" + m_readOnly
-                + ", m_value=" + m_value + "]";
+        return "Variable [name=" + m_name + ", readOnly=" + m_readOnly
+                + ", value=" + m_value + "]";
     }
 }

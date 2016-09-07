@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Test 'find' element.
+ -->
+<package name="test-find" xmlns="http://xdtl.org/xdtl">
+  <variable name="dir">../scripts/find</variable>
+  <connection name="conn" type="DB">$testdb</connection>
+  <tasks>
+    <task name="first">
+      <steps>
+        <find source="$dir/folder1,$dir/folder2" match=".*" recursive="1" rowset="rowset"/>
+        <send source="$rowset" target="file:$dir/filelist.csv" header="1"/>
+      </steps>
+    </task>
+  </tasks>
+</package>

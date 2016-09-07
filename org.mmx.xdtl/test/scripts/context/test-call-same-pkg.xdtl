@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Test calling of a task in the same package.
+-->
+<package name="test-call-same-pkg" xmlns="http://xdtl.org/xdtl">
+  <variable name="pkgVar">Hello</variable>
+
+  <tasks>
+    <task name="first">
+      <steps>
+        <send source="Hello1" target="pkgVar" overwrite="1"/>
+        <call href="#second"></call>
+        <send source="Hello2" target="pkgVar" overwrite="1"/>
+        <call href="#second"></call>
+      </steps>
+    </task>
+
+    <task name="second">
+      <steps>
+        <log msg="$pkgVar"/>
+      </steps>
+    </task>
+  </tasks>
+</package>

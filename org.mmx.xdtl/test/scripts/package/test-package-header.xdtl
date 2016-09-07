@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Test package header elements.
+-->
+<package name="test-package-header" xmlns="http://xdtl.org/xdtl">
+  <script>
+    function add(x, y) {
+        return x + y;
+    }
+  </script>
+  <config href="test.properties"/>
+  <variable name="my_var">Variable</variable>
+  <connection name="my_cnn" type="FILE">$my_var</connection>
+  <parameter name="my_param" default="$my_var"></parameter>
+  <define name="my_const">$my_var</define>
+  <variable name="my_var2">$keyName</variable>
+
+
+  <tasks>
+    <task name="main">
+      <steps>
+        <!--  Embedded script -->
+        <if expr="${add(2, 3) != 5}">
+          <log msg="Failed: embedded script"/>
+        </if>
+
+        <!--  Config -->
+        <if expr="${keyName != 'väärtus'}">
+          <log msg="Failed: config"/>
+        </if>
+
+        <!--  Variable -->
+        <if expr="${my_var != 'Variable'}">
+          <log msg="Failed: variable"/>
+        </if>
+
+        <!--  Connection -->
+        <if expr="${my_cnn.value != 'Variable'}">
+          <log msg="Failed: connection"/>
+        </if>
+
+        <!--  Parameter -->
+        <if expr="${my_param != 'Variable'}">
+          <log msg="Failed: parameter"/>
+        </if>
+
+        <!--  Define -->
+        <if expr="${my_const != 'Variable'}">
+          <log msg="Failed: define"/>
+        </if>
+
+        <!--  Variable 2 -->
+        <if expr="${my_var2 != 'väärtus'}">
+          <log msg="Failed: variable 2"/>
+        </if>
+      </steps>
+    </task>
+  </tasks>
+</package>

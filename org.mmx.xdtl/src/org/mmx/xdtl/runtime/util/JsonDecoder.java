@@ -13,7 +13,7 @@ import java.util.Set;
 
 public class JsonDecoder {
 	
-	public Object Decode(String jsonText) {
+	public Object decode(String jsonText) {
 		
 		List<Object> result = new ArrayList<Object>();
 		JsonElement root = new JsonParser().parse(jsonText);
